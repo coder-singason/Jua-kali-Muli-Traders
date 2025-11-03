@@ -42,3 +42,5 @@ next-env.d.ts
 # prisma
 /prisma/migrations
 
+#plans
+/plans/shoe-shop-full-stack-plan-870d10a2.plan.md

@@ -90,18 +90,20 @@ export default function CartPage() {
             <Card key={item.id} className="shadow-sm">
               <CardContent className="p-4">
               <div className="flex gap-3 md:gap-4">
-                <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted md:h-24 md:w-24">
+                <Link href={`/products/${item.productId}`} className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted md:h-24 md:w-24">
                   <Image
                     src={item.image || "/placeholder-shoe.jpg"}
                     alt={item.name}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform hover:scale-105"
                     sizes="80px"
                   />
-                </div>
+                </Link>
                   <div className="flex flex-1 flex-col justify-between gap-2">
                     <div>
-                      <h3 className="font-semibold text-sm md:text-base line-clamp-2">{item.name}</h3>
+                      <Link href={`/products/${item.productId}`}>
+                        <h3 className="font-semibold text-sm md:text-base line-clamp-2 hover:text-primary transition-colors">{item.name}</h3>
+                      </Link>
                       <p className="text-xs md:text-sm text-muted-foreground mt-1">
                         Size: {item.size}
                       </p>

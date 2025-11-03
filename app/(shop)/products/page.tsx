@@ -1,7 +1,9 @@
 import { Suspense } from "react";
 import { ProductCard } from "@/components/product/ProductCard";
+import { ProductFilters } from "@/components/product/ProductFilters";
 import { prisma } from "@/lib/db/prisma";
 import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
 
 async function getProducts(searchParams: {
   category?: string;
@@ -69,6 +71,24 @@ async function getProducts(searchParams: {
   return { products, total, page, totalPages: Math.ceil(total / limit) };
 }
 
+async function getCategories() {
+  return await prisma.category.findMany({
+    where: {
+      parentId: null,
+    },
+    include: {
+      children: {
+        orderBy: {
+          name: "asc",
+        },
+      },
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+}
+
 export default async function ProductsPage({
   searchParams,
 }: {
@@ -82,16 +102,32 @@ export default async function ProductsPage({
   }>;
 }) {
   const params = await searchParams;
-  const { products, total, page, totalPages } = await getProducts(params);
+  const [productsData, categories] = await Promise.all([
+    getProducts(params),
+    getCategories(),
+  ]);
+  const { products, total, page, totalPages } = productsData;
+
+  // Build current URL params for pagination (preserve filters)
+  const currentParams = new URLSearchParams();
+  if (params.search) currentParams.set("search", params.search);
+  if (params.category) currentParams.set("category", params.category);
+  if (params.minPrice) currentParams.set("minPrice", params.minPrice);
+  if (params.maxPrice) currentParams.set("maxPrice", params.maxPrice);
+  if (params.featured) currentParams.set("featured", params.featured);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold">All Products</h1>
         <p className="text-muted-foreground">
           {total} {total === 1 ? "product" : "products"} found
         </p>
       </div>
+
+      <Suspense fallback={<div>Loading filters...</div>}>
+        <ProductFilters categories={categories} />
+      </Suspense>
 
       {products.length === 0 ? (
         <Card>
@@ -111,21 +147,52 @@ export default async function ProductsPage({
           </div>
 
           {totalPages > 1 && (
-            <div className="mt-8 flex justify-center gap-2">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (pageNum) => (
-                  <a
-                    key={pageNum}
-                    href={`/products?page=${pageNum}`}
-                    className={`rounded px-4 py-2 ${
-                      pageNum === page
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary hover:bg-secondary/80"
-                    }`}
-                  >
-                    {pageNum}
-                  </a>
-                )
+            <div className="mt-8 flex flex-wrap justify-center gap-2">
+              {page > 1 && (
+                <Link
+                  href={`/products?${currentParams.toString()}&page=${page - 1}`}
+                  className="rounded px-4 py-2 bg-secondary hover:bg-secondary/80"
+                >
+                  Previous
+                </Link>
+              )}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((pageNum) => {
+                  // Show first, last, current, and pages around current
+                  return (
+                    pageNum === 1 ||
+                    pageNum === totalPages ||
+                    (pageNum >= page - 1 && pageNum <= page + 1)
+                  );
+                })
+                .map((pageNum, index, array) => {
+                  // Add ellipsis if needed
+                  const showEllipsisBefore = index > 0 && pageNum - array[index - 1] > 1;
+                  return (
+                    <div key={pageNum} className="flex items-center gap-2">
+                      {showEllipsisBefore && (
+                        <span className="px-2 text-muted-foreground">...</span>
+                      )}
+                      <Link
+                        href={`/products?${currentParams.toString()}&page=${pageNum}`}
+                        className={`rounded px-4 py-2 transition-colors ${
+                          pageNum === page
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-secondary hover:bg-secondary/80"
+                        }`}
+                      >
+                        {pageNum}
+                      </Link>
+                    </div>
+                  );
+                })}
+              {page < totalPages && (
+                <Link
+                  href={`/products?${currentParams.toString()}&page=${page + 1}`}
+                  className="rounded px-4 py-2 bg-secondary hover:bg-secondary/80"
+                >
+                  Next
+                </Link>
               )}
             </div>
           )}

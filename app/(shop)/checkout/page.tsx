@@ -11,12 +11,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Link from "next/link";
 import Image from "next/image";
+import { MapPin, Plus } from "lucide-react";
 
 const checkoutSchema = z.object({
+  addressId: z.string().optional(),
   fullName: z.string().min(2, "Full name is required"),
   phone: z.string().min(10, "Valid phone number is required"),
   addressLine1: z.string().min(5, "Address is required"),
@@ -28,6 +37,18 @@ const checkoutSchema = z.object({
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
+interface Address {
+  id: string;
+  label: string;
+  fullName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2: string | null;
+  city: string;
+  postalCode: string | null;
+  isDefault: boolean;
+}
+
 export default function CheckoutPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -35,12 +56,18 @@ export default function CheckoutPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+  const [loadingAddresses, setLoadingAddresses] = useState(true);
+  const [userProfile, setUserProfile] = useState<{ name?: string; phone?: string } | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
+    reset,
   } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
@@ -52,6 +79,69 @@ export default function CheckoutPage() {
   const subtotal = getTotal();
   const shippingCost = 500;
   const total = subtotal + shippingCost;
+
+  // Fetch addresses and user profile
+  useEffect(() => {
+    if (status === "authenticated" && session?.user) {
+      Promise.all([
+        fetch("/api/addresses").then((res) => res.json()),
+        fetch("/api/profile").then((res) => res.json()),
+      ])
+        .then(([addressData, profileData]) => {
+          if (addressData.addresses) {
+            setAddresses(addressData.addresses);
+            const defaultAddress = addressData.addresses.find((addr: Address) => addr.isDefault);
+            if (defaultAddress) {
+              setSelectedAddressId(defaultAddress.id);
+              fillAddressForm(defaultAddress);
+            }
+          }
+          if (profileData.user) {
+            setUserProfile(profileData.user);
+            if (profileData.user.name) setValue("fullName", profileData.user.name);
+            if (profileData.user.phone) setValue("phone", profileData.user.phone);
+          }
+        })
+        .catch((err) => {
+          console.error("Error loading addresses/profile:", err);
+        })
+        .finally(() => {
+          setLoadingAddresses(false);
+        });
+    }
+  }, [status, session, setValue]);
+
+  const fillAddressForm = (address: Address) => {
+    setValue("addressId", address.id);
+    setValue("fullName", address.fullName);
+    setValue("phone", address.phone);
+    setValue("addressLine1", address.addressLine1);
+    setValue("addressLine2", address.addressLine2 || "");
+    setValue("city", address.city);
+    setValue("postalCode", address.postalCode || "");
+  };
+
+  const handleAddressSelect = (addressId: string) => {
+    setSelectedAddressId(addressId);
+    const address = addresses.find((addr) => addr.id === addressId);
+    if (address) {
+      fillAddressForm(address);
+    }
+  };
+
+  const handleUseNewAddress = () => {
+    setSelectedAddressId("");
+    reset({
+      addressId: "",
+      fullName: userProfile?.name || "",
+      phone: userProfile?.phone || "",
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      postalCode: "",
+      paymentMethod: "CASH_ON_DELIVERY",
+    });
+  };
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -204,19 +294,67 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    {...register("fullName")}
-                    placeholder="John Doe"
-                  />
-                  {errors.fullName && (
-                    <p className="text-sm text-destructive">
-                      {errors.fullName.message}
-                    </p>
-                  )}
-                </div>
+                {/* Saved Addresses Selection */}
+                {addresses.length > 0 && (
+                  <div className="space-y-2 rounded-lg border p-4 bg-muted/50">
+                    <div className="flex items-center justify-between mb-3">
+                      <Label className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        Saved Addresses
+                      </Label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleUseNewAddress}
+                        className="text-xs"
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        New Address
+                      </Button>
+                    </div>
+                    {loadingAddresses ? (
+                      <div className="py-2 text-sm text-muted-foreground">Loading addresses...</div>
+                    ) : (
+                      <Select
+                        value={selectedAddressId}
+                        onValueChange={handleAddressSelect}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a saved address" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {addresses.map((address) => (
+                            <SelectItem key={address.id} value={address.id}>
+                              {address.label} {address.isDefault && "(Default)"} - {address.city}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                )}
+
+                {/* Manual Address Form */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm font-semibold">
+                    {addresses.length > 0 && <span className="text-muted-foreground">Or enter manually:</span>}
+                    {addresses.length === 0 && <span>Shipping Information</span>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      {...register("fullName")}
+                      placeholder="John Doe"
+                    />
+                    {errors.fullName && (
+                      <p className="text-sm text-destructive">
+                        {errors.fullName.message}
+                      </p>
+                    )}
+                  </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
@@ -324,6 +462,7 @@ export default function CheckoutPage() {
                     "Place Order"
                   )}
                 </Button>
+                </div>
               </form>
             </CardContent>
           </Card>
