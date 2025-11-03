@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Plus } from "lucide-react";
+import { MapPin, Plus, Info } from "lucide-react";
 
 const checkoutSchema = z.object({
   addressId: z.string().optional(),
@@ -60,6 +60,8 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
   const [loadingAddresses, setLoadingAddresses] = useState(true);
   const [userProfile, setUserProfile] = useState<{ name?: string; phone?: string } | null>(null);
+  const [defaultPromptShown, setDefaultPromptShown] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const {
     register,
@@ -83,31 +85,41 @@ export default function CheckoutPage() {
   // Fetch addresses and user profile
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
-      Promise.all([
-        fetch("/api/addresses").then((res) => res.json()),
-        fetch("/api/profile").then((res) => res.json()),
-      ])
-        .then(([addressData, profileData]) => {
-          if (addressData.addresses) {
-            setAddresses(addressData.addresses);
-            const defaultAddress = addressData.addresses.find((addr: Address) => addr.isDefault);
-            if (defaultAddress) {
-              setSelectedAddressId(defaultAddress.id);
-              fillAddressForm(defaultAddress);
+      (async () => {
+        try {
+          const [addrRes, profileRes] = await Promise.all([
+            fetch("/api/addresses", { cache: "no-store" }),
+            fetch("/api/profile", { cache: "no-store" }),
+          ]);
+
+          if (addrRes.ok) {
+            const addressData = await addrRes.json();
+            if (Array.isArray(addressData.addresses)) {
+              setAddresses(addressData.addresses);
+              const defaultAddress = addressData.addresses.find((addr: Address) => addr.isDefault);
+              if (defaultAddress) {
+                setSelectedAddressId(defaultAddress.id);
+                fillAddressForm(defaultAddress);
+              }
+            }
+          } else {
+            console.warn("Addresses request failed", addrRes.status);
+          }
+
+          if (profileRes.ok) {
+            const profileData = await profileRes.json();
+            if (profileData.user) {
+              setUserProfile(profileData.user);
+              if (profileData.user.name) setValue("fullName", profileData.user.name);
+              if (profileData.user.phone) setValue("phone", profileData.user.phone);
             }
           }
-          if (profileData.user) {
-            setUserProfile(profileData.user);
-            if (profileData.user.name) setValue("fullName", profileData.user.name);
-            if (profileData.user.phone) setValue("phone", profileData.user.phone);
-          }
-        })
-        .catch((err) => {
+        } catch (err) {
           console.error("Error loading addresses/profile:", err);
-        })
-        .finally(() => {
+        } finally {
           setLoadingAddresses(false);
-        });
+        }
+      })();
     }
   }, [status, session, setValue]);
 
@@ -143,6 +155,16 @@ export default function CheckoutPage() {
     });
   };
 
+  // Prompt to use default address if available and not already selected
+  useEffect(() => {
+    if (addresses.length > 0 && !defaultPromptShown) {
+      const defaultAddress = addresses.find((a) => a.isDefault);
+      if (defaultAddress && selectedAddressId !== defaultAddress.id) {
+        setDefaultPromptShown(true);
+      }
+    }
+  }, [addresses, selectedAddressId, defaultPromptShown]);
+
   useEffect(() => {
     if (status === "unauthenticated") {
       // Redirect to login with return URL
@@ -173,7 +195,8 @@ export default function CheckoutPage() {
     return null; // Will redirect
   }
 
-  if (items.length === 0) {
+  // Don't show empty cart during redirect
+  if (items.length === 0 && !isRedirecting) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card>
@@ -184,6 +207,18 @@ export default function CheckoutPage() {
             </Link>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  // Show loading during redirect
+  if (isRedirecting) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col items-center justify-center py-12">
+          <LoadingSpinner size="lg" className="mb-4" />
+          <p className="text-muted-foreground">Redirecting to order details...</p>
+        </div>
       </div>
     );
   }
@@ -254,21 +289,25 @@ export default function CheckoutPage() {
           return;
         }
 
-        // Show success message and redirect
+        // Show success message and redirect immediately, then clear cart
         toast({
           title: "Payment Initiated",
           description: paymentResult.message || "Please complete the payment on your phone",
         });
+        setIsRedirecting(true);
         clearCart();
-        router.push(`/orders/${orderResult.order.id}?success=true&payment=mpesa`);
+        // Use replace to avoid back navigation, redirect immediately
+        router.replace(`/orders/${orderResult.order.id}?success=true&payment=mpesa`);
       } else {
-        // Cash on delivery - just redirect
-        clearCart();
+        // Cash on delivery - redirect immediately, then clear cart
         toast({
           title: "Order Placed Successfully",
           description: "Your order has been received and will be processed shortly.",
         });
-        router.push(`/orders/${orderResult.order.id}?success=true`);
+        setIsRedirecting(true);
+        clearCart();
+        // Use replace to avoid back navigation, redirect immediately
+        router.replace(`/orders/${orderResult.order.id}?success=true`);
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
@@ -313,6 +352,54 @@ export default function CheckoutPage() {
                         New Address
                       </Button>
                     </div>
+                    {defaultPromptShown && (
+                      <div className="mb-3 flex items-start gap-2 rounded-md border bg-background p-3 text-sm">
+                        <Info className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                        <div className="flex-1">
+                          <div className="mb-2 text-muted-foreground">
+                            We found your default address. Would you like to use it?
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => {
+                                const def = addresses.find((a) => a.isDefault);
+                                if (def) {
+                                  setSelectedAddressId(def.id);
+                                  fillAddressForm(def);
+                                  setDefaultPromptShown(false);
+                                }
+                              }}
+                            >
+                              Use Default Address
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setDefaultPromptShown(false);
+                                // Clear the auto-selected address and reset form to profile data
+                                setSelectedAddressId("");
+                                reset({
+                                  addressId: "",
+                                  fullName: userProfile?.name || "",
+                                  phone: userProfile?.phone || "",
+                                  addressLine1: "",
+                                  addressLine2: "",
+                                  city: "",
+                                  postalCode: "",
+                                  paymentMethod: "CASH_ON_DELIVERY",
+                                });
+                              }}
+                            >
+                              Not Now
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     {loadingAddresses ? (
                       <div className="py-2 text-sm text-muted-foreground">Loading addresses...</div>
                     ) : (
@@ -332,6 +419,14 @@ export default function CheckoutPage() {
                         </SelectContent>
                       </Select>
                     )}
+                  </div>
+                )}
+
+                {/* No addresses hint */}
+                {addresses.length === 0 && !loadingAddresses && (
+                  <div className="rounded-md border p-3 text-sm text-muted-foreground">
+                    You have no saved addresses. You can enter your shipping details below or
+                    <Link href="/profile?tab=addresses" className="ml-1 underline">manage addresses</Link>.
                   </div>
                 )}
 

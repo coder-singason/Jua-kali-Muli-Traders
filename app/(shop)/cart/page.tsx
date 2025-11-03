@@ -8,15 +8,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Plus, Minus, AlertCircle } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 export default function CartPage() {
   const { data: session } = useSession();
   const { items, removeItem, updateQuantity, getTotal, clearCart } =
     useCartStore();
+  const router = useRouter();
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
   const [removingItems, setRemovingItems] = useState<Set<string>>(new Set());
   const [isClearing, setIsClearing] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const isAdmin = session?.user?.role === "ADMIN";
 
   const handleUpdateQuantity = async (id: string, newQuantity: number) => {
@@ -202,11 +205,25 @@ export default function CartPage() {
                   Checkout Disabled (Admin Account)
                 </Button>
               ) : (
-                <Link href="/checkout" className="block">
-                  <Button className="w-full rounded-full" size="lg">
-                    Proceed to Checkout
-                  </Button>
-                </Link>
+                <Button
+                  className="w-full rounded-full"
+                  size="lg"
+                  onClick={async () => {
+                    setIsCheckingOut(true);
+                    await new Promise((resolve) => setTimeout(resolve, 300));
+                    router.push("/checkout");
+                  }}
+                  disabled={isCheckingOut}
+                >
+                  {isCheckingOut ? (
+                    <>
+                      <LoadingSpinner size="sm" className="mr-2" />
+                      Preparing Checkout...
+                    </>
+                  ) : (
+                    "Proceed to Checkout"
+                  )}
+                </Button>
               )}
               <Button
                 variant="outline"
