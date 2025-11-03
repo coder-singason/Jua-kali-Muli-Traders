@@ -9,6 +9,9 @@ export async function GET(request: NextRequest) {
     const minPrice = searchParams.get("minPrice");
     const maxPrice = searchParams.get("maxPrice");
     const featured = searchParams.get("featured");
+    const brand = searchParams.get("brand");
+    const color = searchParams.get("color");
+    const material = searchParams.get("material");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "12");
     const skip = (page - 1) * limit;
@@ -43,12 +46,42 @@ export async function GET(request: NextRequest) {
       where.featured = true;
     }
 
+    if (brand && brand !== "all") {
+      where.brand = { contains: brand, mode: "insensitive" };
+    }
+
+    if (color && color !== "all") {
+      where.color = { contains: color, mode: "insensitive" };
+    }
+
+    if (material && material !== "all") {
+      where.material = { contains: material, mode: "insensitive" };
+    }
+
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
-        include: {
-          category: true,
-          sizes: true,
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          brand: true,
+          featured: true,
+          images: true,
+          color: true,
+          material: true,
+          category: {
+            select: {
+              name: true,
+              slug: true,
+            },
+          },
+          sizes: {
+            select: {
+              size: true,
+              stock: true,
+            },
+          },
         },
         skip,
         take: limit,
@@ -59,7 +92,7 @@ export async function GET(request: NextRequest) {
       prisma.product.count({ where }),
     ]);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       products,
       pagination: {
         page,
@@ -68,6 +101,14 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
+
+    // Cache for 2 minutes, revalidate on stale
+    response.headers.set(
+      "Cache-Control",
+      "public, s-maxage=120, stale-while-revalidate=300"
+    );
+
+    return response;
   } catch (error) {
     console.error("Error fetching products:", error);
     return NextResponse.json(

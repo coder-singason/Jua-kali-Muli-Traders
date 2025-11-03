@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { OrderTracking } from "@/components/order/OrderTracking";
 import { OrderSuccessBanner } from "@/components/order/OrderSuccessBanner";
+import { CancelOrderButton } from "@/components/order/CancelOrderButton";
 
 async function getOrder(id: string, userId: string) {
   const order = await prisma.order.findFirst({
@@ -110,10 +111,13 @@ export default async function OrderDetailPage({
       {/* Order Tracking */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Truck className={`h-5 w-5 ${statusColor}`} />
-            Order Tracking
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Truck className={`h-5 w-5 ${statusColor}`} />
+              Order Tracking
+            </CardTitle>
+            <CancelOrderButton orderId={order.id} orderStatus={order.status} />
+          </div>
         </CardHeader>
         <CardContent>
           <OrderTracking

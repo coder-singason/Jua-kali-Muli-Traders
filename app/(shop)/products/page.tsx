@@ -1,8 +1,11 @@
 import { Suspense } from "react";
 import { ProductCard } from "@/components/product/ProductCard";
+import { ProductCardSkeleton } from "@/components/product/ProductCardSkeleton";
 import { ProductFilters } from "@/components/product/ProductFilters";
 import { prisma } from "@/lib/db/prisma";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Package, Search } from "lucide-react";
 import Link from "next/link";
 
 async function getProducts(searchParams: {
@@ -52,21 +55,39 @@ async function getProducts(searchParams: {
     where.featured = true;
   }
 
-  const [products, total] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      include: {
-        category: true,
-        sizes: true,
-      },
-      skip,
-      take: limit,
-      orderBy: {
-        createdAt: "desc",
-      },
-    }),
-    prisma.product.count({ where }),
-  ]);
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          brand: true,
+          featured: true,
+          images: true,
+          color: true,
+          material: true,
+          category: {
+            select: {
+              name: true,
+              slug: true,
+            },
+          },
+          sizes: {
+            select: {
+              size: true,
+              stock: true,
+            },
+          },
+        },
+        skip,
+        take: limit,
+        orderBy: {
+          createdAt: "desc",
+        },
+      }),
+      prisma.product.count({ where }),
+    ]);
 
   return { products, total, page, totalPages: Math.ceil(total / limit) };
 }
@@ -130,21 +151,28 @@ export default async function ProductsPage({
       </Suspense>
 
       {products.length === 0 ? (
-        <Card>
-          <CardContent className="py-16 text-center">
-            <p className="text-lg text-muted-foreground">No products found.</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Try adjusting your search or filters
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Search}
+          title="No products found"
+          description="Try adjusting your search or filters to find what you're looking for"
+        />
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <Suspense
+            fallback={
+              <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <ProductCardSkeleton key={i} />
+                ))}
+              </div>
+            }
+          >
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </Suspense>
 
           {totalPages > 1 && (
             <div className="mt-8 flex flex-wrap justify-center gap-2">

@@ -45,11 +45,14 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  cartItems  CartItem[]
-  orders     Order[]
-  addresses  Address[]
-  accounts   Account[]
-  sessions   Session[]
+  cartItems      CartItem[]
+  orders         Order[]
+  addresses      Address[]
+  accounts       Account[]
+  sessions       Session[]
+  reviews        ProductReview[]
+  wishlistItems  WishlistItem[]
+  recentlyViewed RecentlyViewed[]
 
   @@map("users")
 }
@@ -128,15 +131,21 @@ model Product {
   stock       Int      @default(0)
   sku         String?  @unique
   featured    Boolean  @default(false)
+  color       String?  // For filtering
+  material    String?  // For filtering
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  category      Category         @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  productImages ProductImage[]
+  category       Category         @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  productImages  ProductImage[]
   productDetails ProductDetail[]
-  sizes         ProductSize[]
-  cartItems     CartItem[]
-  orderItems    OrderItem[]
+  sizes          ProductSize[]
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+  reviews        ProductReview[]
+  wishlistItems  WishlistItem[]
+  recentlyViewed RecentlyViewed[]
+  variants       ProductVariant[]
 
   @@map("products")
 }
@@ -269,4 +278,67 @@ model Address {
 
   @@map("addresses")
 }
+
+// Product Reviews and Ratings
+model ProductReview {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId String   @map("product_id") @db.ObjectId
+  userId    String   @map("user_id") @db.ObjectId
+  rating    Int      // 1-5 stars
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId]) // One review per user per product
+  @@map("product_reviews")
+}
+
+// Wishlist/Favorites
+model WishlistItem {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @map("user_id") @db.ObjectId
+  productId String   @map("product_id") @db.ObjectId
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId]) // One wishlist entry per user per product
+  @@map("wishlist_items")
+}
+
+// Recently Viewed Products
+model RecentlyViewed {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @map("user_id") @db.ObjectId
+  productId String   @map("product_id") @db.ObjectId
+  viewedAt  DateTime @default(now()) @map("viewed_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("recently_viewed")
+  @@index([userId, viewedAt])
+}
+
+// Product Variants (Colors)
+model ProductVariant {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId String   @map("product_id") @db.ObjectId
+  color     String   // Color name (e.g., "Red", "Blue", "Black")
+  colorCode String?  @map("color_code") // Hex color code (e.g., "#FF0000")
+  images    String[] @default([]) // Variant-specific images
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, color])
+  @@map("product_variants")
+}
+
 

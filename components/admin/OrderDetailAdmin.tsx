@@ -69,6 +69,16 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
   const statusBg = statusConfig[order.status].bg;
 
   const handleStatusChange = async (newStatus: string) => {
+    // Prevent updating cancelled orders
+    if (order.status === "CANCELLED") {
+      toast({
+        title: "Cannot Update",
+        description: "Cancelled orders cannot be updated. They are final.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsUpdating(true);
     try {
       const response = await fetch(`/api/admin/orders/${order.id}`, {
@@ -78,8 +88,8 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to update order status");
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || errorData.details || "Failed to update order status");
       }
 
       const result = await response.json();
@@ -91,6 +101,7 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
       });
       router.refresh();
     } catch (error) {
+      console.error("Error updating order status:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update order status",
@@ -142,7 +153,7 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
                 <Select
                   value={order.status}
                   onValueChange={handleStatusChange}
-                  disabled={isUpdating}
+                  disabled={isUpdating || order.status === "CANCELLED"}
                 >
                   <SelectTrigger className="w-48">
                     <SelectValue />
@@ -152,11 +163,19 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
                     <SelectItem value="PROCESSING">Processing</SelectItem>
                     <SelectItem value="SHIPPED">Shipped</SelectItem>
                     <SelectItem value="DELIVERED">Delivered</SelectItem>
-                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                    <SelectItem 
+                      value="CANCELLED"
+                      disabled={order.status !== "PENDING" && order.status !== "PROCESSING"}
+                    >
+                      Cancelled
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 {isUpdating && (
                   <LoadingSpinner size="sm" />
+                )}
+                {order.status === "CANCELLED" && (
+                  <span className="text-xs text-muted-foreground">(Cannot be changed)</span>
                 )}
               </div>
             </CardContent>

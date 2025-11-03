@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, User, LogOut, Menu, X, Home, Package, Settings } from "lucide-react";
+import { ShoppingCart, User, LogOut, Menu, X, Home, Package, Settings, Heart } from "lucide-react";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -90,6 +90,22 @@ export function FloatingNav() {
               )}
             </Button>
           </Link>
+
+          {session && (
+            <Link href="/wishlist">
+              <Button
+                variant={isActive("/wishlist") ? "default" : "ghost"}
+                size="icon"
+                className={cn(
+                  "h-10 w-10 rounded-full transition-all",
+                  isActive("/wishlist") && "bg-primary text-primary-foreground"
+                )}
+                aria-label="Wishlist"
+              >
+                <Heart className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
 
           {session ? (
             <>
@@ -205,6 +221,22 @@ export function FloatingNav() {
             </Button>
           </Link>
 
+          {session && (
+            <Link href="/wishlist">
+              <Button
+                variant={isActive("/wishlist") ? "default" : "ghost"}
+                size="icon"
+                className={cn(
+                  "h-9 w-9 rounded-full transition-all",
+                  isActive("/wishlist") && "bg-primary text-primary-foreground"
+                )}
+                aria-label="Wishlist"
+              >
+                <Heart className="h-4 w-4" />
+              </Button>
+            </Link>
+          )}
+
           {session ? (
             <>
               {session.user.role === "ADMIN" && (
@@ -296,6 +328,17 @@ export function FloatingNav() {
                         <span className="font-medium">Admin</span>
                       </Link>
                     )}
+                    <Link
+                      href="/wishlist"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-4 py-3 transition-colors",
+                        isActive("/wishlist") && "bg-primary text-primary-foreground"
+                      )}
+                    >
+                      <Heart className="h-5 w-5" />
+                      <span className="font-medium">Wishlist</span>
+                    </Link>
                     <Link
                       href="/profile"
                       onClick={() => setMobileMenuOpen(false)}

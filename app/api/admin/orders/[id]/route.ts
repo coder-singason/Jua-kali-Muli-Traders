@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db/prisma";
+import { sendOrderStatusUpdateEmail } from "@/lib/email";
 import { z } from "zod";
 
 const updateOrderSchema = z.object({
@@ -28,10 +29,74 @@ export async function PATCH(
       );
     }
 
+    // Get current order to check if status is changing
+    const currentOrder = await prisma.order.findUnique({
+      where: { id },
+      include: {
+        items: true,
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!currentOrder) {
+      return NextResponse.json(
+        { error: "Order not found" },
+        { status: 404 }
+      );
+    }
+
+    // Prevent updating cancelled orders
+    if (currentOrder.status === "CANCELLED") {
+      return NextResponse.json(
+        { error: "Cannot update a cancelled order. Cancelled orders are final." },
+        { status: 400 }
+      );
+    }
+
+    const newStatus = parsedData.data.status;
+    const statusChanged = currentOrder.status !== newStatus;
+
+    // Prevent changing to any status if order is already cancelled
+    if (newStatus === "CANCELLED" && currentOrder.status !== "CANCELLED") {
+      // Only allow cancellation if order is PENDING or PROCESSING
+      if (currentOrder.status !== "PENDING" && currentOrder.status !== "PROCESSING") {
+        return NextResponse.json(
+          { error: `Cannot cancel an order with status: ${currentOrder.status}. Only PENDING or PROCESSING orders can be cancelled.` },
+          { status: 400 }
+        );
+      }
+
+      // Restore stock when cancelling
+      for (const item of currentOrder.items) {
+        try {
+          await prisma.productSize.update({
+            where: {
+              productId_size: {
+                productId: item.productId,
+                size: item.size,
+              },
+            },
+            data: {
+              stock: {
+                increment: item.quantity,
+              },
+            },
+          });
+        } catch (error) {
+          console.error(`Failed to restore stock for product ${item.productId} size ${item.size}:`, error);
+        }
+      }
+    }
+
     const order = await prisma.order.update({
       where: { id },
       data: {
-        status: parsedData.data.status,
+        status: newStatus,
       },
       include: {
         items: {
@@ -55,11 +120,26 @@ export async function PATCH(
       },
     });
 
+    // Send status update email if status changed and user has email (non-blocking)
+    if (statusChanged && currentOrder.user?.email && newStatus !== "PENDING") {
+      // Don't await - send email asynchronously
+      sendOrderStatusUpdateEmail(
+        currentOrder.user.email,
+        currentOrder.user.name || "Customer",
+        order.orderNumber,
+        newStatus
+      ).catch((error) => {
+        console.error("Failed to send order status update email:", error);
+        // Don't fail the request if email fails
+      });
+    }
+
     return NextResponse.json({ order });
   } catch (error) {
     console.error("Error updating order:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to update order" },
+      { error: "Failed to update order", details: errorMessage },
       { status: 500 }
     );
   }

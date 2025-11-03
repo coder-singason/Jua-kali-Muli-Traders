@@ -3,10 +3,11 @@
 import { useCartStore } from "@/lib/stores/cart-store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Image from "next/image";
 import Link from "next/link";
-import { Trash2, Plus, Minus, AlertCircle } from "lucide-react";
+import { Trash2, Plus, Minus, AlertCircle, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -49,17 +50,15 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <h2 className="mb-4 text-2xl font-bold">Your cart is empty</h2>
-            <p className="mb-6 text-muted-foreground">
-              Start shopping to add items to your cart
-            </p>
-            <Link href="/products">
-              <Button>Browse Products</Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={ShoppingCart}
+          title="Your cart is empty"
+          description="Start shopping to add items to your cart"
+          action={{
+            label: "Browse Products",
+            href: "/products",
+          }}
+        />
       </div>
     );
   }

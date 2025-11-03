@@ -7,6 +7,7 @@ import { Product } from "@prisma/client";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { WishlistButton } from "./WishlistButton";
 
 interface ProductDetailClientProps {
   product: Product & {
@@ -72,6 +73,12 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
 
   return (
     <div className="space-y-4">
+      {/* Wishlist Button */}
+      <div className="flex items-center gap-2">
+        <WishlistButton productId={product.id} size="md" />
+        <span className="text-sm text-muted-foreground">Add to Wishlist</span>
+      </div>
+
       {/* Size Selection */}
       <div>
         <Label className="mb-2 block text-sm font-semibold">Size</Label>

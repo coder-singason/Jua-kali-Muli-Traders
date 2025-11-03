@@ -5,6 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProductDetailClient } from "@/components/product/ProductDetailClient";
 import { ProductImageViewer } from "@/components/product/ProductImageViewer";
+import { ProductReviews } from "@/components/product/ProductReviews";
+import { ProductViewTracker } from "@/components/product/ProductViewTracker";
+import { RelatedProducts } from "@/components/product/RelatedProducts";
+import { RecentlyViewed } from "@/components/product/RecentlyViewed";
 import { Package, Star, Truck, Shield, Heart } from "lucide-react";
 import Link from "next/link";
 
@@ -50,7 +54,9 @@ export default async function ProductDetailPage({
   const availableSizes = product.sizes.filter((size) => size.stock > 0);
 
   return (
-    <div className="container mx-auto px-4 py-6 md:py-8">
+    <>
+      <ProductViewTracker productId={product.id} />
+      <div className="container mx-auto px-4 py-6 md:py-8">
       {/* Breadcrumb */}
       <nav className="mb-6 text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
@@ -258,9 +264,29 @@ export default async function ProductDetailPage({
               </div>
             </CardContent>
           </Card>
+
+          {/* Reviews & Ratings */}
+          <div className="mt-6">
+            <ProductReviews productId={product.id} />
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Related Products */}
+      <div className="mt-12">
+        <RelatedProducts
+          productId={product.id}
+          categoryId={product.categoryId}
+          limit={4}
+        />
+      </div>
+
+      {/* Recently Viewed */}
+      <div className="mt-12">
+        <RecentlyViewed currentProductId={product.id} limit={4} />
+      </div>
+      </div>
+    </>
   );
 }
 

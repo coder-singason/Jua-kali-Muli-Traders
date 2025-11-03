@@ -37,7 +37,13 @@ export async function GET(request: NextRequest) {
         slug: cat.slug,
       }));
 
-      return NextResponse.json(formatted);
+      const response = NextResponse.json(formatted);
+      // Cache all categories for 10 minutes
+      response.headers.set(
+        "Cache-Control",
+        "public, s-maxage=600, stale-while-revalidate=1200"
+      );
+      return response;
     }
 
     // Default: return hierarchical structure for navigation
@@ -57,7 +63,13 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(categories);
+    const response = NextResponse.json(categories);
+    // Cache category hierarchy for 10 minutes
+    response.headers.set(
+      "Cache-Control",
+      "public, s-maxage=600, stale-while-revalidate=1200"
+    );
+    return response;
   } catch (error) {
     console.error("Error fetching categories:", error);
     return NextResponse.json(

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Order, OrderItem, Payment } from "@prisma/client";
 import { format } from "date-fns";
 import { Package, ArrowRight, CheckCircle2, Clock, Truck, XCircle } from "lucide-react";
@@ -36,18 +37,15 @@ const statusConfig = {
 export function OrderHistory({ orders }: OrderHistoryProps) {
   if (orders.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-semibold mb-2">No Orders Yet</h3>
-          <p className="text-muted-foreground mb-4">
-            Start shopping to see your orders here
-          </p>
-          <Link href="/products">
-            <Button>Browse Products</Button>
-          </Link>
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={Package}
+        title="No Orders Yet"
+        description="Start shopping to see your orders here"
+        action={{
+          label: "Browse Products",
+          href: "/products",
+        }}
+      />
     );
   }
 
