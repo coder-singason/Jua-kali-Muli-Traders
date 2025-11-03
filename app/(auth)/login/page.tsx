@@ -25,14 +25,28 @@ export default function LoginPage() {
   const { data: session, status } = useSession();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
     if (status === "authenticated") {
-      router.push("/");
+      // Check for callback URL in query params
+      const params = new URLSearchParams(window.location.search);
+      const callbackUrl = params.get("callbackUrl") || "/";
+      router.push(callbackUrl);
       router.refresh();
     }
   }, [status, router]);
+
+  // Check for success message from registration
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("registered") === "true") {
+      setShowSuccess(true);
+      // Clear the query param
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
 
   const {
     register,
@@ -57,7 +71,10 @@ export default function LoginPage() {
         setError("Invalid email or password");
         setIsLoading(false);
       } else {
-        router.push("/");
+        // Redirect to callback URL or home
+        const params = new URLSearchParams(window.location.search);
+        const callbackUrl = params.get("callbackUrl") || "/";
+        router.push(callbackUrl);
         router.refresh();
       }
     } catch (err) {
@@ -90,6 +107,11 @@ export default function LoginPage() {
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
+            {showSuccess && (
+              <div className="rounded-md bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-3 text-sm text-green-800 dark:text-green-200">
+                Account created successfully! Please login to continue.
+              </div>
+            )}
             {error && (
               <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
                 {error}

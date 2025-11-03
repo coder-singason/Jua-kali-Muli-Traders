@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { Package, ShoppingBag, User, Mail, Phone } from "lucide-react";
 
 export function Footer() {
+  const { data: session } = useSession();
+
   return (
     <footer className="border-t bg-card mt-auto">
       <div className="container mx-auto px-4 py-8 md:py-12">
@@ -39,16 +44,35 @@ export function Footer() {
               Account
             </h4>
             <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Link href="/register" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Register
-                </Link>
-              </li>
+              {session ? (
+                <>
+                  <li>
+                    <Link href="/profile" className="text-muted-foreground hover:text-foreground transition-colors">
+                      My Profile
+                    </Link>
+                  </li>
+                  {session.user.role !== "ADMIN" && (
+                    <li>
+                      <Link href="/profile?tab=orders" className="text-muted-foreground hover:text-foreground transition-colors">
+                        My Orders
+                      </Link>
+                    </li>
+                  )}
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors">
+                      Login
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/register" className="text-muted-foreground hover:text-foreground transition-colors">
+                      Register
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
           <div>

@@ -80,6 +80,19 @@ export default function RegisterPage() {
     }
   };
 
+  // Don't render if already logged in (will redirect)
+  if (status === "authenticated") {
+    return null;
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
       <Card className="w-full max-w-md shadow-lg">
