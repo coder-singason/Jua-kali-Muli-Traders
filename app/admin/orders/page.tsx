@@ -65,10 +65,13 @@ export default async function AdminOrdersPage({
   const orders = await getOrders(status, search);
 
   return (
-    <>
-      <h1 className="mb-8 text-3xl font-bold">Orders</h1>
+    <div className="max-w-7xl mx-auto w-full">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Orders</h1>
+        <p className="text-muted-foreground mt-1">View and manage customer orders</p>
+      </div>
       <OrdersList orders={orders} currentStatus={status} currentSearch={search} />
-    </>
+    </div>
   );
 }
 

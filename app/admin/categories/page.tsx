@@ -44,9 +44,12 @@ export default async function AdminCategoriesPage() {
   const categories = await getCategories();
 
   return (
-    <>
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Categories</h1>
+    <div className="max-w-7xl mx-auto w-full">
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Categories</h1>
+          <p className="text-muted-foreground mt-1">Organize your products with categories</p>
+        </div>
         <Link href="/admin/categories/new">
           <Button>
             <Plus className="h-4 w-4 mr-2" />
@@ -116,7 +119,7 @@ export default async function AdminCategoriesPage() {
           ))}
         </div>
       )}
-    </>
+    </div>
   );
 }
 

@@ -514,7 +514,7 @@ export default function CheckoutPage() {
                     Payment Method
                   </Label>
                   <div className="space-y-2">
-                    <label className="flex items-center space-x-2 rounded border p-4 cursor-pointer hover:bg-accent">
+                    <label className="flex items-center space-x-2 rounded border p-4 cursor-pointer hover:bg-muted/50 dark:hover:bg-muted/30 transition-colors">
                       <input
                         type="radio"
                         value="CASH_ON_DELIVERY"
@@ -528,7 +528,7 @@ export default function CheckoutPage() {
                         </div>
                       </div>
                     </label>
-                    <label className="flex items-center space-x-2 rounded border p-4 cursor-pointer hover:bg-accent">
+                    <label className="flex items-center space-x-2 rounded border p-4 cursor-pointer hover:bg-muted/50 dark:hover:bg-muted/30 transition-colors">
                       <input
                         type="radio"
                         value="MPESA"

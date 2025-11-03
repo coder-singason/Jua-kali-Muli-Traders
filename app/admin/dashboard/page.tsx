@@ -117,7 +117,7 @@ async function getDashboardStats() {
     return totalStock > 0 && totalStock <= 5;
   }).length;
 
-  // Get revenue data for the last 7 days for chart
+  // Get revenue and order data for the last 7 days for chart
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
   sevenDaysAgo.setHours(0, 0, 0, 0);
@@ -125,35 +125,51 @@ async function getDashboardStats() {
   // Fetch all orders from the last 7 days
   const recentOrdersForChart = await prisma.order.findMany({
     where: {
-      status: { in: ["PROCESSING", "SHIPPED", "DELIVERED"] },
       createdAt: { gte: sevenDaysAgo },
     },
     select: {
       total: true,
       createdAt: true,
+      status: true,
     },
   });
 
-  // Initialize daily revenue data
+  // Initialize daily revenue and order data
   const dailyRevenueMap = new Map<string, number>();
+  const dailyOrderMap = new Map<string, number>();
+  
   for (let i = 6; i >= 0; i--) {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
     const dayKey = format(date, "MMM d");
     dailyRevenueMap.set(dayKey, 0);
+    dailyOrderMap.set(dayKey, 0);
   }
 
-  // Aggregate revenue by day
+  // Aggregate revenue and orders by day
   recentOrdersForChart.forEach((order) => {
     const dayKey = format(new Date(order.createdAt), "MMM d");
-    const currentRevenue = dailyRevenueMap.get(dayKey) || 0;
-    dailyRevenueMap.set(dayKey, currentRevenue + Number(order.total));
+    
+    // Revenue (only for completed orders)
+    if (["PROCESSING", "SHIPPED", "DELIVERED"].includes(order.status)) {
+      const currentRevenue = dailyRevenueMap.get(dayKey) || 0;
+      dailyRevenueMap.set(dayKey, currentRevenue + Number(order.total));
+    }
+    
+    // Order count (all orders)
+    const currentOrders = dailyOrderMap.get(dayKey) || 0;
+    dailyOrderMap.set(dayKey, currentOrders + 1);
   });
 
   // Convert to array format for chart
   const dailyRevenueData = Array.from(dailyRevenueMap.entries()).map(([date, revenue]) => ({
     date,
     revenue,
+  }));
+
+  const dailyOrderData = Array.from(dailyOrderMap.entries()).map(([date, orders]) => ({
+    date,
+    orders,
   }));
 
   return {
@@ -172,6 +188,7 @@ async function getDashboardStats() {
     totalCustomers,
     recentOrders,
     dailyRevenueData,
+    dailyOrderData,
     orderStatusCounts: orderStatusCounts.reduce(
       (acc, item) => {
         acc[item.status] = item._count.id;
@@ -192,9 +209,12 @@ export default async function AdminDashboardPage() {
   const stats = await getDashboardStats();
 
   return (
-    <>
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Dashboard Overview</h1>
+    <div className="max-w-7xl mx-auto w-full">
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard Overview</h1>
+          <p className="text-muted-foreground mt-1">Welcome back! Here's what's happening with your store.</p>
+        </div>
         <div className="flex gap-2">
           <Link href="/admin/orders?status=PENDING">
             <Button variant="outline" size="sm">
@@ -271,18 +291,14 @@ export default async function AdminDashboardPage() {
         </Card>
       </div>
 
-      {/* Revenue Chart */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Revenue Trend (Last 7 Days)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <RevenueChart data={stats.dailyRevenueData} />
-        </CardContent>
-      </Card>
+      {/* Enhanced Charts */}
+      <div className="mb-6">
+        <RevenueChart 
+          data={stats.dailyRevenueData} 
+          orderData={stats.dailyOrderData}
+          statusData={stats.orderStatusCounts}
+        />
+      </div>
 
       {/* Revenue Breakdown */}
       <div className="grid gap-4 md:grid-cols-3 mb-6">
@@ -405,7 +421,7 @@ export default async function AdminDashboardPage() {
                     <Link
                       key={order.id}
                       href={`/admin/orders/${order.id}`}
-                      className="block p-3 rounded-lg border hover:bg-accent transition-colors"
+                      className="block p-3 rounded-lg border hover:bg-muted/50 dark:hover:bg-muted/30 hover:border-primary/20 transition-all"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
@@ -518,7 +534,7 @@ export default async function AdminDashboardPage() {
           </Card>
         )}
       </div>
-    </>
+    </div>
   );
 }
 

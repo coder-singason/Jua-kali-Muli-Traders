@@ -28,9 +28,25 @@ export function ThemeProvider({
   storageKey = "kickszone-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (typeof window !== "undefined" && (localStorage.getItem(storageKey) as Theme)) || defaultTheme
-  );
+  const [theme, setTheme] = useState<Theme>(() => {
+    // Initialize from localStorage immediately to prevent flicker
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(storageKey) as Theme;
+      if (stored) {
+        // Apply theme immediately before React renders
+        const root = document.documentElement;
+        root.classList.remove("light", "dark");
+        if (stored === "system") {
+          const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          root.classList.add(systemTheme);
+        } else {
+          root.classList.add(stored);
+        }
+        return stored;
+      }
+    }
+    return defaultTheme;
+  });
 
   useEffect(() => {
     const root = window.document.documentElement;

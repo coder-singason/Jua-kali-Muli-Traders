@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Package, ShoppingBag, LayoutDashboard, Settings } from "lucide-react";
+import { Package, ShoppingBag, LayoutDashboard, FolderTree } from "lucide-react";
 
 const iconMap = {
   LayoutDashboard,
   Package,
   ShoppingBag,
-  Settings,
+  FolderTree,
 };
 
 interface AdminNavLinkProps {

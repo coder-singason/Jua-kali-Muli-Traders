@@ -156,7 +156,7 @@ export function OrdersList({ orders, currentStatus, currentSearch }: OrdersListP
             const statusBg = statusConfig[order.status].bg;
 
             return (
-              <Card key={order.id} className="hover:shadow-md transition-shadow">
+              <Card key={order.id} className="hover:shadow-md hover:bg-muted/50 dark:hover:bg-muted/30 transition-all cursor-pointer">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">

@@ -29,9 +29,12 @@ export default async function AdminProductsPage() {
   const products = await getProducts();
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Products</h1>
+    <div className="max-w-7xl mx-auto w-full">
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Products</h1>
+          <p className="text-muted-foreground mt-1">Manage your product catalog</p>
+        </div>
         <Link href="/admin/products/new">
           <Button>Add New Product</Button>
         </Link>
@@ -49,7 +52,7 @@ export default async function AdminProductsPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => (
-            <Card key={product.id}>
+            <Card key={product.id} className="hover:shadow-md hover:bg-muted/30 dark:hover:bg-muted/20 transition-all">
               <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
                 {product.images[0] && (
                   <Image

@@ -248,7 +248,7 @@ export function ProductImageUpload({
           />
           <label
             htmlFor={`image-upload-${images.length}`}
-            className="flex flex-col items-center justify-center aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary cursor-pointer transition-colors bg-muted/50 hover:bg-muted"
+            className="flex flex-col items-center justify-center aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary cursor-pointer transition-colors bg-muted/50 hover:bg-muted/80 dark:hover:bg-muted/60"
           >
             {uploadingIndex === images.length ? (
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
