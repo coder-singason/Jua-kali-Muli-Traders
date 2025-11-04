@@ -146,70 +146,53 @@ export function RevenueChart({
       // Each item.revenue should be a SINGLE DAY's revenue, not a total
       const dailyRevenue = Number(item.revenue) || 0;
       
+      // Get fresh values directly from metrics to avoid any closure issues
+      const actualAvg = metrics.avgDailyRevenue;
+      const actualDaily = dailyRevenue;
+      
       // Calculate precise percentage difference using actual daily values vs daily average
-      // IMPORTANT: dailyRevenue should be a SINGLE DAY's revenue, not a total
-      // ALWAYS compare to the 7-day average for consistent business insights
       let percentDiff = 0;
-      
-      // Always use the 7-day average for comparison (divides total by 7, includes zeros)
-      // This shows how each day performs relative to the expected daily average
-      if (avg > 0) {
-        // Standard calculation: (daily - 7-day average) / 7-day average * 100
-        const diff = dailyRevenue - avg;
-        percentDiff = (diff / avg) * 100;
-      } else if (dailyRevenue > 0) {
-        // If 7-day average is 0 but this day has revenue, this is the first sale
-        // Can't calculate percentage, but mark as significantly above
-        percentDiff = 100; // First day with revenue - mark as significantly above
-      }
-      // If both avg and dailyRevenue are 0, percentDiff remains 0 (no sales)
-      
-      // Use a very small threshold (0.1%) for more accurate categorization
-      // This ensures even small differences are properly categorized
-      const threshold = 0.1;
-      
-      // Determine status based on actual percentage difference
-      // IMPORTANT: Only mark as "average" if the percentage is truly close to 0
       let status: "above" | "average" | "below" = "average";
       
-      // If we have a valid percentage calculation, use it
-      if (avg > 0 && dailyRevenue > 0) {
-        // Calculate the actual difference - FORCE calculation to avoid any rounding issues
-        const actualDiff = dailyRevenue - avg;
-        const actualPercent = (actualDiff / avg) * 100;
+      // Always use the 7-day average for comparison (divides total by 7, includes zeros)
+      if (actualAvg > 0 && actualDaily > 0) {
+        // Calculate revenue ratio first (most reliable check)
+        const revenueRatio = actualDaily / actualAvg;
         
-        // Debug: Log if we're getting unexpected results
-        // Only mark as "average" if truly within 0.1% of the average
-        // Use strict comparison - percentage must be exactly within threshold
-        // CRITICAL: Use < threshold (not <=) to ensure any difference is caught
-        if (Math.abs(actualPercent) < threshold) {
+        // Calculate percentage difference
+        const diff = actualDaily - actualAvg;
+        percentDiff = (diff / actualAvg) * 100;
+        
+        // CRITICAL: Use revenue ratio as primary check - more reliable than percentage
+        // Only mark as "average" if ratio is within 0.1% (0.999 to 1.001)
+        if (revenueRatio >= 0.999 && revenueRatio <= 1.001) {
           status = "average";
-        } else if (actualPercent > 0) {
-          // Above average - ANY positive percentage > threshold means above
+        } else if (revenueRatio > 1.001) {
           status = "above";
         } else {
-          // Below average - ANY negative percentage means below
           status = "below";
         }
         
-        // Use the calculated percentage (not the stored one, in case of rounding issues)
-        percentDiff = actualPercent;
-        
-        // Safety check: If daily revenue is significantly different from average, ensure correct status
-        // This catches any edge cases where calculation might be wrong
-        const revenueRatio = dailyRevenue / avg;
-        if (revenueRatio > 1.001 && status === "average") {
-          // Daily revenue is more than 0.1% higher but status is "average" - force to "above"
+        // Debug: Log if we get unexpected "average" status
+        if (status === "average" && revenueRatio > 1.5) {
+          // This should never happen - force to above if ratio is > 1.5
+          console.warn(`[RevenueChart] Unexpected: revenueRatio=${revenueRatio.toFixed(3)}, daily=${actualDaily}, avg=${actualAvg}, forcing to "above"`);
           status = "above";
-        } else if (revenueRatio < 0.999 && status === "average") {
-          // Daily revenue is more than 0.1% lower but status is "average" - force to "below"
-          status = "below";
         }
-      } else if (dailyRevenue > 0 && avg === 0) {
+        
+        // ALWAYS force correct status based on revenue ratio - don't trust initial status
+        if (revenueRatio > 1.001) {
+          status = "above";
+        } else if (revenueRatio < 0.999) {
+          status = "below";
+        } else {
+          status = "average";
+        }
+      } else if (actualDaily > 0 && actualAvg === 0) {
         // First day with revenue - definitely above
         status = "above";
         percentDiff = 100;
-      } else if (dailyRevenue === 0 && avg > 0) {
+      } else if (actualDaily === 0 && actualAvg > 0) {
         // Day with no revenue when average exists - below average
         status = "below";
         percentDiff = -100;
@@ -254,59 +237,93 @@ export function RevenueChart({
   const RevenueTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      const value = Number(payload[0].value);
-      const avg = metrics.avgDailyRevenue;
+      
+      // Get the revenue value - prefer data.revenue (from formattedData) over payload.value
+      // formattedData has the correct revenue values with proper status calculations
+      // CRITICAL: Use !== undefined check to preserve 0 values (not falsy)
+      let value = 0;
+      if (data.revenue !== undefined && data.revenue !== null) {
+        value = Number(data.revenue);
+      } else if (payload[0].value !== undefined && payload[0].value !== null) {
+        value = Number(payload[0].value);
+      }
+      // Ensure NaN becomes 0
+      if (isNaN(value)) value = 0;
+      
+      // Get fresh values directly from metrics (same as mobile breakdown)
+      const actualAvg = metrics.avgDailyRevenue;
+      const actualDaily = value;
       
       // Determine color based on comparison to average
       let amountColor = "text-foreground";
       let statusText = "";
       let statusColor = "";
       
-      // Calculate percentage difference using actual daily values vs daily average
-      // ALWAYS compare to the 7-day average for consistent business insights
-      const dailyValue = Number(value) || 0;
-      let percentDiff = 0;
-      
-      // Always use the 7-day average for comparison (divides total by 7, includes zeros)
-      if (avg > 0) {
-        // Standard calculation: (daily - 7-day average) / 7-day average * 100
-        const diff = dailyValue - avg;
-        percentDiff = (diff / avg) * 100;
-      } else if (dailyValue > 0) {
-        // If 7-day average is 0 but this day has revenue, this is the first sale
-        percentDiff = 100;
-      }
-      
-      const threshold = 0.1; // 0.1% threshold for "at average" - very precise
-      
-      // Recalculate to ensure accuracy
-      if (avg > 0 && dailyValue > 0) {
-        const actualDiff = dailyValue - avg;
-        const actualPercent = (actualDiff / avg) * 100;
-        percentDiff = actualPercent;
-      }
-      
-      // Use strict comparison - only "at average" if truly within threshold
-      if (Math.abs(percentDiff) < threshold) {
-        // At average - yellow/orange (show actual percentage even if small)
-        amountColor = "text-yellow-600 dark:text-yellow-400";
-        const absPercent = Math.abs(percentDiff);
-        if (absPercent < 0.01) {
-          statusText = `≈ At average`;
+      // Handle different cases based on revenue and average
+      // CRITICAL: Check for zero revenue FIRST using strict equality, before any other checks
+      // This must be checked BEFORE checking if actualDaily > 0
+      if (actualDaily === 0) {
+        if (actualAvg > 0) {
+          // Day with no revenue when average exists - below average (100% below)
+          amountColor = "text-red-600 dark:text-red-400";
+          statusText = `↓ 100.00% below average`;
+          statusColor = "text-red-600 dark:text-red-400";
         } else {
-          statusText = `≈ ${absPercent.toFixed(2)}% from average`;
+          // Both revenue and average are 0 - at average
+          amountColor = "text-yellow-600 dark:text-yellow-400";
+          statusText = `≈ At average`;
+          statusColor = "text-yellow-600 dark:text-yellow-400";
         }
-        statusColor = "text-yellow-600 dark:text-yellow-400";
-      } else if (percentDiff > 0) {
-        // Above average - teal/blue (use strict > check)
+      } else if (actualDaily > 0 && actualAvg === 0) {
+        // First day with revenue
         amountColor = "text-teal-600 dark:text-teal-400";
-        statusText = `↑ ${percentDiff.toFixed(2)}% above average`;
+        statusText = `↑ First sale`;
         statusColor = "text-teal-600 dark:text-teal-400";
+      } else if (actualAvg > 0 && actualDaily > 0) {
+        // Calculate revenue ratio first (same logic as mobile breakdown)
+        const revenueRatio = actualDaily / actualAvg;
+        const actualDiff = actualDaily - actualAvg;
+        const actualPercent = (actualDiff / actualAvg) * 100;
+        
+        // CRITICAL: Use revenue ratio as PRIMARY and ONLY check
+        // Check above average FIRST (most common case)
+        if (revenueRatio > 1.001) {
+          // Above average - teal/blue
+          amountColor = "text-teal-600 dark:text-teal-400";
+          statusText = `↑ ${actualPercent.toFixed(2)}% above average`;
+          statusColor = "text-teal-600 dark:text-teal-400";
+        } 
+        // Check below average second
+        else if (revenueRatio < 0.999) {
+          // Below average - red
+          amountColor = "text-red-600 dark:text-red-400";
+          statusText = `↓ ${Math.abs(actualPercent).toFixed(2)}% below average`;
+          statusColor = "text-red-600 dark:text-red-400";
+        } 
+        // Only if truly within 0.1% of average
+        else {
+          // At average - yellow/orange (within 0.1%)
+          amountColor = "text-yellow-600 dark:text-yellow-400";
+          const absPercent = Math.abs(actualPercent);
+          if (absPercent < 0.01) {
+            statusText = `≈ At average`;
+          } else {
+            statusText = `≈ ${absPercent.toFixed(2)}% from average`;
+          }
+          statusColor = "text-yellow-600 dark:text-yellow-400";
+        }
+        
+        // Final safety check - if ratio is way off but we somehow got "average", force correct status
+        if (revenueRatio > 1.5 && statusText.includes("At average")) {
+          amountColor = "text-teal-600 dark:text-teal-400";
+          statusText = `↑ ${actualPercent.toFixed(2)}% above average`;
+          statusColor = "text-teal-600 dark:text-teal-400";
+        }
       } else {
-        // Below average - red
-        amountColor = "text-red-600 dark:text-red-400";
-        statusText = `↓ ${Math.abs(percentDiff).toFixed(2)}% below average`;
-        statusColor = "text-red-600 dark:text-red-400";
+        // No revenue and no average - both are 0
+        amountColor = "text-yellow-600 dark:text-yellow-400";
+        statusText = `≈ At average`;
+        statusColor = "text-yellow-600 dark:text-yellow-400";
       }
       
       return (
@@ -319,7 +336,7 @@ export function RevenueChart({
               {data.revenueFormatted || `KSh ${value.toLocaleString()}`}
             </p>
             {/* Show percentage whenever there's revenue data (average > 0 OR this day has revenue) */}
-            {((avg > 0) || (dailyValue > 0)) && statusText && (
+            {((actualAvg > 0) || (actualDaily > 0)) && statusText && (
               <p className={`text-xs ${statusColor}`}>
                 {statusText}
               </p>
@@ -590,11 +607,54 @@ export function RevenueChart({
                     let statusIcon = "≈";
                     let statusText = "";
                     
-                    const precisePercentDiff = item.percentDiff;
-                    const absPercentDiff = item.absPercentDiff;
+                    // Recalculate to ensure accuracy - use fresh values
+                    const actualAvg = metrics.avgDailyRevenue;
+                    const actualDaily = Number(item.revenue) || 0;
+                    let actualStatus = item.status;
                     
-                    // Show percentage whenever there's revenue data (this day OR average > 0)
-                    if (item.revenue > 0 || metrics.avgDailyRevenue > 0) {
+                    // Safety check: Recalculate status if revenue is significantly different from average
+                    if (actualAvg > 0 && actualDaily > 0) {
+                      const revenueRatio = actualDaily / actualAvg;
+                      
+                      // If ratio is way off but status is "average", force correct status
+                      if (revenueRatio > 1.001 && actualStatus === "average") {
+                        actualStatus = "above";
+                      } else if (revenueRatio < 0.999 && actualStatus === "average") {
+                        actualStatus = "below";
+                      }
+                      
+                      // Recalculate percentage for display
+                      const actualDiff = actualDaily - actualAvg;
+                      const actualPercent = (actualDiff / actualAvg) * 100;
+                      const precisePercentDiff = actualPercent;
+                      const absPercentDiff = Math.abs(actualPercent);
+                      
+                      // Show percentage whenever there's revenue data
+                      if (actualStatus === "above") {
+                        statusColor = "text-teal-600 dark:text-teal-400";
+                        statusBg = "bg-teal-500/10";
+                        statusIcon = "↑";
+                        statusText = `${precisePercentDiff.toFixed(2)}%`;
+                      } else if (actualStatus === "below") {
+                        statusColor = "text-red-600 dark:text-red-400";
+                        statusBg = "bg-red-500/10";
+                        statusIcon = "↓";
+                        statusText = `${absPercentDiff.toFixed(2)}%`;
+                      } else {
+                        statusColor = "text-yellow-600 dark:text-yellow-400";
+                        statusBg = "bg-yellow-500/10";
+                        // Show precise percentage even when close to average
+                        if (absPercentDiff < 0.01) {
+                          statusText = `At avg`;
+                        } else {
+                          statusText = `${absPercentDiff.toFixed(2)}%`;
+                        }
+                      }
+                    } else if (item.revenue > 0 || metrics.avgDailyRevenue > 0) {
+                      // Fallback to original calculation
+                      const precisePercentDiff = item.percentDiff;
+                      const absPercentDiff = item.absPercentDiff;
+                      
                       if (item.status === "above") {
                         statusColor = "text-teal-600 dark:text-teal-400";
                         statusBg = "bg-teal-500/10";
@@ -608,7 +668,6 @@ export function RevenueChart({
                       } else {
                         statusColor = "text-yellow-600 dark:text-yellow-400";
                         statusBg = "bg-yellow-500/10";
-                        // Show precise percentage even when close to average
                         if (absPercentDiff < 0.01) {
                           statusText = `At avg`;
                         } else {

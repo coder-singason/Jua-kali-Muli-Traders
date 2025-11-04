@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Star, MessageSquare, Trash2 } from "lucide-react";
 import { useProductReviews, useSubmitReview, useDeleteReview } from "@/lib/hooks/use-reviews";
 import { formatDistanceToNow } from "date-fns";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface Review {
   id: string;
@@ -194,9 +195,19 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
                   <Button
                     variant="destructive"
                     onClick={handleDeleteReview}
+                    disabled={deleteReview.isPending}
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
+                    {deleteReview.isPending ? (
+                      <>
+                        <LoadingSpinner size="sm" className="mr-2" />
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </>
+                    )}
                   </Button>
                 )}
                 <Button
