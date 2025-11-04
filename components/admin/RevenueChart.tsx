@@ -113,13 +113,28 @@ export function RevenueChart({
       : 0;
 
     // Calculate trend (comparing last 3 days vs previous 3 days)
+    // More precise calculation with better edge case handling
     const lastThreeDays = validatedData.slice(-3).reduce((sum, d) => sum + d.revenue, 0);
     const prevThreeDays = validatedData.length >= 6 
       ? validatedData.slice(-6, -3).reduce((sum, d) => sum + d.revenue, 0)
       : 0;
-    const trend = prevThreeDays > 0 
-      ? ((lastThreeDays - prevThreeDays) / prevThreeDays) * 100 
-      : (lastThreeDays > 0 ? 100 : 0);
+    
+    let trend: number;
+    if (prevThreeDays === 0 && lastThreeDays === 0) {
+      // No sales in both periods
+      trend = 0;
+    } else if (prevThreeDays === 0 && lastThreeDays > 0) {
+      // New sales started (can't calculate percentage, use special indicator)
+      // For display purposes, we'll use a large positive number to indicate growth
+      // but the UI should ideally show "New sales" or similar
+      trend = Infinity; // Special marker for "new sales"
+    } else if (lastThreeDays === 0 && prevThreeDays > 0) {
+      // Sales stopped completely
+      trend = -100;
+    } else {
+      // Standard percentage change calculation
+      trend = ((lastThreeDays - prevThreeDays) / prevThreeDays) * 100;
+    }
 
     const totalOrders = orderData.reduce((sum, d) => sum + (d.orders || 0), 0);
     const avgDailyOrders = expectedDays > 0 ? totalOrders / expectedDays : 0;
@@ -439,16 +454,26 @@ export function RevenueChart({
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Trend</p>
                 <p className={`text-lg font-bold flex items-center gap-1 ${
-                  metrics.trend >= 0 
+                  metrics.trend >= 0 || metrics.trend === Infinity
                     ? "text-green-600 dark:text-green-400" 
                     : "text-red-600 dark:text-red-400"
                 }`}>
-                  {metrics.trend >= 0 ? (
-                    <TrendingUp className="h-4 w-4" />
+                  {metrics.trend === Infinity ? (
+                    <>
+                      <TrendingUp className="h-4 w-4" />
+                      New Sales
+                    </>
+                  ) : metrics.trend >= 0 ? (
+                    <>
+                      <TrendingUp className="h-4 w-4" />
+                      {metrics.trend.toFixed(1)}%
+                    </>
                   ) : (
-                    <TrendingDown className="h-4 w-4" />
+                    <>
+                      <TrendingDown className="h-4 w-4" />
+                      {Math.abs(metrics.trend).toFixed(1)}%
+                    </>
                   )}
-                  {Math.abs(metrics.trend).toFixed(1)}%
                 </p>
               </div>
               <BarChart3 className="h-5 w-5 text-muted-foreground" />
