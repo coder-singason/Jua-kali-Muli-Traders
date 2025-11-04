@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StarRating } from "./StarRating";
@@ -11,6 +12,16 @@ import { Star, MessageSquare, Trash2 } from "lucide-react";
 import { useProductReviews, useSubmitReview, useDeleteReview } from "@/lib/hooks/use-reviews";
 import { formatDistanceToNow } from "date-fns";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Review {
   id: string;
@@ -31,11 +42,13 @@ interface ProductReviewsProps {
 
 export function ProductReviews({ productId }: ProductReviewsProps) {
   const { data: session } = useSession();
+  const router = useRouter();
   const { data: reviewsData, isLoading: loading } = useProductReviews(productId);
   const submitReview = useSubmitReview();
   const deleteReview = useDeleteReview();
 
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [userComment, setUserComment] = useState("");
 
@@ -58,8 +71,19 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
     }
   }, [userReview]);
 
+  const handleLogin = () => {
+    setShowLoginDialog(false);
+    router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+  };
+
+  const handleRegister = () => {
+    setShowLoginDialog(false);
+    router.push(`/register?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+  };
+
   const handleSubmitReview = async () => {
     if (!session) {
+      setShowLoginDialog(true);
       return;
     }
 
@@ -103,14 +127,15 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
   }
 
   return (
-    <Card>
+    <>
+      <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
             Reviews & Ratings
           </CardTitle>
-          {session && (
+          {session && session.user.role !== "ADMIN" ? (
             <Button
               variant="outline"
               size="sm"
@@ -118,7 +143,15 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
             >
               {userReview ? "Edit Review" : "Write Review"}
             </Button>
-          )}
+          ) : !session ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowLoginDialog(true)}
+            >
+              Write Review
+            </Button>
+          ) : null}
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -161,7 +194,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
         </div>
 
         {/* Review Form */}
-        {showReviewForm && session && (
+        {showReviewForm && session && session.user.role !== "ADMIN" && (
           <Card className="bg-muted/50">
             <CardContent className="p-4 space-y-4">
               <div>
@@ -261,7 +294,28 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
           </div>
         )}
       </CardContent>
-    </Card>
+      </Card>
+
+      <AlertDialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Login Required</AlertDialogTitle>
+            <AlertDialogDescription>
+              You need to be logged in to write a review. Please login or create an account to continue.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRegister} className="bg-primary">
+              Create Account
+            </AlertDialogAction>
+            <AlertDialogAction onClick={handleLogin}>
+              Login
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 

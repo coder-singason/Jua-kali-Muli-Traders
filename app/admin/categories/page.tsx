@@ -2,10 +2,9 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db/prisma";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2 } from "lucide-react";
-import { CategoryActions } from "@/components/admin/CategoryActions";
+import { Plus } from "lucide-react";
+import { CategoriesList } from "@/components/admin/CategoriesList";
 
 async function getCategories() {
   return await prisma.category.findMany({
@@ -58,67 +57,7 @@ export default async function AdminCategoriesPage() {
         </Link>
       </div>
 
-      {categories.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground mb-4">No categories yet.</p>
-            <Link href="/admin/categories/new">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create First Category
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {categories.map((category) => (
-            <Card key={category.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="flex items-center gap-2">
-                      {category.name}
-                      {category.parent && (
-                        <span className="text-xs font-normal text-muted-foreground">
-                          ({category.parent.name})
-                        </span>
-                      )}
-                    </CardTitle>
-                  </div>
-                  <CategoryActions category={category} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Slug:</span>
-                    <span className="font-mono text-xs">{category.slug}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Products:</span>
-                      <span className="font-semibold">{category._count.products}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Subcategories:</span>
-                      <span className="font-semibold">{category._count.children}</span>
-                    </div>
-                  </div>
-                  {category.parent && (
-                    <div className="pt-2 border-t">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">Parent Category:</span>
-                        <span className="font-medium">{category.parent.name}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      <CategoriesList categories={categories} />
     </div>
   );
 }

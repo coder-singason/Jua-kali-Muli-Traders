@@ -79,8 +79,40 @@ export default function CheckoutPage() {
 
   const paymentMethod = watch("paymentMethod");
   const subtotal = getTotal();
-  const shippingCost = 500;
+  const [shippingCost, setShippingCost] = useState(0);
+  const [loadingShipping, setLoadingShipping] = useState(false);
   const total = subtotal + shippingCost;
+
+  // Calculate shipping based on products in cart
+  useEffect(() => {
+    if (items.length === 0) {
+      setShippingCost(0); // Free shipping if no items
+      return;
+    }
+
+    const calculateShipping = async () => {
+      setLoadingShipping(true);
+      try {
+        const productIds = items.map((item) => item.productId);
+        const response = await fetch(`/api/products/shipping?ids=${productIds.join(",")}`);
+        if (response.ok) {
+          const data = await response.json();
+          const calculatedShipping = items.reduce((sum, item) => {
+            const productShippingFee = data.shippingFees[item.productId] || 0;
+            return sum + productShippingFee;
+          }, 0);
+          setShippingCost(calculatedShipping > 0 ? calculatedShipping : 0);
+        }
+      } catch (error) {
+        console.error("Error calculating shipping:", error);
+        setShippingCost(0); // Free shipping as fallback
+      } finally {
+        setLoadingShipping(false);
+      }
+    };
+
+    calculateShipping();
+  }, [items]);
 
   // Fetch addresses and user profile
   useEffect(() => {
@@ -600,7 +632,15 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Shipping</span>
-                  <span>KSh {shippingCost.toLocaleString()}</span>
+                  <span>
+                    {loadingShipping ? (
+                      <span className="text-muted-foreground">Calculating...</span>
+                    ) : shippingCost > 0 ? (
+                      `KSh ${shippingCost.toLocaleString()}`
+                    ) : (
+                      <span className="text-green-600 dark:text-green-400 font-medium">Free</span>
+                    )}
+                  </span>
                 </div>
                 <div className="flex justify-between pt-2 text-lg font-bold border-t">
                   <span>Total</span>

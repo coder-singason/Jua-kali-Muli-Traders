@@ -137,7 +137,7 @@ export default async function ProductDetailPage({
           <div>
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <h1 className="text-2xl font-bold md:text-3xl mb-2">{product.name}</h1>
+                <h1 className="text-2xl font-bold md:text-3xl mb-2 font-sf-pro">{product.name}</h1>
                 {product.brand && (
                   <div className="flex items-center gap-2 text-muted-foreground mb-2">
                     <Package className="h-4 w-4" />
@@ -158,7 +158,7 @@ export default async function ProductDetailPage({
           </div>
 
           <div className="flex items-baseline gap-3">
-            <p className="text-3xl font-bold md:text-4xl">
+            <p className="text-3xl font-bold md:text-4xl font-sf-pro">
               KSh {Number(product.price).toLocaleString()}
             </p>
             {product.featured && (
@@ -184,29 +184,37 @@ export default async function ProductDetailPage({
           </div>
 
           {/* Features */}
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-            <div className="flex items-center gap-2 rounded-lg border p-3">
-              <Truck className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Delivery</p>
-                <p className="text-sm font-medium">1-3 Days</p>
-              </div>
+          {(product.deliveryTime || product.warranty || product.quality) && (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              {product.deliveryTime && (
+                <div className="flex items-center gap-2 rounded-lg border p-3">
+                  <Truck className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Delivery</p>
+                    <p className="text-sm font-medium">{product.deliveryTime}</p>
+                  </div>
+                </div>
+              )}
+              {product.warranty && (
+                <div className="flex items-center gap-2 rounded-lg border p-3">
+                  <Shield className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Warranty</p>
+                    <p className="text-sm font-medium">{product.warranty}</p>
+                  </div>
+                </div>
+              )}
+              {product.quality && (
+                <div className={`flex items-center gap-2 rounded-lg border p-3 ${!product.deliveryTime && !product.warranty ? 'col-span-2 md:col-span-1' : product.deliveryTime && product.warranty ? 'col-span-2 md:col-span-1' : ''}`}>
+                  <Heart className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Quality</p>
+                    <p className="text-sm font-medium">{product.quality}</p>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-2 rounded-lg border p-3">
-              <Shield className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Warranty</p>
-                <p className="text-sm font-medium">1 Year</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 rounded-lg border p-3 col-span-2 md:col-span-1">
-              <Heart className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">Quality</p>
-                <p className="text-sm font-medium">Premium</p>
-              </div>
-            </div>
-          </div>
+          )}
 
           {/* Add to Cart Section */}
           <ProductDetailClient product={product} />

@@ -28,6 +28,10 @@ const createProductSchema = z.object({
   stock: z.number().int().nonnegative().default(0),
   sku: z.string().optional(),
   featured: z.boolean().default(false),
+  deliveryTime: z.string().optional(),
+  warranty: z.string().optional(),
+  quality: z.string().optional(),
+  shippingFee: z.number().nonnegative().optional(),
   sizes: z.array(
     z.object({
       size: z.string(),
@@ -81,9 +85,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Build product data object explicitly - always include all fields
+    const createData = {
+      name: productData.name,
+      description: productData.description || null,
+      price: productData.price,
+      categoryId: productData.categoryId,
+      brand: productData.brand || null,
+      sku: productData.sku || null,
+      featured: productData.featured || false,
+      stock: productData.stock || 0,
+      images: productData.images || [],
+      // Always include new optional fields (set to null if not provided)
+      deliveryTime: productData.deliveryTime || null,
+      warranty: productData.warranty || null,
+      quality: productData.quality || null,
+      shippingFee: productData.shippingFee !== undefined && productData.shippingFee !== null ? productData.shippingFee : null,
+    };
+
     const product = await prisma.product.create({
       data: {
-        ...productData,
+        ...createData,
         sizes: {
           create: sizes,
         },
@@ -122,6 +144,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ product }, { status: 201 });
   } catch (error: any) {
     console.error("Error creating product:", error);
+    console.error("Error details:", JSON.stringify(error, null, 2));
     
     // Handle Prisma unique constraint errors
     if (error.code === "P2002") {
@@ -144,10 +167,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Handle Prisma validation errors
+    if (error.code === "P2009" || error.message?.includes("Unknown argument")) {
+      return NextResponse.json(
+        { 
+          error: "Invalid product data",
+          message: "Some fields are not recognized. Please restart the development server and try again.",
+          details: error.message,
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { 
         error: "Failed to create product",
         message: error.message || "An unexpected error occurred",
+        details: process.env.NODE_ENV === "development" ? error.stack : undefined,
       },
       { status: 500 }
     );

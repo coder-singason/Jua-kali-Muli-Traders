@@ -10,23 +10,29 @@ A modern, full-stack e-commerce platform for selling premium shoes, built with N
 ## ✨ Features
 
 ### Customer Features
-- 🛍️ **Product Catalog**: Advanced search, filtering by category/price, smart pagination
+- 🛍️ **Product Catalog**: Advanced search, filtering by category/price/brand/color/material, smart pagination
 - 🖼️ **Multiple Product Views**: Front, side, top, back, and general image views
-- 🛒 **Shopping Cart**: Persistent cart with Zustand, quick add to cart
-- 💳 **Checkout**: Saved addresses, pre-filled user data, payment options
-- 📦 **Order Tracking**: Interactive visual timeline for order status
+- 🛒 **Shopping Cart**: Persistent cart with Zustand, quick add to cart, dynamic shipping calculation
+- 💳 **Checkout**: Saved addresses, pre-filled user data, payment options (M-Pesa & Cash on Delivery)
+- 📦 **Order Tracking**: Interactive visual timeline for order status, order cancellation
 - 👤 **User Accounts**: Profile management, order history, address book
-- 🌓 **Dark Mode**: Full dark/light theme support
-- 📱 **Responsive Design**: Mobile-first with floating island navigation
+- ❤️ **Wishlist**: Add products to wishlist with smart feedback and contextual actions
+- ⭐ **Product Reviews**: Write and view product reviews with ratings
+- 🔍 **Recently Viewed**: Track recently viewed products
+- 🌓 **Dark Mode**: Full dark/light theme support with no flicker
+- 📱 **Responsive Design**: Mobile-first with collapsible sidebars and bottom navigation
 
 ### Admin Features
-- 📊 **Enhanced Dashboard**: Revenue analytics, charts, order status overview
-- 📈 **Revenue Visualization**: 7-day revenue trend chart with Recharts
-- 📦 **Product Management**: Full CRUD with multi-image uploads and dynamic details
-- 📋 **Order Management**: Filter, search, and status updates
+- 📊 **Enhanced Dashboard**: Revenue analytics, interactive charts, order status overview with 7-day trends
+- 📈 **Revenue Visualization**: Daily revenue charts with smart color coding, order status pie charts
+- 📦 **Product Management**: Full CRUD with multi-image uploads, dynamic details, and customizable product features
+  - **Product Features**: Admin can set Delivery Time, Warranty, Quality, and Shipping Fee per product
+- 📋 **Order Management**: Filter, search, status updates, stock restoration on cancellation
 - 🏷️ **Category Management**: Hierarchical categories with CRUD operations
+- 💬 **Review Management**: View and manage all product reviews
 - ⚠️ **Stock Alerts**: Low stock and out-of-stock warnings
 - 👥 **Customer Insights**: Customer count and statistics
+- 🚚 **Smart Shipping**: Per-product shipping fees with location-based calculation ready for future maps integration
 
 ## 🛠️ Tech Stack
 
@@ -196,14 +202,18 @@ npm run db:studio
 The application uses MongoDB with the following key models:
 
 - **Users**: Customer and admin accounts
-- **Products**: Shoe products with images and details
+- **Products**: Shoe products with images, details, and customizable features (delivery time, warranty, quality, shipping fee)
 - **ProductImages**: Multiple images per product with view types
 - **ProductDetails**: Dynamic product specifications
-- **Categories**: Hierarchical category structure
 - **ProductSizes**: Size options with individual stock
-- **Orders**: Customer orders with status tracking
+- **Categories**: Hierarchical category structure
+- **Orders**: Customer orders with status tracking and calculated shipping costs
+- **OrderItems**: Individual items in orders with product references
 - **Addresses**: Saved shipping addresses
 - **Payments**: M-Pesa payment records
+- **ProductReview**: Product reviews and ratings
+- **WishlistItem**: User wishlist items
+- **RecentlyViewed**: Track recently viewed products
 
 See `prisma/schema.prisma` for the complete schema.
 
@@ -284,6 +294,25 @@ Make sure to set all required environment variables in your deployment platform:
 - Multiple views per product (front, side, top, back, general)
 - Legacy support for simple images array
 - Image optimization with Next.js Image component
+
+### Product Features (Admin Configurable)
+- **Delivery Time**: Set per product (e.g., "1-3 Days", "5-7 Days")
+- **Warranty**: Set per product (e.g., "1 Year", "2 Years")
+- **Quality**: Set per product (e.g., "Premium", "Standard")
+- **Shipping Fee**: Set per product (defaults to free if not set)
+
+### Shipping Calculation
+- Per-product shipping fees set by admin
+- Automatic calculation based on products in cart
+- Free shipping when admin doesn't set a fee
+- Ready for location-based calculation with maps integration
+
+### Wishlist & Reviews
+- Smart wishlist button with contextual feedback
+- "Add to Wishlist" / "Remove from Wishlist" with success messages
+- Product reviews with star ratings
+- Admin review management
+- Recently viewed products tracking
 
 ## 🤝 Contributing
 

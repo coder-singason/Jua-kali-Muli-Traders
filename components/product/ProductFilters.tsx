@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, X, Filter } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 interface Category {
   id: string;
@@ -52,6 +52,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
   // Flatten categories for select dropdown
   const flattenedCategories: { value: string; label: string }[] = [];
   const flattenCategories = (cats: Category[], prefix = "") => {
+    if (!cats || cats.length === 0) return;
     cats.forEach((cat) => {
       flattenedCategories.push({
         value: cat.slug,
@@ -62,7 +63,9 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
       }
     });
   };
-  flattenCategories(categories);
+  if (categories && categories.length > 0) {
+    flattenCategories(categories);
+  }
 
   useEffect(() => {
     // Fetch filter options
@@ -103,13 +106,13 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
   const hasActiveFilters = search || category || minPrice || maxPrice || featured || (brand && brand !== "all") || (color && color !== "all") || (material && material !== "all");
 
   useEffect(() => {
-    // Auto-apply filters when search changes (debounced)
+    // Auto-apply filters when any filter changes (debounced)
     const timeoutId = setTimeout(() => {
       applyFilters();
     }, 500);
     return () => clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, [search, category, minPrice, maxPrice, featured, brand, color, material]);
 
   return (
     <Card className="mb-6">
@@ -140,11 +143,17 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  {flattenedCategories.map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
+                  {flattenedCategories.length > 0 ? (
+                    flattenedCategories.map((cat) => (
+                      <SelectItem key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-categories" disabled>
+                      No categories available
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -253,22 +262,18 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={applyFilters} className="flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              Apply Filters
-            </Button>
-            {hasActiveFilters && (
+          {hasActiveFilters && (
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
                 onClick={clearFilters}
                 className="flex items-center gap-2"
               >
                 <X className="h-4 w-4" />
-                Clear All
+                Clear All Filters
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

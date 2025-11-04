@@ -14,6 +14,9 @@ async function getProducts(searchParams: {
   minPrice?: string;
   maxPrice?: string;
   featured?: string;
+  brand?: string;
+  color?: string;
+  material?: string;
   page?: string;
 }) {
   const category = searchParams.category;
@@ -21,6 +24,9 @@ async function getProducts(searchParams: {
   const minPrice = searchParams.minPrice;
   const maxPrice = searchParams.maxPrice;
   const featured = searchParams.featured;
+  const brand = searchParams.brand;
+  const color = searchParams.color;
+  const material = searchParams.material;
   const page = parseInt(searchParams.page || "1");
   const limit = 12;
   const skip = (page - 1) * limit;
@@ -53,6 +59,18 @@ async function getProducts(searchParams: {
 
   if (featured === "true") {
     where.featured = true;
+  }
+
+  if (brand && brand !== "all") {
+    where.brand = { contains: brand, mode: "insensitive" };
+  }
+
+  if (color && color !== "all") {
+    where.color = { contains: color, mode: "insensitive" };
+  }
+
+  if (material && material !== "all") {
+    where.material = { contains: material, mode: "insensitive" };
   }
 
     const [products, total] = await Promise.all([
@@ -93,21 +111,45 @@ async function getProducts(searchParams: {
 }
 
 async function getCategories() {
-  return await prisma.category.findMany({
-    where: {
-      parentId: null,
-    },
-    include: {
-      children: {
+  try {
+    const categories = await prisma.category.findMany({
+      where: {
+        parentId: null,
+      },
+      include: {
+        children: {
+          orderBy: {
+            name: "asc",
+          },
+        },
+      },
+      orderBy: {
+        name: "asc",
+      },
+    });
+    
+    // If no top-level categories, try to get all categories (including nested ones)
+    if (categories.length === 0) {
+      const allCategories = await prisma.category.findMany({
+        include: {
+          children: {
+            orderBy: {
+              name: "asc",
+            },
+          },
+        },
         orderBy: {
           name: "asc",
         },
-      },
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
+      });
+      return allCategories.filter(cat => !cat.parentId); // Return only top-level
+    }
+    
+    return categories;
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
 }
 
 export default async function ProductsPage({
@@ -119,6 +161,9 @@ export default async function ProductsPage({
     minPrice?: string;
     maxPrice?: string;
     featured?: string;
+    brand?: string;
+    color?: string;
+    material?: string;
     page?: string;
   }>;
 }) {
@@ -136,6 +181,9 @@ export default async function ProductsPage({
   if (params.minPrice) currentParams.set("minPrice", params.minPrice);
   if (params.maxPrice) currentParams.set("maxPrice", params.maxPrice);
   if (params.featured) currentParams.set("featured", params.featured);
+  if (params.brand) currentParams.set("brand", params.brand);
+  if (params.color) currentParams.set("color", params.color);
+  if (params.material) currentParams.set("material", params.material);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8 max-w-7xl">

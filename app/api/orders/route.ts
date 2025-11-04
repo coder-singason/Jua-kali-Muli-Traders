@@ -54,13 +54,35 @@ export async function POST(request: NextRequest) {
 
     const { items, shippingAddress, paymentMethod, phone } = parsedData.data;
 
-    // Calculate totals
+    // Fetch product shipping fees and calculate totals
+    const productIds = items.map((item) => item.productId);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, shippingFee: true },
+    });
+
+    const productShippingMap = new Map(
+      products.map((p) => [p.id, p.shippingFee || 0])
+    );
+
+    // Calculate subtotal
     const subtotal = items.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
-    const shippingCost = 500;
-    const total = subtotal + shippingCost;
+
+    // Calculate shipping: sum of all product shipping fees (can be location-based in future)
+    // For now, we sum all shipping fees. In future, can calculate based on customer address
+    const shippingCost = items.reduce((sum, item) => {
+      const productShippingFee = productShippingMap.get(item.productId) || 0;
+      // If multiple quantities, only charge shipping once per product (or charge per quantity)
+      // For now, charging once per product regardless of quantity
+      return sum + productShippingFee;
+    }, 0);
+
+    // Free shipping if no shipping fees set (admin can set fees per product)
+    const finalShippingCost = shippingCost > 0 ? shippingCost : 0;
+    const total = subtotal + finalShippingCost;
 
     // Validate stock availability and deduct stock before creating order
     for (const item of items) {
@@ -122,7 +144,7 @@ export async function POST(request: NextRequest) {
           status: "PENDING",
           total,
           subtotal,
-          shippingCost,
+          shippingCost: finalShippingCost,
           paymentMethod,
           shippingAddress: shippingAddress as any,
           phone,

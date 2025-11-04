@@ -14,3 +14,6 @@ if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
 
+// Note: Prisma Client connects lazily on first query
+// Don't call $connect() at module load time as it conflicts with Edge Runtime
+

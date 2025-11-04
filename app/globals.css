@@ -2,6 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
+/* SF Pro Display - Apple's system font (fallback) */
+@font-face {
+  font-family: 'SF Pro Display';
+  src: local('-apple-system'), local('BlinkMacSystemFont'), local('Segoe UI');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@layer base {
+  :root {
+    /* Font families */
+    --font-open-sans: 'Open Sans', sans-serif;
+    --font-poppins: 'Poppins', sans-serif;
+    --font-montserrat: 'Montserrat', sans-serif;
+    --font-sf-pro: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  
+  /* Apply fonts globally */
+  body {
+    font-family: var(--font-open-sans);
+  }
+  
+  /* Headings - Montserrat */
+  h1, h2, h3, h4, h5, h6,
+  [class*="CardTitle"],
+  [class*="text-2xl"],
+  [class*="text-3xl"],
+  [class*="text-4xl"],
+  [class*="text-5xl"],
+  [class*="text-6xl"] {
+    font-family: var(--font-montserrat);
+  }
+  
+  /* Buttons - Poppins */
+  button,
+  [role="button"],
+  .btn {
+    font-family: var(--font-poppins);
+  }
+  
+  /* Navigation - Open Sans */
+  nav,
+  header,
+  [class*="Nav"],
+  [class*="Sidebar"],
+  footer {
+    font-family: var(--font-open-sans);
+  }
+  
+  /* Cards and UI components - Open Sans */
+  [class*="Card"],
+  [class*="card"],
+  [class*="Dialog"],
+  [class*="Alert"],
+  [class*="Toast"],
+  [class*="Select"],
+  [class*="Dropdown"] {
+    font-family: var(--font-open-sans);
+  }
+  
+  /* Product names and prices - SF Pro for premium feel */
+  [class*="ProductCard"],
+  [class*="product-name"],
+  [class*="product-price"],
+  .font-sf-pro {
+    font-family: var(--font-sf-pro);
+  }
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -94,8 +163,17 @@
 }
 
 @layer utilities {
-  .font-inter {
-    font-family: var(--font-inter), system-ui, sans-serif;
+  .font-open-sans {
+    font-family: var(--font-open-sans), sans-serif;
+  }
+  .font-poppins {
+    font-family: var(--font-poppins), sans-serif;
+  }
+  .font-montserrat {
+    font-family: var(--font-montserrat), sans-serif;
+  }
+  .font-sf-pro {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
   }
 }
 

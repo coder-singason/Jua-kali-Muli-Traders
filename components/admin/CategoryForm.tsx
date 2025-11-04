@@ -159,14 +159,14 @@ export function CategoryForm({ category, categories }: CategoryFormProps) {
           <div className="space-y-2">
             <Label htmlFor="parentId">Parent Category (Optional)</Label>
             <Select
-              value={parentId || ""}
-              onValueChange={(value) => setValue("parentId", value || undefined)}
+              value={parentId || "none"}
+              onValueChange={(value) => setValue("parentId", value === "none" ? undefined : value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select parent category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None (Top-level category)</SelectItem>
+                <SelectItem value="none">None (Top-level category)</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
                     {cat.name}

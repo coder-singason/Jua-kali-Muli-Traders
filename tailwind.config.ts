@@ -56,9 +56,13 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
-      fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-      },
+          fontFamily: {
+            sans: ["var(--font-open-sans)", "system-ui", "sans-serif"],
+            "open-sans": ["var(--font-open-sans)", "sans-serif"],
+            poppins: ["var(--font-poppins)", "sans-serif"],
+            montserrat: ["var(--font-montserrat)", "sans-serif"],
+            "sf-pro": ["-apple-system", "BlinkMacSystemFont", "SF Pro Display", "Segoe UI", "system-ui", "sans-serif"],
+          },
     },
   },
   plugins: [require("tailwindcss-animate")],

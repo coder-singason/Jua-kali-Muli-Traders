@@ -3,41 +3,26 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, User, LogOut, Menu, X, Home, Package, Settings, Heart } from "lucide-react";
+import { ShoppingCart, User, LogOut, Menu, X, Home, Package, Settings, Heart, MoreVertical } from "lucide-react";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export function FloatingNav() {
   const { data: session } = useSession();
   const itemCount = useCartStore((state) => state.getItemCount());
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
-
-  useEffect(() => {
-    // Check if dark mode is active
-    const checkDarkMode = () => {
-      const root = document.documentElement;
-      const isDarkMode = root.classList.contains('dark');
-      setIsDark(isDarkMode);
-    };
-
-    checkDarkMode();
-    
-    // Watch for theme changes
-    const observer = new MutationObserver(checkDarkMode);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <>
@@ -91,7 +76,7 @@ export function FloatingNav() {
             </Button>
           </Link>
 
-          {session && (
+          {session && session.user.role !== "ADMIN" && (
             <Link href="/wishlist">
               <Button
                 variant={isActive("/wishlist") ? "default" : "ghost"}
@@ -170,100 +155,142 @@ export function FloatingNav() {
         </div>
       </nav>
 
-      {/* Mobile Navigation - Simplified Bottom Bar (only essential items) */}
+      {/* Mobile Navigation - Compact Bottom Bar with More Menu */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border/50 bg-card/95 backdrop-blur-md shadow-lg">
-        <div className="flex items-center justify-around px-2 py-2 safe-area-bottom">
-          <Link href="/" className="flex-1 flex flex-col items-center gap-1 py-1.5">
+        <div className="flex items-center justify-around px-1 py-1.5 safe-area-bottom">
+          <Link href="/" className="flex flex-col items-center gap-0.5 min-w-0 flex-1">
             <Button
               variant="ghost"
               size="icon"
               className={cn(
-                "h-9 w-9 rounded-lg transition-all",
+                "h-8 w-8 rounded-md transition-all",
                 isActive("/") && "bg-primary text-primary-foreground"
               )}
               aria-label="Home"
             >
-              <Home className="h-5 w-5" />
+              <Home className="h-4 w-4" />
             </Button>
-            <span className={cn("text-[10px] font-medium", isActive("/") && "text-primary")}>
+            <span className={cn("text-[9px] font-medium truncate max-w-full", isActive("/") && "text-primary")}>
               Home
             </span>
           </Link>
 
-          <Link href="/products" className="flex-1 flex flex-col items-center gap-1 py-1.5">
+          <Link href="/products" className="flex flex-col items-center gap-0.5 min-w-0 flex-1">
             <Button
               variant="ghost"
               size="icon"
               className={cn(
-                "h-9 w-9 rounded-lg transition-all",
+                "h-8 w-8 rounded-md transition-all",
                 isActive("/products") && "bg-primary text-primary-foreground"
               )}
               aria-label="Products"
             >
-              <Package className="h-5 w-5" />
+              <Package className="h-4 w-4" />
             </Button>
-            <span className={cn("text-[10px] font-medium", isActive("/products") && "text-primary")}>
+            <span className={cn("text-[9px] font-medium truncate max-w-full", isActive("/products") && "text-primary")}>
               Products
             </span>
           </Link>
 
-          <Link href="/cart" className="flex-1 flex flex-col items-center gap-1 py-1.5 relative">
+          <Link href="/cart" className="flex flex-col items-center gap-0.5 min-w-0 flex-1 relative">
             <Button
               variant="ghost"
               size="icon"
               className={cn(
-                "h-9 w-9 rounded-lg transition-all",
+                "h-8 w-8 rounded-md transition-all",
                 isActive("/cart") && "bg-primary text-primary-foreground"
               )}
               aria-label="Shopping Cart"
             >
-              <ShoppingCart className="h-5 w-5" />
+              <ShoppingCart className="h-4 w-4" />
               {itemCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+                <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
                   {itemCount > 9 ? "9+" : itemCount}
                 </span>
               )}
             </Button>
-            <span className={cn("text-[10px] font-medium", isActive("/cart") && "text-primary")}>
+            <span className={cn("text-[9px] font-medium truncate max-w-full", isActive("/cart") && "text-primary")}>
               Cart
             </span>
           </Link>
 
-          {session?.user.role === "ADMIN" && (
-            <Link href="/admin/dashboard" className="flex-1 flex flex-col items-center gap-1 py-1.5">
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "h-9 w-9 rounded-lg transition-all",
-                  isActive("/admin") && "bg-primary text-primary-foreground"
-                )}
-                aria-label="Admin"
-              >
-                <Settings className="h-5 w-5" />
-              </Button>
-              <span className={cn("text-[10px] font-medium", isActive("/admin") && "text-primary")}>
-                Admin
-              </span>
-            </Link>
-          )}
-
-          <Link href={session ? "/profile" : "/login"} className="flex-1 flex flex-col items-center gap-1 py-1.5">
+          <Link href={session ? "/profile" : "/login"} className="flex flex-col items-center gap-0.5 min-w-0 flex-1">
             <Button
               variant="ghost"
               size="icon"
               className={cn(
-                "h-9 w-9 rounded-lg transition-all",
+                "h-8 w-8 rounded-md transition-all",
                 isActive("/profile") && "bg-primary text-primary-foreground"
               )}
               aria-label={session ? "Profile" : "Login"}
             >
-              <User className="h-5 w-5" />
+              <User className="h-4 w-4" />
             </Button>
-            <span className={cn("text-[10px] font-medium", isActive("/profile") && "text-primary")}>
+            <span className={cn("text-[9px] font-medium truncate max-w-full", isActive("/profile") && "text-primary")}>
               {session ? "Profile" : "Login"}
             </span>
           </Link>
+
+          <Sheet>
+            <SheetTrigger asChild>
+              <button
+                className="flex flex-col items-center gap-0.5 min-w-0 flex-1 py-1.5"
+                aria-label="More options"
+              >
+                <div className={cn(
+                  "h-8 w-8 rounded-md flex items-center justify-center transition-all",
+                  "hover:bg-muted active:bg-muted/80"
+                )}>
+                  <MoreVertical className="h-4 w-4" />
+                </div>
+                <span className="text-[9px] font-medium">More</span>
+              </button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[60vh] rounded-t-2xl">
+              <SheetHeader>
+                <SheetTitle>Menu</SheetTitle>
+                <SheetDescription>Additional options and settings</SheetDescription>
+              </SheetHeader>
+              <div className="mt-6 space-y-2">
+                {session && session.user.role !== "ADMIN" && (
+                  <Link href="/wishlist">
+                    <Button
+                      variant={isActive("/wishlist") ? "default" : "ghost"}
+                      className="w-full justify-start gap-3 h-12"
+                    >
+                      <Heart className="h-5 w-5" />
+                      <span>Wishlist</span>
+                    </Button>
+                  </Link>
+                )}
+                {session?.user.role === "ADMIN" && (
+                  <Link href="/admin/dashboard">
+                    <Button
+                      variant={isActive("/admin") ? "default" : "ghost"}
+                      className="w-full justify-start gap-3 h-12"
+                    >
+                      <Settings className="h-5 w-5" />
+                      <span>Admin Dashboard</span>
+                    </Button>
+                  </Link>
+                )}
+                {session && (
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12"
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span>Logout</span>
+                  </Button>
+                )}
+                <div className="flex items-center justify-between w-full px-4 py-3 border-t mt-4">
+                  <span className="text-sm font-medium">Theme</span>
+                  <ThemeToggle />
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </nav>
     </>

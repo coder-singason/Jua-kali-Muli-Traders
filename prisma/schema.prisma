@@ -133,6 +133,10 @@ model Product {
   featured    Boolean  @default(false)
   color       String?  // For filtering
   material    String?  // For filtering
+  deliveryTime String? @map("delivery_time") // e.g., "1-3 Days", "5-7 Days"
+  warranty    String?  // e.g., "1 Year", "2 Years", "6 Months"
+  quality     String?  // e.g., "Premium", "Standard", "Basic"
+  shippingFee Float?   @default(0) @map("shipping_fee") // Default shipping fee for this product (in KSh)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 

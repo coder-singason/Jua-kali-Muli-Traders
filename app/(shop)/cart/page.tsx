@@ -8,7 +8,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Plus, Minus, AlertCircle, ShoppingCart } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -21,7 +21,40 @@ export default function CartPage() {
   const [removingItems, setRemovingItems] = useState<Set<string>>(new Set());
   const [isClearing, setIsClearing] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [shippingCost, setShippingCost] = useState(0);
+  const [loadingShipping, setLoadingShipping] = useState(false);
   const isAdmin = session?.user?.role === "ADMIN";
+
+  // Calculate shipping based on products in cart
+  useEffect(() => {
+    if (items.length === 0) {
+      setShippingCost(0);
+      return;
+    }
+
+    const calculateShipping = async () => {
+      setLoadingShipping(true);
+      try {
+        const productIds = items.map((item) => item.productId);
+        const response = await fetch(`/api/products/shipping?ids=${productIds.join(",")}`);
+        if (response.ok) {
+          const data = await response.json();
+          const calculatedShipping = items.reduce((sum, item) => {
+            const productShippingFee = data.shippingFees[item.productId] || 0;
+            return sum + productShippingFee;
+          }, 0);
+          setShippingCost(calculatedShipping > 0 ? calculatedShipping : 0);
+        }
+      } catch (error) {
+        console.error("Error calculating shipping:", error);
+        setShippingCost(0);
+      } finally {
+        setLoadingShipping(false);
+      }
+    };
+
+    calculateShipping();
+  }, [items]);
 
   const handleUpdateQuantity = async (id: string, newQuantity: number) => {
     setUpdatingItems((prev) => new Set(prev).add(id));
@@ -186,12 +219,20 @@ export default function CartPage() {
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span className="font-semibold">KSh 500</span>
+                <span className="font-semibold">
+                  {loadingShipping ? (
+                    <span className="text-muted-foreground text-sm">Calculating...</span>
+                  ) : shippingCost > 0 ? (
+                    `KSh ${shippingCost.toLocaleString()}`
+                  ) : (
+                    <span className="text-green-600 dark:text-green-400">Free</span>
+                  )}
+                </span>
               </div>
               <div className="border-t pt-4">
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span>KSh {(total + 500).toLocaleString()}</span>
+                  <span>KSh {(total + shippingCost).toLocaleString()}</span>
                 </div>
               </div>
               {isAdmin ? (

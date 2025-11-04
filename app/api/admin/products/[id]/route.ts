@@ -26,6 +26,10 @@ const updateProductSchema = z.object({
   sku: z.string().optional(),
   featured: z.boolean().default(false),
   stock: z.number().int().nonnegative().default(0),
+  deliveryTime: z.string().optional(),
+  warranty: z.string().optional(),
+  quality: z.string().optional(),
+  shippingFee: z.number().nonnegative().optional(),
   images: z.array(z.string()).optional(), // Legacy support
   productImages: z.array(productImageSchema).optional(),
   productDetails: z.array(productDetailSchema).optional(),
@@ -115,10 +119,61 @@ export async function PATCH(
       );
     }
 
-    // Update product
+    // Check if SKU is being updated and if it already exists for another product
+    if (productData.sku !== undefined) {
+      // Normalize empty string to null
+      const newSku = productData.sku?.trim() || null;
+      
+      if (newSku) {
+        // Check if SKU is already taken by another product
+        const existingProduct = await prisma.product.findFirst({
+          where: {
+            sku: newSku,
+            id: { not: id }, // Exclude current product
+          },
+          select: { id: true, name: true },
+        });
+
+        if (existingProduct) {
+          return NextResponse.json(
+            {
+              error: "SKU already exists",
+              message: `A product with SKU "${newSku}" already exists. Please use a different SKU or leave it blank.`,
+            },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
+    // Update product - explicitly include new fields
+    const updateData: any = {
+      name: productData.name,
+      description: productData.description || null,
+      price: productData.price,
+      brand: productData.brand || null,
+      sku: productData.sku?.trim() || null, // Normalize empty string to null
+      featured: productData.featured || false,
+      stock: productData.stock || 0,
+    };
+
+    // Add optional fields only if they're provided
+    if (productData.deliveryTime !== undefined) {
+      updateData.deliveryTime = productData.deliveryTime || null;
+    }
+    if (productData.warranty !== undefined) {
+      updateData.warranty = productData.warranty || null;
+    }
+    if (productData.quality !== undefined) {
+      updateData.quality = productData.quality || null;
+    }
+    if (productData.shippingFee !== undefined) {
+      updateData.shippingFee = productData.shippingFee || null;
+    }
+
     const product = await prisma.product.update({
       where: { id },
-      data: productData,
+      data: updateData,
     });
 
     // Update sizes if provided
@@ -194,10 +249,48 @@ export async function PATCH(
     });
 
     return NextResponse.json({ product: updatedProduct });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating product:", error);
+    
+    // Handle Prisma unique constraint errors
+    if (error.code === "P2002") {
+      const target = error.meta?.target;
+      if (Array.isArray(target) && target.includes("sku")) {
+        return NextResponse.json(
+          {
+            error: "SKU already exists",
+            message: "A product with this SKU already exists. Please use a different SKU or leave it blank.",
+          },
+          { status: 400 }
+        );
+      }
+      return NextResponse.json(
+        {
+          error: "Duplicate entry",
+          message: "A product with this information already exists.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Handle Prisma validation errors
+    if (error.code === "P2009" || error.message?.includes("Unknown argument")) {
+      return NextResponse.json(
+        { 
+          error: "Invalid product data",
+          message: "Some fields are not recognized. Please restart the development server and try again.",
+          details: error.message,
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Failed to update product" },
+      { 
+        error: "Failed to update product",
+        message: error.message || "An unexpected error occurred",
+        details: process.env.NODE_ENV === "development" ? error.stack : undefined,
+      },
       { status: 500 }
     );
   }

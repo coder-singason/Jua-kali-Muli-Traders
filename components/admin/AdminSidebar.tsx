@@ -10,6 +10,7 @@ import {
   Box,
   ShoppingCart,
   Layers,
+  MessageSquare,
   Menu,
   X,
   Home,
@@ -44,6 +45,11 @@ const navItems: NavItem[] = [
     href: "/admin/categories",
     icon: Layers,
     label: "Categories",
+  },
+  {
+    href: "/admin/reviews",
+    icon: MessageSquare,
+    label: "Reviews",
   },
 ];
 

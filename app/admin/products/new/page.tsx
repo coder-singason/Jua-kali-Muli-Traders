@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import Link from "next/link";
 import { ProductImageUpload, type ProductImage } from "@/components/admin/ProductImageUpload";
 import { ProductDetailsManager, type ProductDetail } from "@/components/admin/ProductDetailsManager";
@@ -24,6 +25,10 @@ const productSchema = z.object({
   sku: z.string().optional(),
   featured: z.boolean().default(false),
   stock: z.number().int().nonnegative().default(0),
+  deliveryTime: z.string().optional(),
+  warranty: z.string().optional(),
+  quality: z.string().optional(),
+  shippingFee: z.number().nonnegative().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -229,6 +234,50 @@ export default function NewProductPage() {
                 className="h-4 w-4"
               />
               <Label htmlFor="featured">Featured Product</Label>
+            </div>
+
+            {/* Product Features */}
+            <div className="space-y-4 border-t pt-4">
+              <h3 className="text-lg font-semibold">Product Features</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="deliveryTime">Delivery Time</Label>
+                  <Input
+                    id="deliveryTime"
+                    placeholder="e.g., 1-3 Days, 5-7 Days"
+                    {...register("deliveryTime")}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="warranty">Warranty</Label>
+                  <Input
+                    id="warranty"
+                    placeholder="e.g., 1 Year, 2 Years, 6 Months"
+                    {...register("warranty")}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="quality">Quality</Label>
+                  <Input
+                    id="quality"
+                    placeholder="e.g., Premium, Standard, Basic"
+                    {...register("quality")}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="shippingFee">Shipping Fee (KSh)</Label>
+                  <Input
+                    id="shippingFee"
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    {...register("shippingFee", { valueAsNumber: true })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Default shipping fee for this product. Can be calculated based on location in future.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Product Images */}

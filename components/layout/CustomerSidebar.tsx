@@ -73,7 +73,7 @@ export function CustomerSidebar() {
       label: "Cart",
       badge: itemCount > 0 ? itemCount : undefined,
     },
-    ...(session
+    ...(session && session.user.role !== "ADMIN"
       ? [
           {
             href: "/wishlist",

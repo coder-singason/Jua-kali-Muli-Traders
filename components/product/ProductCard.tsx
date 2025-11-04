@@ -152,7 +152,7 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
           {/* Product Info */}
           <div className="flex-1 space-y-2">
             <h3 
-              className="font-semibold text-base leading-tight line-clamp-2 cursor-pointer hover:text-primary transition-colors"
+              className="font-semibold text-base leading-tight line-clamp-2 cursor-pointer hover:text-primary transition-colors font-sf-pro"
               onClick={handleCardClick}
             >
               {product.name}
@@ -168,7 +168,7 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
           {/* Price and Stock Info */}
           <div className="flex items-center justify-between pt-2 border-t">
             <div>
-              <span className="text-lg font-bold">
+              <span className="text-lg font-bold font-sf-pro">
                 KSh {Number(product.price).toLocaleString()}
               </span>
               {hasStock && (
@@ -179,33 +179,36 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
             </div>
           </div>
 
-          {/* Action Buttons - Always Visible, Stacked on Mobile */}
-          <div className="flex flex-col sm:flex-row gap-2 pt-2">
+          {/* Action Buttons - Compact and Responsive */}
+          <div className="flex gap-2 pt-2">
             <Button
               variant="outline"
               size="sm"
-              className="flex-1"
+              className="flex-1 sm:flex-initial sm:min-w-[100px] text-xs sm:text-sm"
               onClick={handleCardClick}
             >
-              <Eye className="h-4 w-4 mr-2" />
-              View Details
+              <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">View Details</span>
+              <span className="sm:hidden">View</span>
             </Button>
             {hasStock && (
               <Button
                 size="sm"
-                className="flex-1"
+                className="flex-1 sm:flex-initial sm:min-w-[100px] text-xs sm:text-sm"
                 onClick={handleQuickAdd}
                 disabled={isAdding}
               >
                 {isAdding ? (
                   <>
-                    <LoadingSpinner size="sm" className="mr-2" />
-                    Adding...
+                    <LoadingSpinner size="sm" className="sm:mr-2" />
+                    <span className="hidden sm:inline">Adding...</span>
+                    <span className="sm:hidden">Add</span>
                   </>
                 ) : (
                   <>
-                    <ShoppingCart className="mr-2 h-4 w-4" />
-                    Quick Add
+                    <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Quick Add</span>
+                    <span className="sm:hidden">Add</span>
                   </>
                 )}
               </Button>

@@ -74,9 +74,12 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   return (
     <div className="space-y-4">
       {/* Wishlist Button */}
-      <div className="flex items-center gap-2">
-        <WishlistButton productId={product.id} size="md" />
-        <span className="text-sm text-muted-foreground">Add to Wishlist</span>
+      <div className="flex justify-start">
+        <WishlistButton 
+          productId={product.id} 
+          size="md" 
+          variant="button"
+        />
       </div>
 
       {/* Size Selection */}

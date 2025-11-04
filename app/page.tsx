@@ -26,8 +26,15 @@ export default async function Home() {
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground py-20 md:py-32">
-        <div className="container mx-auto px-4 text-center">
+      <section className="relative bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground py-20 md:py-32 overflow-hidden">
+        {/* Blob Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 -right-20 w-96 h-96 bg-primary-foreground/30 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-20 -left-20 w-96 h-96 bg-primary-foreground/30 rounded-full blur-2xl"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary-foreground/20 rounded-full blur-2xl"></div>
+        </div>
+        
+        <div className="relative z-10 container mx-auto px-4 text-center">
           <h1 className="text-4xl font-bold mb-4 md:text-6xl">Welcome to KicksZone</h1>
           <p className="text-lg mb-8 md:text-xl text-primary-foreground/90">Premium Shoes for Every Step</p>
           <Link href="/products">
