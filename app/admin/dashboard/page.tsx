@@ -407,7 +407,7 @@ export default async function AdminDashboardPage() {
                 <p>No orders yet.</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {stats.recentOrders.map((order) => {
                   const statusColors = {
                     PENDING: "bg-yellow-100 dark:bg-yellow-950 text-yellow-800 dark:text-yellow-200",
@@ -417,18 +417,26 @@ export default async function AdminDashboardPage() {
                     CANCELLED: "bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-200",
                   };
 
+                  const orderDate = new Date(order.createdAt);
+                  const formattedDate = format(orderDate, "MMM d, yyyy");
+                  const formattedTime = format(orderDate, "h:mm a");
+
                   return (
                     <Link
                       key={order.id}
                       href={`/admin/orders/${order.id}`}
-                      className="block p-3 rounded-lg border hover:bg-muted/50 dark:hover:bg-muted/30 hover:border-primary/20 transition-all"
+                      className="block p-4 rounded-lg border border-border/50 hover:bg-muted/50 dark:hover:bg-muted/30 hover:border-primary/30 transition-all active:scale-[0.98]"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold">#{order.orderNumber}</span>
+                      <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                        {/* Left Section - Order Info */}
+                        <div className="flex-1 min-w-0">
+                          {/* Order Number and Status */}
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <span className="font-semibold text-base text-foreground">
+                              #{order.orderNumber}
+                            </span>
                             <span
-                              className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                              className={`px-2 py-0.5 rounded-md text-xs font-medium shrink-0 ${
                                 statusColors[order.status as keyof typeof statusColors] || ""
                               }`}
                             >
@@ -436,19 +444,43 @@ export default async function AdminDashboardPage() {
                                 order.status.slice(1).toLowerCase()}
                             </span>
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>{order.user.name || order.user.email}</span>
-                            <span>•</span>
-                            <span>{format(new Date(order.createdAt), "MMM d, yyyy 'at' h:mm a")}</span>
-                            <span>•</span>
-                            <span>{order.items.length} item{order.items.length !== 1 ? "s" : ""}</span>
+                          
+                          {/* Customer Name */}
+                          <div className="mb-2">
+                            <p className="text-sm font-medium text-foreground">
+                              {order.user.name || order.user.email}
+                            </p>
+                          </div>
+                          
+                          {/* Date and Time - Stacked on mobile, inline on desktop */}
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs text-muted-foreground">
+                            <span>{formattedDate}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span>{formattedTime}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="hidden sm:inline">
+                              {order.items.length} item{order.items.length !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                          
+                          {/* Items count - Mobile only */}
+                          <div className="sm:hidden mt-1 text-xs text-muted-foreground">
+                            {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold text-lg">
-                            KSh {Number(order.total).toLocaleString()}
-                          </p>
-                          <ArrowRight className="h-4 w-4 text-muted-foreground mt-1 ml-auto" />
+                        
+                        {/* Right Section - Amount and Arrow */}
+                        <div className="flex items-start justify-between sm:justify-end gap-3 sm:flex-col sm:items-end">
+                          <div className="text-right sm:text-right">
+                            <p className="font-bold text-lg sm:text-xl text-foreground">
+                              KSh {Number(order.total).toLocaleString()}
+                            </p>
+                            {/* Items count - Desktop only */}
+                            <p className="hidden sm:block text-xs text-muted-foreground mt-1">
+                              {order.items.length} item{order.items.length !== 1 ? "s" : ""}
+                            </p>
+                          </div>
+                          <ArrowRight className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5 sm:mt-0" />
                         </div>
                       </div>
                     </Link>

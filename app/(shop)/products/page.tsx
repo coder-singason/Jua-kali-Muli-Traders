@@ -138,7 +138,7 @@ export default async function ProductsPage({
   if (params.featured) currentParams.set("featured", params.featured);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8 max-w-7xl">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">All Products</h1>
         <p className="text-muted-foreground">

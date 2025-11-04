@@ -122,61 +122,61 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Back Button */}
       <Link href="/admin/orders">
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" className="text-xs sm:text-sm">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Orders
         </Button>
       </Link>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Order Status Card */}
           <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <StatusIcon className={`h-5 w-5 ${statusColor}`} />
-                  Order Status
-                </CardTitle>
-              </div>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <StatusIcon className={`h-4 w-4 sm:h-5 sm:w-5 ${statusColor}`} />
+                Order Status
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-4">
-                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${statusBg} ${statusColor}`}>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${statusBg} ${statusColor} w-fit`}>
                   <StatusIcon className="h-4 w-4" />
-                  <span className="font-semibold">{statusConfig[order.status].label}</span>
+                  <span className="font-semibold text-sm">{statusConfig[order.status].label}</span>
                 </div>
-                <Select
-                  value={order.status}
-                  onValueChange={handleStatusChange}
-                  disabled={isUpdating || order.status === "CANCELLED"}
-                >
-                  <SelectTrigger className="w-48">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="PENDING">Pending</SelectItem>
-                    <SelectItem value="PROCESSING">Processing</SelectItem>
-                    <SelectItem value="SHIPPED">Shipped</SelectItem>
-                    <SelectItem value="DELIVERED">Delivered</SelectItem>
-                    <SelectItem 
-                      value="CANCELLED"
-                      disabled={order.status !== "PENDING" && order.status !== "PROCESSING"}
-                    >
-                      Cancelled
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                {isUpdating && (
-                  <LoadingSpinner size="sm" />
-                )}
-                {order.status === "CANCELLED" && (
-                  <span className="text-xs text-muted-foreground">(Cannot be changed)</span>
-                )}
+                <div className="flex items-center gap-2 flex-1">
+                  <Select
+                    value={order.status}
+                    onValueChange={handleStatusChange}
+                    disabled={isUpdating || order.status === "CANCELLED"}
+                  >
+                    <SelectTrigger className="w-full sm:w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PENDING">Pending</SelectItem>
+                      <SelectItem value="PROCESSING">Processing</SelectItem>
+                      <SelectItem value="SHIPPED">Shipped</SelectItem>
+                      <SelectItem value="DELIVERED">Delivered</SelectItem>
+                      <SelectItem 
+                        value="CANCELLED"
+                        disabled={order.status !== "PENDING" && order.status !== "PROCESSING"}
+                      >
+                        Cancelled
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {isUpdating && (
+                    <LoadingSpinner size="sm" />
+                  )}
+                  {order.status === "CANCELLED" && (
+                    <span className="text-xs text-muted-foreground">(Cannot be changed)</span>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -187,45 +187,47 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
               <CardTitle>Order Items</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {order.items.map((item) => (
-                  <div key={item.id} className="flex gap-4 pb-4 border-b last:border-0">
-                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
-                      {item.product?.images?.[0] ? (
-                        <Image
-                          src={item.product.images[0]}
-                          alt={item.productName}
-                          fill
-                          className="object-cover"
-                          sizes="80px"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <Package className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{item.productName}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Size: {item.size} • Quantity: {item.quantity}
-                      </p>
-                      {item.product && (
-                        <Link
-                          href={`/admin/products/${item.product.id}/edit`}
-                          className="text-xs text-primary hover:underline mt-1 inline-block"
-                        >
-                          View Product
-                        </Link>
-                      )}
-                      {!item.product && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Product no longer available
+                  <div key={item.id} className="flex flex-col sm:flex-row gap-3 sm:gap-4 pb-3 sm:pb-4 border-b last:border-0">
+                    <div className="flex gap-3 sm:gap-4 flex-1">
+                      <div className="relative h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
+                        {item.product?.images?.[0] ? (
+                          <Image
+                            src={item.product.images[0]}
+                            alt={item.productName}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 640px) 64px, 80px"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <Package className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-sm sm:text-base break-words">{item.productName}</h4>
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                          Size: {item.size} • Quantity: {item.quantity}
                         </p>
-                      )}
+                        {item.product && (
+                          <Link
+                            href={`/admin/products/${item.product.id}/edit`}
+                            className="text-xs text-primary hover:underline mt-1 inline-block"
+                          >
+                            View Product
+                          </Link>
+                        )}
+                        {!item.product && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Product no longer available
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">
+                    <div className="text-left sm:text-right flex items-start sm:items-end justify-between sm:flex-col">
+                      <p className="font-semibold text-sm sm:text-base">
                         KSh {(item.price * item.quantity).toLocaleString()}
                       </p>
                       <p className="text-xs text-muted-foreground">
@@ -240,7 +242,7 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Order Summary */}
           <Card>
             <CardHeader>

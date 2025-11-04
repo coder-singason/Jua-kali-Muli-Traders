@@ -53,7 +53,7 @@ export default function RootLayout({
           <QueryProvider>
             <SessionProvider>
               <div className="flex min-h-screen flex-col">
-                <main className="flex-1 pb-20 md:pt-0 md:pb-24">{children}</main>
+                <main className="flex-1 pb-16 md:pb-20 lg:pb-0">{children}</main>
                 <Footer />
                 <FloatingNav />
               </div>

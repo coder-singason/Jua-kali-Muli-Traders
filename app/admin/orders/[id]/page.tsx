@@ -52,18 +52,16 @@ export default async function AdminOrderDetailPage({
   }
 
   return (
-    <>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Order #{order.orderNumber}</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Placed on {format(new Date(order.createdAt), "PPP 'at' p")}
-          </p>
-        </div>
+    <div className="max-w-7xl mx-auto w-full">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold">Order #{order.orderNumber}</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+          Placed on {format(new Date(order.createdAt), "PPP 'at' p")}
+        </p>
       </div>
 
       <OrderDetailAdmin order={order} />
-    </>
+    </div>
   );
 }
 

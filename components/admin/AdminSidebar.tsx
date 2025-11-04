@@ -6,16 +6,15 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
-  Package,
-  ShoppingBag,
-  FolderTree,
+  BarChart3,
+  Box,
+  ShoppingCart,
+  Layers,
   Menu,
   X,
   Home,
   ChevronLeft,
   ChevronRight,
-  Settings,
 } from "lucide-react";
 
 interface NavItem {
@@ -28,22 +27,22 @@ interface NavItem {
 const navItems: NavItem[] = [
   {
     href: "/admin/dashboard",
-    icon: LayoutDashboard,
+    icon: BarChart3,
     label: "Dashboard",
   },
   {
     href: "/admin/products",
-    icon: Package,
+    icon: Box,
     label: "Products",
   },
   {
     href: "/admin/orders",
-    icon: ShoppingBag,
+    icon: ShoppingCart,
     label: "Orders",
   },
   {
     href: "/admin/categories",
-    icon: FolderTree,
+    icon: Layers,
     label: "Categories",
   },
 ];
@@ -92,47 +91,50 @@ export function AdminSidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:sticky top-0 left-0 z-50 h-screen bg-card border-r border-border transition-all duration-300 ease-in-out",
+          "fixed lg:sticky top-0 left-0 z-50 h-screen bg-card/95 backdrop-blur-sm border-r border-border/50 transition-all duration-300 ease-in-out shadow-lg lg:shadow-none",
           "flex flex-col",
           isCollapsed ? "w-16" : "w-64",
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center justify-between p-4 lg:p-5 border-b border-border/50">
           <div
             className={cn(
-              "flex items-center gap-3 transition-opacity duration-200",
+              "flex items-center gap-3 transition-all duration-200",
               isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
             )}
           >
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
-              <LayoutDashboard className="h-5 w-5" />
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-md">
+              <BarChart3 className="h-5 w-5" />
             </div>
             <div className="flex flex-col">
-              <h2 className="font-bold text-lg leading-tight">Admin Panel</h2>
-              <p className="text-xs text-muted-foreground">KicksZone</p>
+              <h2 className="font-bold text-lg leading-tight text-foreground">Admin Panel</h2>
+              <p className="text-xs text-muted-foreground font-medium">KicksZone</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="ml-auto shrink-0"
+            className={cn(
+              "ml-auto shrink-0 h-8 w-8 hover:bg-muted/80",
+              isCollapsed && "mx-auto"
+            )}
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {isMobileOpen ? (
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4 text-foreground" />
             ) : isCollapsed ? (
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
             ) : (
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4 text-muted-foreground" />
             )}
           </Button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+        <nav className="flex-1 overflow-y-auto p-2 lg:p-3 space-y-1.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -142,58 +144,92 @@ export function AdminSidebar() {
                 key={item.href}
                 href={item.href}
                 onClick={closeMobileSidebar}
-                className="block"
+                className="block group"
               >
-                <Button
-                  variant={isActive ? "secondary" : "ghost"}
+                <div
                   className={cn(
-                    "w-full justify-start gap-3 h-11 transition-all",
-                    isActive && "bg-primary text-primary-foreground hover:bg-primary/90",
-                    isCollapsed && "justify-center px-2"
+                    "relative flex items-center rounded-xl transition-all duration-200",
+                    isCollapsed 
+                      ? "justify-center h-12 w-12 mx-auto" 
+                      : "h-12 gap-3 px-4",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
                   )}
                 >
-                  <Icon className={cn("h-5 w-5 shrink-0", isActive && "text-primary-foreground")} />
-                  <span
+                  {/* Active indicator */}
+                  {isActive && !isCollapsed && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 bg-primary-foreground rounded-r-full" />
+                  )}
+                  
+                  <div
                     className={cn(
-                      "font-medium transition-opacity duration-200",
-                      isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                      "flex items-center justify-center shrink-0 transition-all",
+                      isCollapsed ? "w-full h-full" : "w-6 h-6",
+                      isActive
+                        ? "text-primary-foreground"
+                        : "text-muted-foreground group-hover:text-foreground"
                     )}
                   >
-                    {item.label}
-                  </span>
+                    <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
+                  </div>
+                  
+                  {!isCollapsed && (
+                    <span
+                      className={cn(
+                        "font-semibold text-sm transition-all duration-200 flex-1 whitespace-nowrap",
+                        isActive && "text-primary-foreground"
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                  )}
+                  
                   {item.badge && !isCollapsed && (
-                    <span className="ml-auto bg-accent text-accent-foreground text-xs font-semibold px-2 py-0.5 rounded-full">
+                    <span
+                      className={cn(
+                        "ml-auto text-xs font-bold px-2 py-0.5 rounded-full shrink-0 min-w-[20px] text-center",
+                        isActive
+                          ? "bg-primary-foreground/20 text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
+                      )}
+                    >
                       {item.badge}
                     </span>
                   )}
-                </Button>
+                </div>
               </Link>
             );
           })}
         </nav>
 
-        <div className="border-t border-border" />
+        <div className="border-t border-border/50" />
 
         {/* Footer */}
-        <div className="p-4 border-t border-border">
-          <Link href="/" onClick={closeMobileSidebar}>
-            <Button
-              variant="outline"
+        <div className="p-2 lg:p-3 border-t border-border/50">
+          <Link href="/" onClick={closeMobileSidebar} className="block group">
+            <div
               className={cn(
-                "w-full justify-start gap-3",
-                isCollapsed && "justify-center px-2"
+                "flex items-center rounded-lg transition-all duration-200",
+                "border border-border/50 hover:border-border hover:bg-muted/60",
+                "text-muted-foreground hover:text-foreground",
+                isCollapsed 
+                  ? "justify-center h-12 w-12 mx-auto border-0" 
+                  : "h-11 gap-3 px-3"
               )}
             >
-              <Home className="h-5 w-5 shrink-0" />
-              <span
+              <Home 
                 className={cn(
-                  "transition-opacity duration-200",
-                  isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-                )}
-              >
-                Back to Shop
-              </span>
-            </Button>
+                  "shrink-0 text-muted-foreground group-hover:text-foreground transition-colors",
+                  isCollapsed ? "h-5 w-5" : "h-5 w-5"
+                )} 
+              />
+              {!isCollapsed && (
+                <span className="font-medium text-sm transition-all duration-200 whitespace-nowrap">
+                  Back to Shop
+                </span>
+              )}
+            </div>
           </Link>
         </div>
       </aside>
@@ -202,11 +238,11 @@ export function AdminSidebar() {
       <Button
         variant="outline"
         size="icon"
-        className="fixed top-4 left-4 z-40 lg:hidden"
+        className="fixed top-4 left-4 z-40 lg:hidden h-10 w-10 bg-card/95 backdrop-blur-sm border-border/50 shadow-lg hover:bg-muted/80"
         onClick={toggleSidebar}
         aria-label="Toggle sidebar"
       >
-        <Menu className="h-5 w-5" />
+        <Menu className="h-5 w-5 text-foreground" />
       </Button>
     </>
   );
