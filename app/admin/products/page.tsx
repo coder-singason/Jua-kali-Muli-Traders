@@ -10,6 +10,12 @@ async function getProducts() {
     include: {
       category: true,
       sizes: true,
+      productImages: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+        take: 1, // Only get first image for list view
+      },
     },
     orderBy: {
       createdAt: "desc",

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, X } from "lucide-react";
+import { Search, X, Package } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { ProductActions } from "@/components/admin/ProductActions";
@@ -15,6 +15,12 @@ interface Product {
   name: string;
   price: number;
   images: string[];
+  productImages?: Array<{
+    url: string;
+    viewType: string;
+    alt?: string;
+    sortOrder: number;
+  }>;
   stock: number;
   featured: boolean;
   category: {
@@ -24,6 +30,47 @@ interface Product {
 
 interface ProductsListProps {
   products: Product[];
+}
+
+function ProductImageDisplay({ product }: { product: Product }) {
+  const [imageError, setImageError] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  
+  // Prioritize productImages over legacy images array
+  const imageUrl = product.productImages && product.productImages.length > 0
+    ? product.productImages.sort((a, b) => a.sortOrder - b.sortOrder)[0].url
+    : product.images && product.images.length > 0
+    ? product.images[0]
+    : null;
+
+  // Set initial image source
+  useEffect(() => {
+    if (imageUrl) {
+      setImageSrc(imageUrl);
+    }
+  }, [imageUrl]);
+
+  if (!imageUrl || imageError || !imageSrc) {
+    return (
+      <div className="flex items-center justify-center h-full bg-muted">
+        <Package className="h-12 w-12 text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Use regular img tag for better error handling
+  return (
+    <img
+      src={imageSrc}
+      alt={product.name}
+      className="w-full h-full object-cover"
+      onError={() => {
+        setImageError(true);
+        setImageSrc(null);
+      }}
+      loading="lazy"
+    />
+  );
 }
 
 export function ProductsList({ products: initialProducts }: ProductsListProps) {
@@ -98,14 +145,7 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
           {filteredProducts.map((product) => (
             <Card key={product.id} className="hover:shadow-md hover:bg-muted/30 dark:hover:bg-muted/20 transition-all">
               <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
-                {product.images[0] && (
-                  <Image
-                    src={product.images[0]}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
-                )}
+                <ProductImageDisplay product={product} />
               </div>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
