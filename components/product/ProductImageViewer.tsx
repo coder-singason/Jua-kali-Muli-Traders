@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { ProductImageFallback } from "@/components/ui/product-image-fallback";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ProductImage {
@@ -36,9 +37,7 @@ export function ProductImageViewer({
   if (!images || images.length === 0) {
     return (
       <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted">
-        <div className="flex h-full items-center justify-center">
-          <p className="text-muted-foreground">No images available</p>
-        </div>
+        <ProductImageFallback className="w-full h-full" size="lg" />
       </div>
     );
   }

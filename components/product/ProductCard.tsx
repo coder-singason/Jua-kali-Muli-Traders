@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, memo, useMemo } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { WishlistButton } from "./WishlistButton";
+import { ProductImageFallback } from "@/components/ui/product-image-fallback";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
@@ -22,7 +23,20 @@ interface ProductCardProps {
 
 export const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
-  const imageUrl = useMemo(() => product.images[0] || "/placeholder-shoe.jpg", [product.images]);
+  
+  // Get image URL - prioritize productImages, fallback to legacy images
+  const imageUrl = useMemo(() => {
+    const productWithImages = product as any;
+    if (productWithImages.productImages && productWithImages.productImages.length > 0) {
+      const sorted = [...productWithImages.productImages].sort((a: any, b: any) => a.sortOrder - b.sortOrder);
+      return sorted[0].url;
+    }
+    if (product.images && product.images.length > 0) {
+      return product.images[0];
+    }
+    return null; // No placeholder - use fallback component
+  }, [product]);
+  
   const hasStock = useMemo(() => product.sizes.some((size) => size.stock > 0), [product.sizes]);
   const availableSizes = useMemo(() => product.sizes.filter((size) => size.stock > 0), [product.sizes]);
   const [isAdding, setIsAdding] = useState(false);
@@ -67,7 +81,7 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
         quantity: 1,
         price: Number(product.price),
         name: product.name,
-        image: imageUrl,
+        image: imageUrl || "",
       });
 
       setIsAdding(false);
@@ -94,7 +108,7 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
       quantity: 1,
       price: Number(product.price),
       name: product.name,
-      image: imageUrl,
+      image: imageUrl || "",
     });
 
     setIsAdding(false);
@@ -107,18 +121,22 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
   return (
     <>
       <Card className="group relative h-full flex flex-col overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1">
-        {/* Image Section */}
-        <div className="relative aspect-square w-full overflow-hidden bg-muted">
-          <Image
-            src={imageUrl}
-            alt={product.name}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-110"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            loading="lazy"
-            placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//9k="
-          />
+            {/* Image Section */}
+            <div className="relative aspect-square w-full overflow-hidden bg-muted">
+              {imageUrl ? (
+                <Image
+                  src={imageUrl}
+                  alt={product.name}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//9k="
+                />
+              ) : (
+                <ProductImageFallback className="w-full h-full" size="lg" />
+              )}
           
           {/* Top Badges - Always Visible */}
           <div className="absolute top-2 left-2 right-2 flex items-start justify-between gap-2 z-10">
@@ -132,7 +150,8 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
             </div>
             <WishlistButton 
               productId={product.id} 
-              size="sm" 
+              size="md" 
+              variant="icon"
               className="bg-background/95 backdrop-blur-sm shadow-md hover:bg-background transition-all" 
             />
           </div>

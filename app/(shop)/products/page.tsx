@@ -97,6 +97,16 @@ async function getProducts(searchParams: {
               stock: true,
             },
           },
+          productImages: {
+            select: {
+              url: true,
+              sortOrder: true,
+            },
+            orderBy: {
+              sortOrder: "asc",
+            },
+            take: 1, // Only get first image for list view
+          },
         },
         skip,
         take: limit,

@@ -392,12 +392,16 @@ export default function EditProductPage({
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      // Add common shoe sizes
+                      // Add common shoe sizes (admin can customize these)
+                      // Note: These are default sizes - admins can add/remove as needed
                       const commonSizes = ["7", "8", "9", "10", "11", "12"];
-                      const newSizes = commonSizes.map((size) => ({
-                        size,
-                        stock: 0,
-                      }));
+                      const existingSizes = sizes.map(s => s.size);
+                      const newSizes = commonSizes
+                        .filter(size => !existingSizes.includes(size))
+                        .map((size) => ({
+                          size,
+                          stock: 0,
+                        }));
                       setSizes([...sizes, ...newSizes.filter((s) => !sizes.some((existing) => existing.size === s.size))]);
                     }}
                     title="Add common sizes"

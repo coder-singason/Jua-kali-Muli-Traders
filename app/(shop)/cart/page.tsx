@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { ProductImageFallback } from "@/components/ui/product-image-fallback";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Plus, Minus, AlertCircle, ShoppingCart } from "lucide-react";
@@ -126,13 +127,17 @@ export default function CartPage() {
               <CardContent className="p-4">
               <div className="flex gap-3 md:gap-4">
                 <Link href={`/products/${item.productId}`} className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted md:h-24 md:w-24">
-                  <Image
-                    src={item.image || "/placeholder-shoe.jpg"}
-                    alt={item.name}
-                    fill
-                    className="object-cover transition-transform hover:scale-105"
-                    sizes="80px"
-                  />
+                  {item.image ? (
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      fill
+                      className="object-cover transition-transform hover:scale-105"
+                      sizes="80px"
+                    />
+                  ) : (
+                    <ProductImageFallback className="w-full h-full" size="md" />
+                  )}
                 </Link>
                   <div className="flex flex-1 flex-col justify-between gap-2">
                     <div>

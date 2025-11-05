@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Order, OrderItem, Payment } from "@prisma/client";
 import { format } from "date-fns";
 import { Package, ArrowRight, CheckCircle2, Clock, Truck, XCircle } from "lucide-react";
+import { ProductImageFallback } from "@/components/ui/product-image-fallback";
 import Image from "next/image";
 
 interface OrderHistoryProps {
@@ -92,13 +93,17 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
                       key={item.id}
                       className="relative h-16 w-16 flex-shrink-0 rounded-lg overflow-hidden bg-muted border"
                     >
-                      <Image
-                        src={item.product.images[0] || "/placeholder-shoe.jpg"}
-                        alt={item.product.name}
-                        fill
-                        className="object-cover"
-                        sizes="64px"
-                      />
+                      {item.product.images?.[0] ? (
+                        <Image
+                          src={item.product.images[0]}
+                          alt={item.product.name}
+                          fill
+                          className="object-cover"
+                          sizes="64px"
+                        />
+                      ) : (
+                        <ProductImageFallback className="w-full h-full" size="sm" />
+                      )}
                     </div>
                   ))}
                   {order.items.length > 3 && (

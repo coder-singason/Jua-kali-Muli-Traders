@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { ProductImageFallback } from "@/components/ui/product-image-fallback";
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Plus, Info } from "lucide-react";
@@ -605,12 +606,16 @@ export default function CheckoutPage() {
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-3">
                     <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-gray-100">
-                      <Image
-                        src={item.image || "/placeholder-shoe.jpg"}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                      />
+                        {item.image ? (
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <ProductImageFallback className="w-full h-full" size="md" />
+                        )}
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium">{item.name}</p>

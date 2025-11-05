@@ -10,6 +10,7 @@ import { ProductViewTracker } from "@/components/product/ProductViewTracker";
 import { RelatedProducts } from "@/components/product/RelatedProducts";
 import { RecentlyViewed } from "@/components/product/RecentlyViewed";
 import { Package, Star, Truck, Shield, Heart } from "lucide-react";
+import { ProductImageFallback } from "@/components/ui/product-image-fallback";
 import Link from "next/link";
 
 async function getProduct(id: string) {
@@ -89,14 +90,18 @@ export default async function ProductDetailPage({
             // Fallback to legacy images array
             <>
               <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted">
-                <Image
-                  src={product.images[0] || "/placeholder-shoe.jpg"}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
+                {product.images[0] ? (
+                  <Image
+                    src={product.images[0]}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                  />
+                ) : (
+                  <ProductImageFallback className="w-full h-full" size="lg" />
+                )}
                 {product.featured && (
                   <div className="absolute top-4 left-4 flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground shadow-lg">
                     <Star className="h-3 w-3 fill-current" />

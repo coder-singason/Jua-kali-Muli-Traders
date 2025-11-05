@@ -53,7 +53,14 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Use productImages if available, otherwise fall back to images array
-    const imageUrl = product.images?.[0] || (product as any).productImages?.[0]?.url || "";
+    const productWithImages = product as any;
+    let imageUrl = "";
+    if (productWithImages.productImages && productWithImages.productImages.length > 0) {
+      const sorted = [...productWithImages.productImages].sort((a: any, b: any) => a.sortOrder - b.sortOrder);
+      imageUrl = sorted[0].url;
+    } else if (product.images && product.images.length > 0) {
+      imageUrl = product.images[0];
+    }
     
     addToCart({
       productId: product.id,
@@ -78,7 +85,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
         <WishlistButton 
           productId={product.id} 
           size="md" 
-          variant="button"
+          variant="icon"
         />
       </div>
 

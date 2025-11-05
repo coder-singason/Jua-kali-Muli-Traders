@@ -19,6 +19,8 @@ interface ProductDetailsManagerProps {
   onChange: (details: ProductDetail[]) => void;
 }
 
+// Suggested product details - these are just templates to help admins
+// Admins can use these as starting points or create their own
 const suggestedDetails = [
   { label: "Material", value: "Leather" },
   { label: "Sole Material", value: "Rubber" },
@@ -91,7 +93,7 @@ export function ProductDetailsManager({
     onChange(updated);
   };
 
-  const useSuggestion = (suggestion: { label: string; value: string }) => {
+  const handleUseSuggestion = (suggestion: { label: string; value: string }) => {
     setNewLabel(suggestion.label);
     setNewValue(suggestion.value);
   };

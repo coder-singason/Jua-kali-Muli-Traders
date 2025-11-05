@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Heart, Check } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -37,8 +37,6 @@ export function WishlistButton({
   const { data: session } = useSession();
   const router = useRouter();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const [showSuccessFeedback, setShowSuccessFeedback] = useState(false);
-  const [feedbackMessage, setFeedbackMessage] = useState("");
   
   // All hooks must be called before any conditional returns
   const { data: wishlistCheck, isLoading: checking } = useWishlistCheck(
@@ -47,39 +45,13 @@ export function WishlistButton({
   );
   const toggleWishlist = useToggleWishlist();
   
+  const isInWishlist = wishlistCheck?.inWishlist || false;
+  const loading = toggleWishlist.isPending;
+
   // Hide wishlist for admins (after all hooks are called)
   if (session?.user?.role === "ADMIN") {
     return null;
   }
-
-  const isInWishlist = wishlistCheck?.inWishlist || false;
-  const loading = toggleWishlist.isPending;
-  const [previousWishlistState, setPreviousWishlistState] = useState(isInWishlist);
-  const [justToggled, setJustToggled] = useState(false);
-
-  // Show success feedback when wishlist state changes
-  useEffect(() => {
-    if (previousWishlistState !== isInWishlist && !loading && previousWishlistState !== undefined) {
-      setShowSuccessFeedback(true);
-      setJustToggled(true);
-      
-      if (isInWishlist) {
-        setFeedbackMessage("Added to wishlist!");
-      } else {
-        setFeedbackMessage("Removed from wishlist");
-      }
-      
-      const timer = setTimeout(() => {
-        setShowSuccessFeedback(false);
-        setJustToggled(false);
-      }, 3000); // Show feedback longer for better UX
-      
-      setPreviousWishlistState(isInWishlist);
-      return () => clearTimeout(timer);
-    } else if (previousWishlistState === undefined) {
-      setPreviousWishlistState(isInWishlist);
-    }
-  }, [isInWishlist, loading, previousWishlistState]);
 
   const handleToggleWishlist = () => {
     if (!session) {
@@ -149,19 +121,13 @@ export function WishlistButton({
             title={
               loading 
                 ? "Processing..."
-                : showSuccessFeedback
-                ? (isInWishlist ? "Tap to remove" : "Tap to re-add")
                 : isInWishlist 
                   ? "Remove from wishlist"
-                  : justToggled
-                  ? "Re-add to wishlist"
                   : "Add to wishlist"
             }
           >
             {loading ? (
               <LoadingSpinner size="sm" />
-            ) : showSuccessFeedback ? (
-              <Check className={cn(iconSizeClasses[size], "text-green-500")} />
             ) : (
               <Heart
                 className={cn(
@@ -174,17 +140,6 @@ export function WishlistButton({
               />
             )}
           </Button>
-
-          {/* Success feedback tooltip */}
-          {showSuccessFeedback && (
-            <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 px-3 py-1.5 bg-green-500 text-white text-xs rounded-md shadow-lg whitespace-nowrap animate-in fade-in slide-in-from-bottom-2 duration-300 pointer-events-none">
-              <div className="font-medium">{feedbackMessage}</div>
-              <div className="text-[10px] opacity-90 mt-0.5">
-                {isInWishlist ? "Tap to remove" : "Tap to re-add"}
-              </div>
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-green-500"></div>
-            </div>
-          )}
         </div>
 
         <AlertDialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
@@ -227,29 +182,19 @@ export function WishlistButton({
           </>
         ) : (
           <>
-            {showSuccessFeedback ? (
-              <Check className={cn(iconSizeClasses[size], "text-green-500")} />
-            ) : (
-              <Heart
-                className={cn(
-                  iconSizeClasses[size],
-                  "transition-all",
-                  isInWishlist
-                    ? "fill-current"
-                    : ""
-                )}
-              />
-            )}
+            <Heart
+              className={cn(
+                iconSizeClasses[size],
+                "transition-all",
+                isInWishlist
+                  ? "fill-red-500 text-red-500"
+                  : ""
+              )}
+            />
             <span className={textClasses[size]}>
-              {loading 
-                ? "Processing..."
-                : showSuccessFeedback
-                ? feedbackMessage
-                : isInWishlist 
-                  ? "Remove from Wishlist"
-                  : justToggled
-                  ? "Re-add to Wishlist"
-                  : "Add to Wishlist"
+              {isInWishlist 
+                ? "Remove from Wishlist"
+                : "Add to Wishlist"
               }
             </span>
           </>
