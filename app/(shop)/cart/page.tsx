@@ -97,9 +97,24 @@ export default function CartPage() {
     );
   }
 
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
     <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8 max-w-7xl">
-      <h1 className="mb-6 sm:mb-8 text-2xl sm:text-3xl font-bold">Shopping Cart</h1>
+      <div className="mb-6 sm:mb-8 flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold">Shopping Cart</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {itemCount} {itemCount === 1 ? "item" : "items"} in your cart
+          </p>
+        </div>
+        <Link href="/products">
+          <Button variant="outline" className="gap-2">
+            <ShoppingCart className="h-4 w-4" />
+            Continue Shopping
+          </Button>
+        </Link>
+      </div>
 
       {isAdmin && (
         <Card className="mb-6 border-yellow-200 dark:border-yellow-900 bg-yellow-50 dark:bg-yellow-950">
@@ -122,123 +137,178 @@ export default function CartPage() {
 
       <div className="grid gap-6 md:gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4">
-          {items.map((item) => (
-            <Card key={item.id} className="shadow-sm">
-              <CardContent className="p-4">
-              <div className="flex gap-3 md:gap-4">
-                <Link href={`/products/${item.productId}`} className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted md:h-24 md:w-24">
-                  {item.image ? (
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      fill
-                      className="object-cover transition-transform hover:scale-105"
-                      sizes="80px"
-                    />
-                  ) : (
-                    <ProductImageFallback className="w-full h-full" size="md" />
-                  )}
-                </Link>
-                  <div className="flex flex-1 flex-col justify-between gap-2">
-                    <div>
-                      <Link href={`/products/${item.productId}`}>
-                        <h3 className="font-semibold text-sm md:text-base line-clamp-2 hover:text-primary transition-colors">{item.name}</h3>
-                      </Link>
-                      <p className="text-xs md:text-sm text-muted-foreground mt-1">
-                        Size: {item.size}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() =>
-                            handleUpdateQuantity(item.id, item.quantity - 1)
-                          }
-                          disabled={updatingItems.has(item.id) || item.quantity <= 1}
-                          className="h-8 w-8"
-                        >
-                          {updatingItems.has(item.id) ? (
-                            <LoadingSpinner size="sm" />
-                          ) : (
-                            <Minus className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <span className="w-8 text-center font-medium">
-                          {item.quantity}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() =>
-                            handleUpdateQuantity(item.id, item.quantity + 1)
-                          }
-                          disabled={updatingItems.has(item.id)}
-                          className="h-8 w-8"
-                        >
-                          {updatingItems.has(item.id) ? (
-                            <LoadingSpinner size="sm" />
-                          ) : (
-                            <Plus className="h-4 w-4" />
-                          )}
-                        </Button>
+          {items.map((item) => {
+            const itemTotal = item.price * item.quantity;
+            const isUpdating = updatingItems.has(item.id);
+            const isRemoving = removingItems.has(item.id);
+            
+            return (
+              <Card 
+                key={item.id} 
+                className={`shadow-sm transition-all ${
+                  isRemoving ? "opacity-50" : "hover:shadow-md"
+                }`}
+              >
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex gap-4 md:gap-6">
+                    {/* Product Image */}
+                    <Link 
+                      href={`/products/${item.productId}`} 
+                      className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-muted md:h-28 md:w-28 group"
+                    >
+                      {item.image ? (
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-cover transition-transform group-hover:scale-110"
+                          sizes="112px"
+                        />
+                      ) : (
+                        <ProductImageFallback className="w-full h-full" size="md" />
+                      )}
+                    </Link>
+
+                    {/* Product Details */}
+                    <div className="flex flex-1 flex-col justify-between gap-3 min-w-0">
+                      <div className="space-y-1">
+                        <Link href={`/products/${item.productId}`}>
+                          <h3 className="font-semibold text-base md:text-lg line-clamp-2 hover:text-primary transition-colors">
+                            {item.name}
+                          </h3>
+                        </Link>
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                          <span>Size: <span className="font-medium">{item.size}</span></span>
+                          <span className="text-muted-foreground/50">•</span>
+                          <span>Unit: <span className="font-medium">KSh {item.price.toLocaleString()}</span></span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <p className="font-semibold text-sm md:text-base">
-                          KSh {(item.price * item.quantity).toLocaleString()}
-                        </p>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemove(item.id)}
-                          disabled={removingItems.has(item.id)}
-                          className="h-8 w-8"
-                        >
-                          {removingItems.has(item.id) ? (
-                            <LoadingSpinner size="sm" />
-                          ) : (
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          )}
-                        </Button>
+
+                      {/* Quantity and Price Controls */}
+                      <div className="flex items-center justify-between gap-4 flex-wrap">
+                        {/* Quantity Selector */}
+                        <div className="flex items-center gap-2 bg-muted rounded-lg p-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                            disabled={isUpdating || isRemoving || item.quantity <= 1}
+                            className="h-8 w-8 rounded-md hover:bg-background"
+                            title="Decrease quantity"
+                          >
+                            {isUpdating ? (
+                              <LoadingSpinner size="sm" />
+                            ) : (
+                              <Minus className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <span className="w-10 text-center font-semibold text-base">
+                            {item.quantity}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                            disabled={isUpdating || isRemoving}
+                            className="h-8 w-8 rounded-md hover:bg-background"
+                            title="Increase quantity"
+                          >
+                            {isUpdating ? (
+                              <LoadingSpinner size="sm" />
+                            ) : (
+                              <Plus className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+
+                        {/* Price and Remove */}
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="font-bold text-lg text-foreground">
+                              KSh {itemTotal.toLocaleString()}
+                            </p>
+                            {item.quantity > 1 && (
+                              <p className="text-xs text-muted-foreground">
+                                {item.quantity} × KSh {item.price.toLocaleString()}
+                              </p>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemove(item.id)}
+                            disabled={isRemoving || isUpdating}
+                            className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            title="Remove item"
+                          >
+                            {isRemoving ? (
+                              <LoadingSpinner size="sm" />
+                            ) : (
+                              <Trash2 className="h-5 w-5" />
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         <div className="lg:col-span-1">
-          <Card className="shadow-md sticky top-4">
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
+          <Card className="shadow-lg sticky top-4 border-2">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl">Order Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span className="font-semibold">
+              {/* Item Count */}
+              <div className="pb-2 border-b">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Items ({itemCount})</span>
+                  <span className="font-medium">KSh {total.toLocaleString()}</span>
+                </div>
+              </div>
+
+              {/* Subtotal */}
+              <div className="flex justify-between items-center">
+                <span className="font-medium">Subtotal</span>
+                <span className="font-bold text-lg">
                   KSh {total.toLocaleString()}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span>Shipping</span>
+
+              {/* Shipping */}
+              <div className="flex justify-between items-center pb-3 border-b">
+                <span className="font-medium">Shipping</span>
                 <span className="font-semibold">
                   {loadingShipping ? (
-                    <span className="text-muted-foreground text-sm">Calculating...</span>
+                    <span className="text-muted-foreground text-sm flex items-center gap-1">
+                      <LoadingSpinner size="sm" />
+                      Calculating...
+                    </span>
                   ) : shippingCost > 0 ? (
                     `KSh ${shippingCost.toLocaleString()}`
                   ) : (
-                    <span className="text-green-600 dark:text-green-400">Free</span>
+                    <span className="text-green-600 dark:text-green-400 font-bold">Free</span>
                   )}
                 </span>
               </div>
-              <div className="border-t pt-4">
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Total</span>
-                  <span>KSh {(total + shippingCost).toLocaleString()}</span>
+
+              {/* Total */}
+              <div className="pt-2 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-bold">Total</span>
+                  <span className="text-2xl font-bold text-primary">
+                    KSh {(total + shippingCost).toLocaleString()}
+                  </span>
                 </div>
+                {shippingCost === 0 && total > 0 && (
+                  <p className="text-xs text-green-600 dark:text-green-400 text-center">
+                    ✓ Free shipping included
+                  </p>
+                )}
               </div>
               {isAdmin ? (
                 <Button 

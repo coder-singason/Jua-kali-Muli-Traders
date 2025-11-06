@@ -348,15 +348,25 @@ export default function CheckoutPage() {
     }
   };
 
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold">Checkout</h1>
+    <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8 max-w-7xl">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold">Checkout</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Review your order and complete your purchase
+        </p>
+      </div>
 
       <div className="grid gap-6 md:gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle>Shipping Information</CardTitle>
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="shadow-lg border-2">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Shipping Information
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -464,11 +474,12 @@ export default function CheckoutPage() {
                 )}
 
                 {/* Manual Address Form */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm font-semibold">
-                    {addresses.length > 0 && <span className="text-muted-foreground">Or enter manually:</span>}
-                    {addresses.length === 0 && <span>Shipping Information</span>}
-                  </div>
+                <div className="space-y-4 pt-2">
+                  {addresses.length > 0 && (
+                    <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground pb-2 border-b">
+                      <span>Or enter manually:</span>
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <Label htmlFor="fullName">Full Name</Label>
@@ -542,34 +553,44 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div className="space-y-4 pt-4">
-                  <Label className="text-base font-semibold">
+                {/* Payment Method */}
+                <div className="space-y-4 pt-6 border-t">
+                  <Label className="text-base font-semibold flex items-center gap-2">
+                    <span>💳</span>
                     Payment Method
                   </Label>
-                  <div className="space-y-2">
-                    <label className="flex items-center space-x-2 rounded border p-4 cursor-pointer hover:bg-muted/50 dark:hover:bg-muted/30 transition-colors">
+                  <div className="space-y-3">
+                    <label className={`flex items-start gap-3 rounded-lg border-2 p-4 cursor-pointer transition-all ${
+                      paymentMethod === "CASH_ON_DELIVERY" 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border hover:border-primary/50 hover:bg-muted/50"
+                    }`}>
                       <input
                         type="radio"
                         value="CASH_ON_DELIVERY"
                         {...register("paymentMethod")}
-                        className="h-4 w-4"
+                        className="h-5 w-5 mt-0.5"
                       />
-                      <div>
-                        <div className="font-semibold">Cash on Delivery</div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-base mb-1">Cash on Delivery</div>
                         <div className="text-sm text-muted-foreground">
                           Pay when you receive your order
                         </div>
                       </div>
                     </label>
-                    <label className="flex items-center space-x-2 rounded border p-4 cursor-pointer hover:bg-muted/50 dark:hover:bg-muted/30 transition-colors">
+                    <label className={`flex items-start gap-3 rounded-lg border-2 p-4 cursor-pointer transition-all ${
+                      paymentMethod === "MPESA" 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border hover:border-primary/50 hover:bg-muted/50"
+                    }`}>
                       <input
                         type="radio"
                         value="MPESA"
                         {...register("paymentMethod")}
-                        className="h-4 w-4"
+                        className="h-5 w-5 mt-0.5"
                       />
-                      <div>
-                        <div className="font-semibold">M-Pesa</div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-base mb-1">M-Pesa</div>
                         <div className="text-sm text-muted-foreground">
                           Pay via M-Pesa mobile money
                         </div>
@@ -578,11 +599,16 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full rounded-full" 
+                  size="lg" 
+                  disabled={isLoading}
+                >
                   {isLoading ? (
                     <>
                       <LoadingSpinner size="sm" className="mr-2" />
-                      Processing...
+                      Processing Order...
                     </>
                   ) : paymentMethod === "MPESA" ? (
                     "Pay with M-Pesa"
@@ -597,61 +623,115 @@ export default function CheckoutPage() {
         </div>
 
         <div className="lg:col-span-1">
-          <Card className="shadow-md sticky top-4">
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
+          <Card className="shadow-lg sticky top-4 border-2">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl">Order Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-3">
-                {items.map((item) => (
-                  <div key={item.id} className="flex gap-3">
-                    <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-gray-100">
+              {/* Items List */}
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                {items.map((item) => {
+                  const itemTotal = item.price * item.quantity;
+                  return (
+                    <div key={item.id} className="flex gap-3 pb-3 border-b last:border-0 last:pb-0">
+                      <Link 
+                        href={`/products/${item.productId}`}
+                        className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted group"
+                      >
                         {item.image ? (
                           <Image
                             src={item.image}
                             alt={item.name}
                             fill
-                            className="object-cover"
+                            className="object-cover transition-transform group-hover:scale-110"
+                            sizes="80px"
                           />
                         ) : (
                           <ProductImageFallback className="w-full h-full" size="md" />
                         )}
+                      </Link>
+                      <div className="flex-1 min-w-0">
+                        <Link href={`/products/${item.productId}`}>
+                          <p className="text-sm font-semibold line-clamp-2 hover:text-primary transition-colors">
+                            {item.name}
+                          </p>
+                        </Link>
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-xs text-muted-foreground">
+                            Size: <span className="font-medium">{item.size}</span> × <span className="font-medium">{item.quantity}</span>
+                          </p>
+                          <p className="text-sm font-bold ml-2">
+                            KSh {itemTotal.toLocaleString()}
+                          </p>
+                        </div>
+                        {item.quantity > 1 && (
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {item.quantity} × KSh {item.price.toLocaleString()}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Size: {item.size} × {item.quantity}
-                      </p>
-                    </div>
-                    <p className="text-sm font-semibold">
-                      KSh {(item.price * item.quantity).toLocaleString()}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
-              <div className="border-t pt-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Subtotal</span>
-                  <span>KSh {subtotal.toLocaleString()}</span>
+              {/* Summary */}
+              <div className="border-t pt-4 space-y-3">
+                {/* Item Count */}
+                <div className="pb-2 border-b">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Items ({itemCount})</span>
+                    <span className="font-medium">KSh {subtotal.toLocaleString()}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span>Shipping</span>
-                  <span>
+
+                {/* Subtotal */}
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Subtotal</span>
+                  <span className="font-bold text-lg">
+                    KSh {subtotal.toLocaleString()}
+                  </span>
+                </div>
+
+                {/* Shipping */}
+                <div className="flex justify-between items-center pb-3 border-b">
+                  <span className="font-medium">Shipping</span>
+                  <span className="font-semibold">
                     {loadingShipping ? (
-                      <span className="text-muted-foreground">Calculating...</span>
+                      <span className="text-muted-foreground text-sm flex items-center gap-1">
+                        <LoadingSpinner size="sm" />
+                        Calculating...
+                      </span>
                     ) : shippingCost > 0 ? (
                       `KSh ${shippingCost.toLocaleString()}`
                     ) : (
-                      <span className="text-green-600 dark:text-green-400 font-medium">Free</span>
+                      <span className="text-green-600 dark:text-green-400 font-bold">Free</span>
                     )}
                   </span>
                 </div>
-                <div className="flex justify-between pt-2 text-lg font-bold border-t">
-                  <span>Total</span>
-                  <span>KSh {total.toLocaleString()}</span>
+
+                {/* Total */}
+                <div className="pt-2 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-bold">Total</span>
+                    <span className="text-2xl font-bold text-primary">
+                      KSh {total.toLocaleString()}
+                    </span>
+                  </div>
+                  {shippingCost === 0 && total > 0 && (
+                    <p className="text-xs text-green-600 dark:text-green-400 text-center">
+                      ✓ Free shipping included
+                    </p>
+                  )}
                 </div>
               </div>
+
+              {/* Back to Cart Link */}
+              <Link href="/cart">
+                <Button variant="outline" className="w-full rounded-full" size="sm">
+                  ← Edit Cart
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>

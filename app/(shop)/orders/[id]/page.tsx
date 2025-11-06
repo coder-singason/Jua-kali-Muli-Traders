@@ -84,15 +84,48 @@ export default async function OrderDetailPage({
     postalCode?: string;
   };
 
+  const showSuccessBanner = search.success === "true" && order.status !== "CANCELLED";
+  const showCancelledBanner = order.status === "CANCELLED";
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Success Banner */}
-      {search.success === "true" && (
+      {showSuccessBanner && (
         <OrderSuccessBanner
           orderNumber={order.orderNumber}
           paymentMethod={order.paymentMethod}
           showPaymentNote={search.payment === "mpesa"}
         />
+      )}
+
+      {showCancelledBanner && (
+        <Card className="mb-6 border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-4">
+              <div className="rounded-full bg-red-600 p-2">
+                <XCircle className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-red-900 dark:text-red-100 mb-2">
+                  Order Cancelled
+                </h2>
+                <p className="text-red-800 dark:text-red-200 mb-3">
+                  This order <span className="font-semibold">#{order.orderNumber}</span> has been cancelled and will
+                  no longer be processed. If you still need the items, please place a new order or reach out to our
+                  support team for assistance.
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <Button asChild size="sm" variant="outline">
+                    <Link href="/profile?tab=orders">View Other Orders</Link>
+                  </Button>
+                  <Button asChild size="sm">
+                    <Link href="/products">Shop Again</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <div className="mb-6">

@@ -2,13 +2,30 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { Package, ShoppingBag, User, Mail, Phone } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useContext } from "react";
+import { SidebarContext } from "./SidebarContext";
 
 export function Footer() {
   const { data: session } = useSession();
+  const pathname = usePathname();
+  
+  // Safely get sidebar context (might not be available on all pages)
+  const sidebarContext = useContext(SidebarContext);
+  const isCollapsed = sidebarContext?.isCollapsed ?? false;
+  
+  // Check if we're on a shop page (sidebar visible)
+  const isShopPage = !pathname?.startsWith("/admin") && !pathname?.startsWith("/login") && !pathname?.startsWith("/register");
+  
+  // Account for sidebar width on desktop shop pages
+  const footerPadding = isShopPage 
+    ? (isCollapsed ? "lg:pl-16" : "lg:pl-64")
+    : "";
 
   return (
-    <footer className="border-t bg-card mt-auto">
+    <footer className={cn("border-t bg-card mt-auto transition-all duration-300", footerPadding)}>
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <div>
