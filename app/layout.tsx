@@ -5,10 +5,10 @@ import "./globals.css";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { Header } from "@/components/layout/Header";
 import { FloatingNav } from "@/components/layout/FloatingNav";
 import { Footer } from "@/components/layout/Footer";
 import { Toaster } from "@/components/ui/toaster";
-import { SidebarProvider } from "@/components/layout/SidebarContext";
 
 const openSans = Open_Sans({
   subsets: ["latin"],
@@ -72,14 +72,13 @@ export default function RootLayout({
         <ThemeProvider defaultTheme="system" storageKey="kickszone-theme">
           <QueryProvider>
             <SessionProvider>
-              <SidebarProvider>
-                <div className="flex min-h-screen flex-col">
-                  <main className="flex-1 pb-16 md:pb-20 lg:pb-0">{children}</main>
-                  <Footer />
-                  <FloatingNav />
-                </div>
-                <Toaster />
-              </SidebarProvider>
+              <div className="flex min-h-screen flex-col">
+                <Header />
+                <main className="flex-1 pb-16 md:pb-20 lg:pb-0">{children}</main>
+                <Footer />
+                <FloatingNav />
+              </div>
+              <Toaster />
             </SessionProvider>
           </QueryProvider>
         </ThemeProvider>

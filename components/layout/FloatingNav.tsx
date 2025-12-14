@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import { ShoppingCart, User, LogOut, Menu, X, Home, Package, Settings, Heart, MoreVertical } from "lucide-react";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
@@ -21,6 +22,12 @@ export function FloatingNav() {
   const { data: session } = useSession();
   const itemCount = useCartStore((state) => state.getItemCount());
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch by only showing cart badge after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
 
@@ -74,7 +81,7 @@ export function FloatingNav() {
               aria-label="Shopping Cart"
             >
               <ShoppingCart className="h-4 w-4" />
-              {itemCount > 0 && (
+              {mounted && itemCount > 0 && (
                 <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
                   {itemCount > 9 ? "9+" : itemCount}
                 </span>
