@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,8 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
     colors: [],
     materials: [],
   });
+  const isInitialMount = useRef(true);
+  const isApplyingFilters = useRef(false);
 
   // Flatten categories for select dropdown
   const flattenedCategories: { value: string; label: string }[] = [];
@@ -67,6 +69,43 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
     flattenCategories(categories);
   }
 
+  // Sync state with URL params when they change (e.g., browser back/forward)
+  useEffect(() => {
+    if (isApplyingFilters.current) {
+      isApplyingFilters.current = false;
+      return;
+    }
+
+    const urlSearch = searchParams.get("search") || "";
+    const urlCategory = searchParams.get("category") || "";
+    const urlMinPrice = searchParams.get("minPrice") || "";
+    const urlMaxPrice = searchParams.get("maxPrice") || "";
+    const urlFeatured = searchParams.get("featured") === "true";
+    const urlBrand = searchParams.get("brand") || "";
+    const urlColor = searchParams.get("color") || "";
+    const urlMaterial = searchParams.get("material") || "";
+
+    if (
+      search !== urlSearch ||
+      category !== urlCategory ||
+      minPrice !== urlMinPrice ||
+      maxPrice !== urlMaxPrice ||
+      featured !== urlFeatured ||
+      brand !== urlBrand ||
+      color !== urlColor ||
+      material !== urlMaterial
+    ) {
+      setSearch(urlSearch);
+      setCategory(urlCategory);
+      setMinPrice(urlMinPrice);
+      setMaxPrice(urlMaxPrice);
+      setFeatured(urlFeatured);
+      setBrand(urlBrand);
+      setColor(urlColor);
+      setMaterial(urlMaterial);
+    }
+  }, [searchParams, search, category, minPrice, maxPrice, featured, brand, color, material]);
+
   useEffect(() => {
     // Fetch filter options
     fetch("/api/products/filters")
@@ -75,10 +114,10 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
       .catch((error) => console.error("Error fetching filter options:", error));
   }, []);
 
-  const applyFilters = () => {
+  const buildParams = useCallback(() => {
     const params = new URLSearchParams();
     
-    if (search) params.set("search", search);
+    if (search.trim()) params.set("search", search.trim());
     if (category && category !== "all") params.set("category", category);
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
@@ -87,9 +126,21 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
     if (color && color !== "all") params.set("color", color);
     if (material && material !== "all") params.set("material", material);
     
-    // Reset to page 1 when filters change
-    router.push(`/products?${params.toString()}`);
-  };
+    return params;
+  }, [search, category, minPrice, maxPrice, featured, brand, color, material]);
+
+  const applyFilters = useCallback(() => {
+    const params = buildParams();
+    const newUrl = `/products?${params.toString()}`;
+    const currentUrl = `/products?${searchParams.toString()}`;
+    
+    // Only navigate if URL actually changed
+    if (newUrl !== currentUrl) {
+      isApplyingFilters.current = true;
+      // Use replace to avoid cluttering browser history
+      router.replace(newUrl);
+    }
+  }, [buildParams, router, searchParams]);
 
   const clearFilters = () => {
     setSearch("");
@@ -100,19 +151,25 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
     setBrand("");
     setColor("");
     setMaterial("");
-    router.push("/products");
+    isApplyingFilters.current = true;
+    router.replace("/products");
   };
 
   const hasActiveFilters = search || category || minPrice || maxPrice || featured || (brand && brand !== "all") || (color && color !== "all") || (material && material !== "all");
 
   useEffect(() => {
+    // Skip on initial mount to avoid double navigation
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
     // Auto-apply filters when any filter changes (debounced)
     const timeoutId = setTimeout(() => {
       applyFilters();
     }, 500);
     return () => clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, category, minPrice, maxPrice, featured, brand, color, material]);
+  }, [search, category, minPrice, maxPrice, featured, brand, color, material, applyFilters]);
 
   return (
     <Card className="mb-6">
