@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, User, LogOut, Package, Heart } from "lucide-react";
 import { useCartStore } from "@/lib/stores/cart-store";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -89,6 +90,11 @@ export function Header() {
               )}
             </Button>
           </Link>
+
+          {/* Theme Toggle */}
+          <div className="ml-2 pl-2 border-l">
+            <ThemeToggle />
+          </div>
 
           {/* User Menu */}
           {session ? (

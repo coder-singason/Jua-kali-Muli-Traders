@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
 import {
   BarChart3,
@@ -237,6 +238,30 @@ export function AdminSidebar() {
               )}
             </div>
           </Link>
+          {/* Theme Toggle */}
+          <div
+            className={cn(
+              "flex items-center rounded-lg transition-all duration-200 mt-2",
+              "border border-border/50 hover:border-border hover:bg-muted/60",
+              "text-muted-foreground hover:text-foreground",
+              isCollapsed 
+                ? "justify-center h-12 w-12 mx-auto border-0" 
+                : "h-11 gap-3 px-3"
+            )}
+          >
+            {isCollapsed ? (
+              <ThemeToggle />
+            ) : (
+              <>
+                <div className="flex items-center justify-center shrink-0">
+                  <ThemeToggle />
+                </div>
+                <span className="font-medium text-sm transition-all duration-200 whitespace-nowrap">
+                  Theme
+                </span>
+              </>
+            )}
+          </div>
         </div>
       </aside>
 

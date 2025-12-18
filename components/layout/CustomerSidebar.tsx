@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { useSidebar } from "./SidebarContext";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export function CustomerSidebar() {
   const { isCollapsed, setIsCollapsed } = useSidebar();
@@ -201,6 +202,27 @@ export function CustomerSidebar() {
             )}
           </Link>
         )}
+        {/* Theme Toggle */}
+        <div
+          className={cn(
+            "flex items-center rounded-lg transition-all duration-200",
+            "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+            isCollapsed ? "justify-center h-12 w-12 mx-auto" : "w-full h-11 gap-3 px-3"
+          )}
+        >
+          {isCollapsed ? (
+            <ThemeToggle />
+          ) : (
+            <>
+              <div className="flex items-center justify-center shrink-0">
+                <ThemeToggle />
+              </div>
+              <span className="font-medium text-sm transition-all duration-200 whitespace-nowrap">
+                Theme
+              </span>
+            </>
+          )}
+        </div>
       </div>
     </aside>
   );
