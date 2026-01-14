@@ -73,49 +73,45 @@ async function getProducts(searchParams: {
     where.material = { contains: material, mode: "insensitive" };
   }
 
-    const [products, total] = await Promise.all([
-      prisma.product.findMany({
-        where,
-        select: {
-          id: true,
-          name: true,
-          price: true,
-          brand: true,
-          featured: true,
-          images: true,
-          color: true,
-          material: true,
-          category: {
-            select: {
-              name: true,
-              slug: true,
-            },
-          },
-          sizes: {
-            select: {
-              size: true,
-              stock: true,
-            },
-          },
-          productImages: {
-            select: {
-              url: true,
-              sortOrder: true,
-            },
-            orderBy: {
-              sortOrder: "asc",
-            },
-            take: 1, // Only get first image for list view
+  const [products, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      // FIX APPLIED HERE:
+      // Changed from 'select' to 'include'.
+      // This fetches ALL scalar fields (id, name, price, createdAt, description, etc.)
+      // which satisfies the TypeScript requirement in ProductCard.
+      include: {
+        category: {
+          select: {
+            name: true,
+            slug: true,
           },
         },
-        skip,
-        take: limit,
-        orderBy: {
-          createdAt: "desc",
+        sizes: {
+          select: {
+            size: true,
+            stock: true,
+          },
         },
-      }),
-      prisma.product.count({ where }),
-    ]);
+        productImages: {
+          select: {
+            url: true,
+            sortOrder: true,
+          },
+          orderBy: {
+            sortOrder: "asc",
+          },
+          take: 1, // Only get first image for list view
+        },
+      },
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+    prisma.product.count({ where }),
+  ]);
 
   return { products, total, page, totalPages: Math.ceil(total / limit) };
 }
@@ -287,4 +283,3 @@ export default async function ProductsPage({
     </div>
   );
 }
-
