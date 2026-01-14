@@ -18,7 +18,8 @@ interface Product {
   productImages?: Array<{
     url: string;
     viewType: string;
-    alt?: string;
+    // FIX: Added '| null' to allow null values from the database
+    alt?: string | null;
     sortOrder: number;
   }>;
   stock: number;
@@ -178,4 +179,3 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
     </div>
   );
 }
-

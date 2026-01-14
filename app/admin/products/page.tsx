@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ProductsList } from "@/components/admin/ProductsList";
 
 async function getProducts() {
-  return await prisma.product.findMany({
+  const products = await prisma.product.findMany({
     include: {
       category: true,
       sizes: true,
@@ -21,6 +21,15 @@ async function getProducts() {
       createdAt: "desc",
     },
   });
+
+  // FIX: Transform 'null' values to 'undefined' to match the component's interface
+  return products.map((product) => ({
+    ...product,
+    productImages: product.productImages.map((img) => ({
+      ...img,
+      alt: img.alt || undefined, // Converts null to undefined
+    })),
+  }));
 }
 
 export default async function AdminProductsPage() {
@@ -48,4 +57,3 @@ export default async function AdminProductsPage() {
     </div>
   );
 }
-
