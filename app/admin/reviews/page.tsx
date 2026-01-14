@@ -28,7 +28,12 @@ async function getReviews() {
     },
   });
 
-  return reviews;
+  // FIX: Convert Date objects to strings to match the component's interface
+  return reviews.map((review) => ({
+    ...review,
+    createdAt: review.createdAt.toISOString(),
+    updatedAt: review.updatedAt.toISOString(),
+  }));
 }
 
 export default async function AdminReviewsPage() {
@@ -63,4 +68,3 @@ export default async function AdminReviewsPage() {
     </div>
   );
 }
-
