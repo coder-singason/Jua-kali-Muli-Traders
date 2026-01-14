@@ -720,7 +720,7 @@ export default function CheckoutPage() {
                   </div>
                   {shippingCost === 0 && total > 0 && (
                     <p className="text-xs text-green-600 dark:text-green-400 text-center">
-                      ✓ Free shipping included
+                      Free shipping included
                     </p>
                   )}
                 </div>
