@@ -220,7 +220,7 @@ export function ProductDetailsManager({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => useSuggestion(suggestion)}
+                  onClick={() => handleUseSuggestion(suggestion)}
                   className="text-xs h-7"
                 >
                   {suggestion.label}

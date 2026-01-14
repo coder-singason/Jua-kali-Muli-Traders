@@ -213,7 +213,9 @@ export default async function AdminDashboardPage() {
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Dashboard Overview</h1>
-          <p className="text-muted-foreground mt-1">Welcome back! Here's what's happening with your store.</p>
+          <p className="text-muted-foreground mt-1">
+            Welcome back! Here&apos;s what&apos;s happening with your store.
+          </p>
         </div>
         <div className="flex gap-2">
           <Link href="/admin/orders?status=PENDING">
@@ -304,7 +306,7 @@ export default async function AdminDashboardPage() {
       <div className="grid gap-4 md:grid-cols-3 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Today's Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium">Today&apos;s Revenue</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>

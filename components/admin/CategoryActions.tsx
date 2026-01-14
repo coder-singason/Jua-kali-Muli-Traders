@@ -98,7 +98,7 @@ export function CategoryActions({ category }: CategoryActionsProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete "{category.name}". This action cannot be undone.
+              This will permanently delete &quot;{category.name}&quot;. This action cannot be undone.
               {category.slug && (
                 <>
                   {" "}

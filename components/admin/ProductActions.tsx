@@ -96,7 +96,7 @@ export function ProductActions({ product }: ProductActionsProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete "{product.name}". This action cannot be undone.
+              This will permanently delete &quot;{product.name}&quot;. This action cannot be undone.
               Any orders containing this product will remain, but the product will no longer be available.
             </AlertDialogDescription>
           </AlertDialogHeader>

@@ -417,7 +417,7 @@ export default function EditProductPage({
                     No sizes added yet. Each size needs its own stock count.
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Example: Size "8" with stock "5", Size "9" with stock "3", etc.
+                    Example: Size &quot;8&quot; with stock &quot;5&quot;, Size &quot;9&quot; with stock &quot;3&quot;, etc.
                   </p>
                 </div>
               ) : (
