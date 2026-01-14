@@ -97,7 +97,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                info@kickszone.com
+                singason65@gmail.com
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
