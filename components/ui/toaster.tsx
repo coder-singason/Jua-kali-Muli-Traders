@@ -12,7 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { CheckCircle2, AlertCircle, Info, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const getToastIcon = (variant?: "default" | "destructive" | "success" | "warning" | "info") => {
+// FIX: Added '| null' to the type definition to match what useToast provides
+const getToastIcon = (variant?: "default" | "destructive" | "success" | "warning" | "info" | null) => {
   switch (variant) {
     case "destructive":
       return <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />;
@@ -56,4 +57,3 @@ export function Toaster() {
     </ToastProvider>
   );
 }
-
