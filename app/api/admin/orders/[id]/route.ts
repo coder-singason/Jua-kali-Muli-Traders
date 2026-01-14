@@ -61,8 +61,9 @@ export async function PATCH(
     const newStatus = parsedData.data.status;
     const statusChanged = currentOrder.status !== newStatus;
 
-    // Prevent changing to any status if order is already cancelled
-    if (newStatus === "CANCELLED" && currentOrder.status !== "CANCELLED") {
+    // FIX: Removed '&& currentOrder.status !== "CANCELLED"' because the early return 
+    // above ensures currentOrder.status is NOT "CANCELLED" by this point.
+    if (newStatus === "CANCELLED") {
       // Only allow cancellation if order is PENDING or PROCESSING
       if (currentOrder.status !== "PENDING" && currentOrder.status !== "PROCESSING") {
         return NextResponse.json(
@@ -192,4 +193,3 @@ export async function GET(
     );
   }
 }
-
