@@ -5,8 +5,8 @@ import { prisma } from "@/lib/db/prisma";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(prisma),
+  // FIX: Cast adapter to 'any' to resolve type mismatch with custom User model (role field)
+  adapter: PrismaAdapter(prisma) as any,
   session: { strategy: "jwt" },
   trustHost: true,
 });
-
