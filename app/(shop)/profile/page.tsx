@@ -8,18 +8,19 @@ import { OrderHistory } from "@/components/profile/OrderHistory";
 import { AddressBook } from "@/components/profile/AddressBook";
 import { AdminProfileInfo } from "@/components/profile/AdminProfileInfo";
 
-async function getUserProfile(userId: string, isAdmin: boolean) {
+// FIX: Removed 'isAdmin' parameter and conditional include.
+// Always fetching addresses ensures the return type consistently has the 'addresses' property,
+// which fixes the TypeScript error in the AddressBook component below.
+async function getUserProfile(userId: string) {
   return await prisma.user.findUnique({
     where: { id: userId },
-    include: isAdmin
-      ? undefined
-      : {
-          addresses: {
-            orderBy: {
-              isDefault: "desc",
-            },
-          },
+    include: {
+      addresses: {
+        orderBy: {
+          isDefault: "desc",
         },
+      },
+    },
   });
 }
 
@@ -101,7 +102,7 @@ export default async function ProfilePage({
     : "profile";
 
   const [user, orders, adminStats] = await Promise.all([
-    getUserProfile(session.user.id, isAdmin),
+    getUserProfile(session.user.id),
     isAdmin ? Promise.resolve([]) : getUserOrders(session.user.id),
     isAdmin ? getAdminStats() : Promise.resolve(null),
   ]);
@@ -130,7 +131,7 @@ export default async function ProfilePage({
 
           <TabsContent value="profile" className="space-y-6">
             <ProfileInfo
-              user={user as typeof user & { addresses: Array<any> }}
+              user={user}
             />
           </TabsContent>
 
@@ -146,4 +147,3 @@ export default async function ProfilePage({
     </div>
   );
 }
-
