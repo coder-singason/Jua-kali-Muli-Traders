@@ -571,19 +571,22 @@ export function RevenueChart({
                       strokeWidth={isMobile ? 2 : 3}
                       fillOpacity={1}
                       fill="url(#colorRevenue)"
-                      onClick={(data: any, index: number) => {
+                      // FIX: Cast handler to any to allow Recharts' specific signature
+                      onClick={((data: any, index: number) => {
                         if (isMobile) {
                           setSelectedDataPoint(selectedDataPoint === index ? null : index);
                         }
-                      }}
+                      }) as any}
                     />
                     <Line
                       type="monotone"
                       dataKey="revenue"
                       stroke={COLORS.revenue.primary}
                       strokeWidth={isMobile ? 2 : 2}
-                      dot={(props: any, index: number) => {
-                        const { payload, cx, cy } = props;
+                      // FIX: Removed second argument 'index' from signature to satisfy TypeScript
+                      // We now destructure 'index' from 'props'
+                      dot={(props: any) => {
+                        const { payload, cx, cy, index } = props;
                         const dataIndex = formattedData.findIndex((d) => d.date === payload.date);
                         const actualIndex = dataIndex !== -1 ? dataIndex : index;
                         const isSelected = selectedDataPoint === actualIndex;
@@ -845,7 +848,8 @@ export function RevenueChart({
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }) => 
+                        // FIX: Explicitly type the arguments to prevent 'unknown' error
+                        label={({ name, percent }: any) => 
                           isMobile 
                             ? `${(percent * 100).toFixed(0)}%`
                             : `${name}: ${(percent * 100).toFixed(0)}%`
