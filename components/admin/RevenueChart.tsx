@@ -82,30 +82,30 @@ export function RevenueChart({
     // Ensure we have exactly 7 days of data (fill missing days with 0)
     const daysWithData = data.length;
     const expectedDays = 7;
-    
+
     // Validate and ensure data contains daily values (not totals)
     // Each item should represent ONE day's revenue
     const validatedData = data.map((item) => ({
       ...item,
       revenue: Number(item.revenue) || 0, // Ensure it's a number
     }));
-    
+
     // Calculate total revenue from validated daily data
     const totalRevenue = validatedData.reduce((sum, d) => sum + d.revenue, 0);
-    
+
     // Calculate average daily revenue - always divide by 7 days for consistency
     // This ensures the average represents the true daily average over the period
     const avgDailyRevenue = expectedDays > 0 ? totalRevenue / expectedDays : 0;
-    
+
     // Alternative: Calculate average only from days with revenue (more accurate for business metrics)
     const daysWithRevenue = validatedData.filter((d) => d.revenue > 0).length;
-    const avgDailyRevenueFromActiveDays = daysWithRevenue > 0 
-      ? totalRevenue / daysWithRevenue 
+    const avgDailyRevenueFromActiveDays = daysWithRevenue > 0
+      ? totalRevenue / daysWithRevenue
       : avgDailyRevenue;
-    
+
     // Use the more conservative average (over all 7 days) for comparison
     // This prevents inflated percentages when most days have no revenue
-    const maxRevenue = validatedData.length > 0 
+    const maxRevenue = validatedData.length > 0
       ? Math.max(...validatedData.map((d) => d.revenue), 0)
       : 0;
     const minRevenue = validatedData.length > 0
@@ -115,10 +115,10 @@ export function RevenueChart({
     // Calculate trend (comparing last 3 days vs previous 3 days)
     // More precise calculation with better edge case handling
     const lastThreeDays = validatedData.slice(-3).reduce((sum, d) => sum + d.revenue, 0);
-    const prevThreeDays = validatedData.length >= 6 
+    const prevThreeDays = validatedData.length >= 6
       ? validatedData.slice(-6, -3).reduce((sum, d) => sum + d.revenue, 0)
       : 0;
-    
+
     let trend: number;
     if (prevThreeDays === 0 && lastThreeDays === 0) {
       // No sales in both periods
@@ -155,29 +155,29 @@ export function RevenueChart({
   // Format revenue data with better formatting and color indicators
   const formattedData = useMemo(() => {
     const avg = metrics.avgDailyRevenue;
-    
+
     // Ensure we're working with the actual daily revenue values (not totals)
     return data.map((item, index) => {
       // Each item.revenue should be a SINGLE DAY's revenue, not a total
       const dailyRevenue = Number(item.revenue) || 0;
-      
+
       // Get fresh values directly from metrics to avoid any closure issues
       const actualAvg = metrics.avgDailyRevenue;
       const actualDaily = dailyRevenue;
-      
+
       // Calculate precise percentage difference using actual daily values vs daily average
       let percentDiff = 0;
       let status: "above" | "average" | "below" = "average";
-      
+
       // Always use the 7-day average for comparison (divides total by 7, includes zeros)
       if (actualAvg > 0 && actualDaily > 0) {
         // Calculate revenue ratio first (most reliable check)
         const revenueRatio = actualDaily / actualAvg;
-        
+
         // Calculate percentage difference
         const diff = actualDaily - actualAvg;
         percentDiff = (diff / actualAvg) * 100;
-        
+
         // CRITICAL: Use revenue ratio as primary check - more reliable than percentage
         // Only mark as "average" if ratio is within 0.1% (0.999 to 1.001)
         if (revenueRatio >= 0.999 && revenueRatio <= 1.001) {
@@ -187,14 +187,14 @@ export function RevenueChart({
         } else {
           status = "below";
         }
-        
+
         // Debug: Log if we get unexpected "average" status
         if (status === "average" && revenueRatio > 1.5) {
           // This should never happen - force to above if ratio is > 1.5
           console.warn(`[RevenueChart] Unexpected: revenueRatio=${revenueRatio.toFixed(3)}, daily=${actualDaily}, avg=${actualAvg}, forcing to "above"`);
           status = "above";
         }
-        
+
         // ALWAYS force correct status based on revenue ratio - don't trust initial status
         if (revenueRatio > 1.001) {
           status = "above";
@@ -216,7 +216,7 @@ export function RevenueChart({
         status = "average";
         percentDiff = 0;
       }
-      
+
       return {
         ...item,
         revenue: dailyRevenue, // Ensure we use the actual daily value
@@ -252,7 +252,7 @@ export function RevenueChart({
   const RevenueTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      
+
       // Get the revenue value - prefer data.revenue (from formattedData) over payload.value
       // formattedData has the correct revenue values with proper status calculations
       // CRITICAL: Use !== undefined check to preserve 0 values (not falsy)
@@ -264,16 +264,16 @@ export function RevenueChart({
       }
       // Ensure NaN becomes 0
       if (isNaN(value)) value = 0;
-      
+
       // Get fresh values directly from metrics (same as mobile breakdown)
       const actualAvg = metrics.avgDailyRevenue;
       const actualDaily = value;
-      
+
       // Determine color based on comparison to average
       let amountColor = "text-foreground";
       let statusText = "";
       let statusColor = "";
-      
+
       // Handle different cases based on revenue and average
       // CRITICAL: Check for zero revenue FIRST using strict equality, before any other checks
       // This must be checked BEFORE checking if actualDaily > 0
@@ -299,7 +299,7 @@ export function RevenueChart({
         const revenueRatio = actualDaily / actualAvg;
         const actualDiff = actualDaily - actualAvg;
         const actualPercent = (actualDiff / actualAvg) * 100;
-        
+
         // CRITICAL: Use revenue ratio as PRIMARY and ONLY check
         // Check above average FIRST (most common case)
         if (revenueRatio > 1.001) {
@@ -307,14 +307,14 @@ export function RevenueChart({
           amountColor = "text-teal-600 dark:text-teal-400";
           statusText = `↑ ${actualPercent.toFixed(2)}% above average`;
           statusColor = "text-teal-600 dark:text-teal-400";
-        } 
+        }
         // Check below average second
         else if (revenueRatio < 0.999) {
           // Below average - red
           amountColor = "text-red-600 dark:text-red-400";
           statusText = `↓ ${Math.abs(actualPercent).toFixed(2)}% below average`;
           statusColor = "text-red-600 dark:text-red-400";
-        } 
+        }
         // Only if truly within 0.1% of average
         else {
           // At average - yellow/orange (within 0.1%)
@@ -327,7 +327,7 @@ export function RevenueChart({
           }
           statusColor = "text-yellow-600 dark:text-yellow-400";
         }
-        
+
         // Final safety check - if ratio is way off but we somehow got "average", force correct status
         if (revenueRatio > 1.5 && statusText.includes("At average")) {
           amountColor = "text-teal-600 dark:text-teal-400";
@@ -340,7 +340,7 @@ export function RevenueChart({
         statusText = `≈ At average`;
         statusColor = "text-yellow-600 dark:text-yellow-400";
       }
-      
+
       return (
         <div className="rounded-lg border bg-card p-3 shadow-lg backdrop-blur-sm">
           <p className="font-semibold text-sm mb-2 text-foreground">
@@ -453,11 +453,10 @@ export function RevenueChart({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Trend</p>
-                <p className={`text-lg font-bold flex items-center gap-1 ${
-                  metrics.trend >= 0 || metrics.trend === Infinity
-                    ? "text-green-600 dark:text-green-400" 
+                <p className={`text-lg font-bold flex items-center gap-1 ${metrics.trend >= 0 || metrics.trend === Infinity
+                    ? "text-green-600 dark:text-green-400"
                     : "text-red-600 dark:text-red-400"
-                }`}>
+                  }`}>
                   {metrics.trend === Infinity ? (
                     <>
                       <TrendingUp className="h-4 w-4" />
@@ -510,7 +509,7 @@ export function RevenueChart({
             </CardHeader>
             <CardContent>
               <div className="w-full h-[400px] min-h-[300px]">
-                <ResponsiveContainer width="100%" height="100%" minHeight={300} minWidth={0}>
+                <ResponsiveContainer width="100%" height="100%" minHeight={300} aspect={2}>
                   <AreaChart
                     data={formattedData}
                     margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
@@ -521,9 +520,9 @@ export function RevenueChart({
                         <stop offset="95%" stopColor={COLORS.revenue.primary} stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid 
-                      strokeDasharray="3 3" 
-                      className="stroke-muted opacity-50" 
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      className="stroke-muted opacity-50"
                     />
                     <XAxis
                       dataKey="date"
@@ -546,7 +545,7 @@ export function RevenueChart({
                       }}
                       width={isMobile ? 45 : 60}
                     />
-                    <Tooltip 
+                    <Tooltip
                       content={<RevenueTooltip />}
                       cursor={{ stroke: COLORS.revenue.primary, strokeWidth: 1 }}
                       trigger={isMobile ? "click" : "hover"}
@@ -595,7 +594,7 @@ export function RevenueChart({
                         if (status === "above") dotColor = "#14b8a6"; // teal
                         else if (status === "below") dotColor = "#ef4444"; // red
                         else dotColor = "#eab308"; // yellow
-                        
+
                         return (
                           <circle
                             key={`dot-${actualIndex}-${payload.date}`}
@@ -616,7 +615,7 @@ export function RevenueChart({
               </div>
             </CardContent>
           </Card>
-          
+
           {/* Mobile: Daily Breakdown - Last 7 Days Only */}
           <div className="lg:hidden mt-4">
             <Card className="border-border/50">
@@ -628,35 +627,35 @@ export function RevenueChart({
                   {formattedData.slice(-7).map((item, index) => {
                     const actualIndex = formattedData.length - 7 + index;
                     const isSelected = selectedDataPoint === actualIndex;
-                    
+
                     // Status styling
                     let statusColor = "text-muted-foreground";
                     let statusBg = "bg-muted/30";
                     let statusIcon = "≈";
                     let statusText = "";
-                    
+
                     // Recalculate to ensure accuracy - use fresh values
                     const actualAvg = metrics.avgDailyRevenue;
                     const actualDaily = Number(item.revenue) || 0;
                     let actualStatus = item.status;
-                    
+
                     // Safety check: Recalculate status if revenue is significantly different from average
                     if (actualAvg > 0 && actualDaily > 0) {
                       const revenueRatio = actualDaily / actualAvg;
-                      
+
                       // If ratio is way off but status is "average", force correct status
                       if (revenueRatio > 1.001 && actualStatus === "average") {
                         actualStatus = "above";
                       } else if (revenueRatio < 0.999 && actualStatus === "average") {
                         actualStatus = "below";
                       }
-                      
+
                       // Recalculate percentage for display
                       const actualDiff = actualDaily - actualAvg;
                       const actualPercent = (actualDiff / actualAvg) * 100;
                       const precisePercentDiff = actualPercent;
                       const absPercentDiff = Math.abs(actualPercent);
-                      
+
                       // Show percentage whenever there's revenue data
                       if (actualStatus === "above") {
                         statusColor = "text-teal-600 dark:text-teal-400";
@@ -682,7 +681,7 @@ export function RevenueChart({
                       // Fallback to original calculation
                       const precisePercentDiff = item.percentDiff;
                       const absPercentDiff = item.absPercentDiff;
-                      
+
                       if (item.status === "above") {
                         statusColor = "text-teal-600 dark:text-teal-400";
                         statusBg = "bg-teal-500/10";
@@ -706,7 +705,7 @@ export function RevenueChart({
                       // No revenue data - show empty state
                       statusText = "";
                     }
-                    
+
                     return (
                       <button
                         key={`daily-${actualIndex}-${item.date}`}
@@ -732,7 +731,7 @@ export function RevenueChart({
                     );
                   })}
                 </div>
-                
+
                 {/* Minimal Average Reference */}
                 {metrics.avgDailyRevenue > 0 && (
                   <div className="mt-3 pt-3 border-t border-border/50">
@@ -772,16 +771,16 @@ export function RevenueChart({
                   <ResponsiveContainer width="100%" height="100%" minHeight={300} minWidth={0}>
                     <BarChart
                       data={formattedOrderData}
-                      margin={{ 
-                        top: 10, 
-                        right: isMobile ? 10 : 20, 
-                        left: 0, 
-                        bottom: isMobile ? 50 : 10 
+                      margin={{
+                        top: 10,
+                        right: isMobile ? 10 : 20,
+                        left: 0,
+                        bottom: isMobile ? 50 : 10
                       }}
                     >
-                      <CartesianGrid 
-                        strokeDasharray="3 3" 
-                        className="stroke-muted opacity-50" 
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        className="stroke-muted opacity-50"
                       />
                       <XAxis
                         dataKey="date"
@@ -800,7 +799,7 @@ export function RevenueChart({
                         allowDecimals={false}
                         width={isMobile ? 35 : 40}
                       />
-                      <Tooltip 
+                      <Tooltip
                         content={<OrderTooltip />}
                         cursor={{ fill: COLORS.orders.primary, opacity: 0.1 }}
                         trigger={isMobile ? "click" : "hover"}
@@ -849,8 +848,8 @@ export function RevenueChart({
                         cy="50%"
                         labelLine={false}
                         // FIX: Explicitly type the arguments to prevent 'unknown' error
-                        label={({ name, percent }: any) => 
-                          isMobile 
+                        label={({ name, percent }: any) =>
+                          isMobile
                             ? `${(percent * 100).toFixed(0)}%`
                             : `${name}: ${(percent * 100).toFixed(0)}%`
                         }
@@ -862,7 +861,7 @@ export function RevenueChart({
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip 
+                      <Tooltip
                         content={<StatusTooltip />}
                         trigger={isMobile ? "click" : "hover"}
                       />
