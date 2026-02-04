@@ -3,9 +3,9 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Starting database seed...");
+  console.log("🌱 Starting Juakali database seed...");
 
-  // Clear existing data (optional - comment out if you want to keep existing data)
+  // 1. Clean existing data
   console.log("🧹 Cleaning existing data...");
   await prisma.cartItem.deleteMany();
   await prisma.orderItem.deleteMany();
@@ -21,379 +21,281 @@ async function main() {
   await prisma.productDetail.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
-  await prisma.verificationToken.deleteMany();
-  await prisma.session.deleteMany();
-  await prisma.account.deleteMany();
-  await prisma.user.deleteMany();
+  // Keep users/accounts/sessions to avoid locking you out
 
-  // Create Categories for Electronics & Juakali Appliances
+  // 2. Create Categories
   console.log("📁 Creating categories...");
 
-  const smartphonesCategory = await prisma.category.create({
-    data: {
-      name: "Smartphones & Tablets",
-      slug: "smartphones-tablets",
-    },
+  const furniture = await prisma.category.create({
+    data: { name: "Furniture", slug: "furniture" },
   });
 
-  const laptopsCategory = await prisma.category.create({
-    data: {
-      name: "Laptops & Computers",
-      slug: "laptops-computers",
-    },
+  const metalwork = await prisma.category.create({
+    data: { name: "Metalwork & Grills", slug: "metalwork" },
   });
 
-  const appliancesCategory = await prisma.category.create({
-    data: {
-      name: "Home Appliances",
-      slug: "home-appliances",
-    },
+  const decor = await prisma.category.create({
+    data: { name: "Home Decor", slug: "home-decor" },
   });
 
-  const juakaliCategory = await prisma.category.create({
-    data: {
-      name: "Juakali Tools & Equipment",
-      slug: "juakali-tools",
-    },
+  const utility = await prisma.category.create({
+    data: { name: "Construction & Utility", slug: "construction-utility" },
   });
 
-  const audioCategory = await prisma.category.create({
-    data: {
-      name: "Audio & Entertainment",
-      slug: "audio-entertainment",
-    },
-  });
+  console.log("🛠️ Creating products...");
 
-  // Create Electronics & Appliances Products
-  console.log("📱 Creating products...");
-
-  // Smartphones
-  const product1 = await prisma.product.create({
+  // --- FURNITURE ---
+  await prisma.product.create({
     data: {
-      name: "Samsung Galaxy A54 5G",
-      description: "6.4-inch Super AMOLED display, 50MP triple camera, 5000mAh battery. Perfect for photography and daily use.",
-      price: 45000,
-      categoryId: smartphonesCategory.id,
-      brand: "Samsung",
-      images: [
-        "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=800",
-      ],
-      stock: 25,
-      sku: "SMRT-001",
+      name: "Rustic Pallet Sofa Set",
+      description: "Handcrafted L-shaped sofa made from treated reclaimed pine pallets. Includes high-density foam cushions with removable, washable canvas covers. Perfect for outdoor lounges or rustic living rooms.",
+      price: 35000,
+      categoryId: furniture.id,
+      brand: "Juakali Woodworks",
+      images: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80"],
+      stock: 5,
+      sku: "FURN-001",
       featured: true,
       condition: "New",
-      modelNumber: "SM-A546E",
-      specifications: {
-        display: "6.4-inch Super AMOLED, 1080 x 2340 pixels",
-        processor: "Exynos 1380",
-        ram: "8GB",
-        camera: "50MP + 12MP + 5MP Triple Camera",
-        battery: "5000mAh",
-        os: "Android 13",
-      },
-      technicalDetails: {
-        dimensions: "158.2 x 76.7 x 8.2 mm",
-        weight: "202 grams",
-      },
-      warranty: "1 Year",
-      quality: "Premium",
-      deliveryTime: "1-3 Days",
-      shippingFee: 500,
-      sizes: {
-        create: [
-          { size: "128GB", stock: 10 },
-          { size: "256GB", stock: 15 },
-        ],
-      },
-    },
-  });
-
-  const product2 = await prisma.product.create({
-    data: {
-      name: "HP Pavilion 15 Laptop",
-      description: "15.6-inch FHD display, Intel Core i5, 8GB RAM, 512GB SSD. Ideal for work, study, and entertainment.",
-      price: 75000,
-      categoryId: laptopsCategory.id,
-      brand: "HP",
-      images: [
-        "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800",
-      ],
-      stock: 15,
-      sku: "LPTP-001",
-      featured: true,
-      condition: "New",
-      modelNumber: "15-eg2xxx",
-      specifications: {
-        display: "15.6-inch FHD (1920 x 1080)",
-        processor: "Intel Core i5-1235U",
-        ram: "8GB DDR4",
-        storage: "512GB PCIe NVMe SSD",
-        graphics: "Intel Iris Xe Graphics",
-        os: "Windows 11 Home",
-      },
-      technicalDetails: {
-        weight: "1.75 kg",
-        batteryLife: "Up to 7 hours",
-        ports: "2x USB 3.2, 1x HDMI, 1x USB-C, Audio jack",
-      },
-      warranty: "1 Year",
-      quality: "Premium",
-      deliveryTime: "2-4 Days",
-      shippingFee: 800,
-      sizes: {
-        create: [
-          { size: "8GB RAM / 512GB SSD", stock: 15 },
-        ],
-      },
-    },
-  });
-
-  // Home Appliances
-  const product3 = await prisma.product.create({
-    data: {
-      name: "Samsung 8kg Front Load Washing Machine",
-      description: "Energy-efficient washing machine with multiple wash programs, quick wash, and digital inverter technology.",
-      price: 55000,
-      categoryId: appliancesCategory.id,
-      brand: "Samsung",
-      images: [
-        "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=800",
-      ],
-      stock: 10,
-      sku: "APPL-001",
-      featured: true,
-      condition: "New",
-      modelNumber: "WW80T504DAW",
-      specifications: {
-        capacity: "8 kg",
-        spinSpeed: "1400 RPM",
-        programs: "15 wash programs",
-        energyRating: "A++",
-      },
-      technicalDetails: {
-        voltage: "220-240V",
-        frequency: "50Hz",
-        powerConsumption: "2100W",
-        dimensions: "600 x 550 x 850 mm",
-        weight: "65 kg",
-      },
-      warranty: "2 Years",
-      quality: "Premium",
+      specifications: { material: "Pine Wood", cushions: "High Density Foam", capacity: "5 Seater" },
       deliveryTime: "3-5 Days",
-      shippingFee: 1500,
-      sizes: {
-        create: [
-          { size: "Standard", stock: 10 },
-        ],
-      },
-    },
-  });
-
-  const product4 = await prisma.product.create({
-    data: {
-      name: "Ramtons 2-Door Refrigerator 138L",
-      description: "Compact and energy-efficient refrigerator perfect for small families. Features separate freezer compartment.",
-      price: 28000,
-      categoryId: appliancesCategory.id,
-      brand: "Ramtons",
-      images: [
-        "https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=800",
-      ],
-      stock: 12,
-      sku: "APPL-002",
-      featured: false,
-      condition: "New",
-      modelNumber: "RF/225",
-      specifications: {
-        capacity: "138 Liters (100L Fridge + 38L Freezer)",
-        defrost: "Manual",
-        energyRating: "A+",
-        shelves: "3 glass shelves",
-      },
-      technicalDetails: {
-        voltage: "220-240V",
-        frequency: "50Hz",
-        powerConsumption: "90W",
-        dimensions: "480 x 520 x 1220 mm",
-        weight: "35 kg",
-      },
       warranty: "1 Year",
-      quality: "Standard",
-      deliveryTime: "2-4 Days",
-      shippingFee: 1000,
-      sizes: {
-        create: [
-          { size: "Standard", stock: 12 },
-        ],
-      },
+      sizes: { create: [{ size: "Standard L-Shape", stock: 5 }] }
     },
   });
 
-  // Juakali Tools & Equipment
-  const product5 = await prisma.product.create({
+  await prisma.product.create({
     data: {
-      name: "Bosch Angle Grinder 900W",
-      description: "Powerful 900W angle grinder ideal for cutting, grinding, and polishing metal and masonry. Essential for juakali work.",
+      name: "Industrial Pipe Coffee Table",
+      description: "Modern industrial design featuring black galvanized steel pipes and a solid mahogany top with a matte varnish finish.",
       price: 12500,
-      categoryId: juakaliCategory.id,
-      brand: "Bosch",
-      images: [
-        "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=800",
-      ],
-      stock: 20,
-      sku: "JKTL-001",
-      featured: true,
-      condition: "New",
-      modelNumber: "GWS 900-125",
-      specifications: {
-        power: "900W",
-        discDiameter: "125mm (5 inch)",
-        noLoadSpeed: "11000 RPM",
-        spindleThread: "M14",
-      },
-      technicalDetails: {
-        voltage: "220-240V",
-        frequency: "50-60Hz",
-        powerConsumption: "900W",
-        weight: "2.0 kg",
-        cableLength: "2.5m",
-      },
-      warranty: "6 Months",
-      quality: "Premium",
-      deliveryTime: "1-2 Days",
-      shippingFee: 300,
-      sizes: {
-        create: [
-          { size: "Standard", stock: 20 },
-        ],
-      },
-    },
-  });
-
-  const product6 = await prisma.product.create({
-    data: {
-      name: "Makita Cordless Drill Driver 18V",
-      description: "Compact and lightweight cordless drill with variable speed control. Includes 2 batteries and charger.",
-      price: 18000,
-      categoryId: juakaliCategory.id,
-      brand: "Makita",
-      images: [
-        "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800",
-      ],
-      stock: 15,
-      sku: "JKTL-002",
+      categoryId: furniture.id,
+      brand: "Urban Metal",
+      images: ["https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=800&q=80"],
+      stock: 8,
+      sku: "FURN-002",
       featured: false,
       condition: "New",
-      modelNumber: "DDF483Z",
-      specifications: {
-        voltage: "18V",
-        chuckCapacity: "13mm",
-        maxTorque: "36 Nm",
-        noLoadSpeed: "0-500 / 0-1900 RPM",
-        batteryIncluded: "2x 18V 2.0Ah Li-ion",
-      },
-      technicalDetails: {
-        weight: "1.7 kg (with battery)",
-        dimensions: "186 x 78 x 254 mm",
-      },
-      warranty: "1 Year",
-      quality: "Premium",
-      deliveryTime: "1-3 Days",
-      shippingFee: 400,
-      sizes: {
-        create: [
-          { size: "Standard", stock: 15 },
-        ],
-      },
+      specifications: { dimensions: "100cm x 60cm", height: "45cm", wood: "Mahogany" },
+      deliveryTime: "2-4 Days",
+      warranty: "2 Years",
+      sizes: { create: [{ size: "Standard", stock: 8 }] }
     },
   });
 
-  // Audio & Entertainment
-  const product7 = await prisma.product.create({
+  await prisma.product.create({
     data: {
-      name: "JBL Flip 6 Bluetooth Speaker",
-      description: "Portable Bluetooth speaker with powerful sound, IP67 waterproof rating, and 12-hour battery life.",
-      price: 15000,
-      categoryId: audioCategory.id,
-      brand: "JBL",
-      images: [
-        "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=800",
-      ],
-      stock: 30,
-      sku: "AUDI-001",
-      featured: true,
+      name: "Convertible School Desk",
+      description: "Heavy-duty steel frame desk that converts into a bench. Wooden top made from cypress. Ideal for home schooling or compact spaces.",
+      price: 4500,
+      categoryId: furniture.id,
+      brand: "Elimu Works",
+      images: ["https://images.unsplash.com/photo-1503602642458-232111445657?w=800&q=80"],
+      stock: 20,
+      sku: "FURN-003",
       condition: "New",
-      modelNumber: "FLIP6",
-      specifications: {
-        bluetooth: "Bluetooth 5.1",
-        batteryLife: "12 hours",
-        waterproof: "IP67",
-        speakerPower: "30W RMS",
-      },
-      technicalDetails: {
-        weight: "550 grams",
-        dimensions: "178 x 72 x 68 mm",
-        chargingTime: "2.5 hours",
-        inputVoltage: "5V / 3A (USB-C)",
-      },
-      warranty: "1 Year",
-      quality: "Premium",
       deliveryTime: "1-2 Days",
-      shippingFee: 200,
-      sizes: {
-        create: [
-          { size: "Standard", stock: 30 },
-        ],
-      },
+      sizes: { create: [{ size: "Standard", stock: 20 }] }
     },
   });
 
-  const product8 = await prisma.product.create({
+  await prisma.product.create({
     data: {
-      name: "TCL 43-inch Smart Android TV",
-      description: "Full HD Smart TV with Android OS, built-in Chromecast, HDR support, and access to Google Play Store.",
-      price: 32000,
-      categoryId: audioCategory.id,
-      brand: "TCL",
-      images: [
-        "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=800",
-      ],
-      stock: 18,
-      sku: "AUDI-002",
+      name: "Woven Reed Chair",
+      description: "Traditional coastal style chair woven from natural reeds on a hardwood frame. Breathable and comfortable.",
+      price: 3800,
+      categoryId: furniture.id,
+      brand: "Coastal Weaves",
+      images: ["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80"],
+      stock: 12,
+      sku: "FURN-004",
+      condition: "New",
+      deliveryTime: "2-4 Days",
+      sizes: { create: [{ size: "Single", stock: 12 }] }
+    },
+  });
+
+  // --- METALWORK ---
+  await prisma.product.create({
+    data: {
+      name: "Heavy Duty Steel Gate",
+      description: "Double-swing steel gate with decorative floral scrollwork. Painted with anti-rust primer and black gloss finish. Installation available.",
+      price: 45000,
+      categoryId: metalwork.id,
+      brand: "Nairobi Steelworks",
+      images: ["https://images.unsplash.com/photo-1535953396732-d85c5c9e4215?w=800&q=80"],
+      stock: 2,
+      sku: "METL-001",
       featured: true,
       condition: "New",
-      modelNumber: "43S6500FS",
-      specifications: {
-        screenSize: "43 inches",
-        resolution: "1920 x 1080 (Full HD)",
-        smartOS: "Android TV 11",
-        hdr: "HDR10",
-        connectivity: "3x HDMI, 2x USB, WiFi, Ethernet",
-      },
-      technicalDetails: {
-        voltage: "220-240V",
-        frequency: "50-60Hz",
-        powerConsumption: "80W",
-        dimensions: "970 x 630 x 180 mm (with stand)",
-        weight: "7.5 kg",
-      },
-      warranty: "1 Year",
-      quality: "Standard",
-      deliveryTime: "2-3 Days",
-      shippingFee: 1200,
-      sizes: {
-        create: [
-          { size: "43-inch", stock: 18 },
-        ],
-      },
+      specifications: { width: "12ft (Standard)", height: "7ft", gauge: "16 Gauge" },
+      deliveryTime: "7-10 Days",
+      warranty: "5 Years",
+      sizes: { create: [{ size: "12ft x 7ft", stock: 2 }] }
+    },
+  });
+
+  await prisma.product.create({
+    data: {
+      name: "Energy Saving Jiko",
+      description: "Ceramic-lined charcoal stove that retains heat properly, using 50% less charcoal than standard jikos. Durable metal casing.",
+      price: 1500,
+      categoryId: metalwork.id,
+      brand: "EcoJiko",
+      images: ["https://images.unsplash.com/photo-1542601906990-b4d3fb7d5b7a?w=800&q=80"],
+      stock: 50,
+      sku: "METL-002",
+      featured: true,
+      condition: "New",
+      deliveryTime: "1 Day",
+      sizes: { create: [{ size: "Small", stock: 20 }, { size: "Medium", stock: 20 }, { size: "Large", stock: 10 }] }
+    },
+  });
+
+  await prisma.product.create({
+    data: {
+      name: "Steel Window Grills",
+      description: "Custom-made burglar proof window grills. Geometric patterns for modern security. Quote per square meter.",
+      price: 3500,
+      categoryId: metalwork.id,
+      brand: "SecureHome",
+      images: ["https://images.unsplash.com/photo-1509644851169-2acc08aa25b5?w=800&q=80"],
+      stock: 100, // Conceptually "materials available"
+      sku: "METL-003",
+      condition: "New",
+      deliveryTime: "3-5 Days",
+      sizes: { create: [{ size: "Standard (4x4)", stock: 100 }] }
+    },
+  });
+
+  await prisma.product.create({
+    data: {
+      name: "Commercial BBQ Grill",
+      description: "Half-drum BBQ grill with stand and side table. Perfect for nyama choma businesses or large family gatherings.",
+      price: 8500,
+      categoryId: metalwork.id,
+      brand: "Choma Master",
+      images: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80"], // Using sofa placeholder as generic fallback if BBQ specific absent
+      stock: 10,
+      sku: "METL-004",
+      condition: "New",
+      deliveryTime: "2 Days",
+      sizes: { create: [{ size: "Large", stock: 10 }] }
+    },
+  });
+
+  await prisma.product.create({
+    data: {
+      name: "Boda Boda Carrier Frame",
+      description: "Reinforced steel carrier frame for motorcycle deliveries. Welded joints for extra load capacity.",
+      price: 2500,
+      categoryId: metalwork.id,
+      brand: "Thika Welders",
+      images: ["https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&q=80"],
+      stock: 15,
+      sku: "METL-005",
+      condition: "New",
+      sizes: { create: [{ size: "Standard", stock: 15 }] }
+    },
+  });
+
+  // --- HOME DECOR ---
+  await prisma.product.create({
+    data: {
+      name: "Recycled Tire Planters",
+      description: "Vibrant, painted garden planters made from upcycled tires. Available in various colors and shapes (swan, cup, plain).",
+      price: 800,
+      categoryId: decor.id,
+      brand: "Green Cycle",
+      images: ["https://images.unsplash.com/photo-1545241047-6083a3684587?w=800&q=80"],
+      stock: 30,
+      sku: "DECO-001",
+      condition: "New",
+      sizes: { create: [{ size: "Medium", stock: 30 }] }
+    },
+  });
+
+  await prisma.product.create({
+    data: {
+      name: "Maasai Shuka Fleece Blanket",
+      description: "Traditional Maasai Shuka fabric backed with warm polar fleece. Ideal for cold evenings or travel.",
+      price: 2200,
+      categoryId: decor.id,
+      brand: "Safari Warmth",
+      images: ["https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=800&q=80"],
+      stock: 40,
+      sku: "DECO-002",
+      featured: true,
+      condition: "New",
+      sizes: { create: [{ size: "150x200cm", stock: 40 }] }
+    },
+  });
+
+  await prisma.product.create({
+    data: {
+      name: "Beaded Wire Sculpture - Lion",
+      description: "Intricate lion sculpture made from wire and colorful glass beads. A classic piece of Kenyan artistry.",
+      price: 3500,
+      categoryId: decor.id,
+      brand: "Kazuri Beads",
+      images: ["https://images.unsplash.com/photo-1493962853295-0fd70327578a?w=800&q=80"], // Generic art/craft
+      stock: 5,
+      sku: "DECO-003",
+      condition: "New",
+      sizes: { create: [{ size: "Standard", stock: 5 }] }
+    },
+  });
+
+  await prisma.product.create({
+    data: {
+      name: "Banana Fiber Laundry Basket",
+      description: "Eco-friendly laundry basket woven from dried banana fibers. Comes with a fitting lid and fabric lining.",
+      price: 1800,
+      categoryId: decor.id,
+      brand: "Natural Weaves",
+      images: ["https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&q=80"],
+      stock: 25,
+      sku: "DECO-004",
+      condition: "New",
+      sizes: { create: [{ size: "Large", stock: 25 }] }
+    },
+  });
+
+  // --- UTILITY ---
+  await prisma.product.create({
+    data: {
+      name: "Custom Heavy Wheelbarrow",
+      description: "Construction-grade wheelbarrow with reinforced tub and solid rubber tire. Built for heavy loads on rough terrain.",
+      price: 5500,
+      categoryId: utility.id,
+      brand: "Jenga Tools",
+      images: ["https://images.unsplash.com/photo-1581235720704-06d3acfcb36f?w=800&q=80"],
+      stock: 12,
+      sku: "UTIL-001",
+      condition: "New",
+      specifications: { capacity: "65 Liters", material: "Steel", tire: "Solid Rubber" },
+      sizes: { create: [{ size: "Standard", stock: 12 }] }
+    },
+  });
+
+  await prisma.product.create({
+    data: {
+      name: "Poultry House (Chicken Coop)",
+      description: "Expertly assembled wooden poultry house with wire mesh ventilation and designated laying nests. Fits ~50 chickens.",
+      price: 18000,
+      categoryId: utility.id,
+      brand: "AgriStructures",
+      images: ["https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=800&q=80"], // Wood texture
+      stock: 3,
+      sku: "UTIL-002",
+      featured: true,
+      condition: "New",
+      sizes: { create: [{ size: "50 Bird Capacity", stock: 3 }] }
     },
   });
 
   console.log("✅ Seed completed successfully!");
-  console.log(`📊 Created:`);
-  console.log(`   - 5 Categories (Electronics & Juakali)`);
-  console.log(`   - 8 Products (Smartphones, Laptops, Appliances, Tools, Audio)`);
-  console.log(`   - Multiple variants for storage/capacity options`);
+  console.log("📊 Added 15 Juakali products across 4 categories.");
 }
 
 main()

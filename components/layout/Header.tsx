@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import NextImage from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -29,11 +30,23 @@ export function Header() {
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           prefetch={true}
         >
-          <span className="text-lg font-bold bg-gradient-to-r from-primary via-accent to-primary/70 bg-clip-text text-transparent whitespace-nowrap">
+          <div className="relative h-8 w-8 sm:h-10 sm:w-10">
+            <NextImage
+              src="/icon.png"
+              alt="Jua-Kali Logo"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+          <span className="text-lg font-bold bg-gradient-to-r from-primary via-accent to-primary/70 bg-clip-text text-transparent whitespace-nowrap hidden sm:inline-block">
             JUA-KALI MULI TRADERS
+          </span>
+          <span className="text-lg font-bold bg-gradient-to-r from-primary via-accent to-primary/70 bg-clip-text text-transparent whitespace-nowrap sm:hidden">
+            JUA-KALI
           </span>
         </Link>
 
