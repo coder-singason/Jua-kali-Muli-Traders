@@ -36,13 +36,13 @@ interface ProductsListProps {
 function ProductImageDisplay({ product }: { product: Product }) {
   const [imageError, setImageError] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
-  
+
   // Prioritize productImages over legacy images array
   const imageUrl = product.productImages && product.productImages.length > 0
     ? product.productImages.sort((a, b) => a.sortOrder - b.sortOrder)[0].url
     : product.images && product.images.length > 0
-    ? product.images[0]
-    : null;
+      ? product.images[0]
+      : null;
 
   // Set initial image source
   useEffect(() => {
@@ -79,6 +79,14 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
 
+  // Sync search state with URL (e.g. on back button)
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || "";
+    if (urlSearch !== search) {
+      setSearch(urlSearch);
+    }
+  }, [searchParams]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
@@ -96,9 +104,9 @@ export function ProductsList({ products: initialProducts }: ProductsListProps) {
   // Filter products client-side if search is provided
   const filteredProducts = search.trim()
     ? initialProducts.filter((product) =>
-        product.name.toLowerCase().includes(search.toLowerCase()) ||
-        product.category.name.toLowerCase().includes(search.toLowerCase())
-      )
+      product.name.toLowerCase().includes(search.toLowerCase()) ||
+      product.category.name.toLowerCase().includes(search.toLowerCase())
+    )
     : initialProducts;
 
   return (

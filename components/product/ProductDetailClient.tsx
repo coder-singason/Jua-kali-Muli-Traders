@@ -23,13 +23,17 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
   const addToCart = useCartStore((state) => state.addItem);
   const { toast } = useToast();
 
-  const availableSizes = product.sizes.filter((size) => size.stock > 0);
-  const selectedSizeStock = product.sizes.find(
-    (s) => s.size === selectedSize
-  )?.stock || 0;
+  const hasVariants = product.sizes && product.sizes.length > 0;
+  const availableSizes = hasVariants ? product.sizes.filter((size) => size.stock > 0) : [];
+
+  // For simple products (no variants), use main stock. For variants, use selected size stock.
+  const currentStock = hasVariants
+    ? (product.sizes.find((s) => s.size === selectedSize)?.stock || 0)
+    : product.stock;
 
   const handleAddToCart = async () => {
-    if (!selectedSize) {
+    // Only require size if product has variants
+    if (hasVariants && !selectedSize) {
       toast({
         title: "Size Required",
         description: "Please select a size",
@@ -38,7 +42,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       return;
     }
 
-    if (quantity > selectedSizeStock) {
+    if (quantity > currentStock) {
       toast({
         title: "Insufficient Stock",
         description: "Not enough stock available",
@@ -48,7 +52,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     }
 
     setIsAdding(true);
-    
+
     // Simulate async operation
     await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -61,10 +65,10 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     } else if (product.images && product.images.length > 0) {
       imageUrl = product.images[0];
     }
-    
+
     addToCart({
       productId: product.id,
-      size: selectedSize,
+      size: hasVariants ? selectedSize : "Standard", // Default size label for simple products
       quantity,
       price: Number(product.price),
       name: product.name,
@@ -74,48 +78,54 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     setIsAdding(false);
     toast({
       title: "Added to Cart",
-      description: `${product.name} (Size: ${selectedSize}) added to cart`,
+      description: `${product.name}${hasVariants ? ` (Size: ${selectedSize})` : ""} added to cart`,
     });
   };
+
+  const isOutOfStock = hasVariants ? availableSizes.length === 0 : product.stock === 0;
 
   return (
     <div className="space-y-4">
       {/* Wishlist Button */}
       <div className="flex justify-start">
-        <WishlistButton 
-          productId={product.id} 
-          size="md" 
+        <WishlistButton
+          productId={product.id}
+          size="md"
           variant="icon"
         />
       </div>
 
-      {/* Size Selection */}
-      <div>
-        <Label className="mb-2 block text-sm font-semibold">Size</Label>
-        <div className="flex flex-wrap gap-2">
-          {availableSizes.length === 0 ? (
-            <p className="text-destructive">Out of Stock</p>
-          ) : (
-            availableSizes.map((size) => (
-              <button
-                key={size.size}
-                onClick={() => setSelectedSize(size.size)}
-                className={`rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all ${
-                  selectedSize === size.size
-                    ? "border-primary bg-primary text-primary-foreground shadow-md"
-                    : "border-border bg-card hover:border-primary/50 hover:bg-muted"
-                }`}
-              >
-                {size.size}
-                <span className="ml-1 text-xs opacity-75">({size.stock})</span>
-              </button>
-            ))
-          )}
+      {/* Size Selection - Only show if variants exist */}
+      {hasVariants && (
+        <div>
+          <Label className="mb-2 block text-sm font-semibold">Size</Label>
+          <div className="flex flex-wrap gap-2">
+            {availableSizes.length === 0 ? (
+              <p className="text-destructive">Out of Stock</p>
+            ) : (
+              availableSizes.map((size) => (
+                <button
+                  key={size.size}
+                  onClick={() => {
+                    setSelectedSize(size.size);
+                    setQuantity(1); // Reset quantity when size changes
+                  }}
+                  className={`rounded-lg border-2 px-4 py-2 text-sm font-medium transition-all ${selectedSize === size.size
+                      ? "border-primary bg-primary text-primary-foreground shadow-md"
+                      : "border-border bg-card hover:border-primary/50 hover:bg-muted"
+                    }`}
+                >
+                  {size.size}
+                  <span className="ml-1 text-xs opacity-75">({size.stock})</span>
+                </button>
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Quantity Selection */}
-      {selectedSize && (
+      {(!hasVariants || selectedSize) && !isOutOfStock && (
         <div>
           <Label className="mb-2 block text-sm font-semibold">Quantity</Label>
           <div className="flex items-center gap-3">
@@ -133,15 +143,15 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
               variant="outline"
               size="icon"
               onClick={() =>
-                setQuantity(Math.min(selectedSizeStock, quantity + 1))
+                setQuantity(Math.min(currentStock, quantity + 1))
               }
-              disabled={quantity >= selectedSizeStock}
+              disabled={quantity >= currentStock}
               className="h-9 w-9"
             >
               <span className="text-lg">+</span>
             </Button>
             <span className="text-sm text-muted-foreground">
-              Max: {selectedSizeStock}
+              Max: {currentStock}
             </span>
           </div>
         </div>
@@ -152,13 +162,15 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
         className="w-full rounded-full"
         size="lg"
         onClick={handleAddToCart}
-        disabled={!selectedSize || availableSizes.length === 0 || isAdding}
+        disabled={(hasVariants && !selectedSize) || isOutOfStock || isAdding}
       >
         {isAdding ? (
           <>
             <LoadingSpinner size="sm" className="mr-2" />
             Adding...
           </>
+        ) : isOutOfStock ? (
+          "Out of Stock"
         ) : (
           "Add to Cart"
         )}

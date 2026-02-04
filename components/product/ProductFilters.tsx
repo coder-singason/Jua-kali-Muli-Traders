@@ -94,7 +94,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
       setFeatured(urlFeatured);
       setBrand(urlBrand);
     }
-  }, [searchParams, search, category, minPrice, maxPrice, featured, brand]);
+  }, [searchParams]);
 
   useEffect(() => {
     // Fetch filter options

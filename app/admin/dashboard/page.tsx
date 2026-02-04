@@ -105,15 +105,22 @@ async function getDashboardStats() {
   ]);
 
   // Calculate low stock and out of stock products
+  // Calculate low stock and out of stock products
   const outOfStockCount = allProducts.filter((product) => {
-    if (product.sizes.length === 0) return true; // No sizes = out of stock
+    if (product.sizes.length === 0) {
+      return product.stock === 0;
+    }
     const totalStock = product.sizes.reduce((sum, size) => sum + size.stock, 0);
     return totalStock === 0;
   }).length;
 
   const lowStockCount = allProducts.filter((product) => {
-    if (product.sizes.length === 0) return false; // No sizes = out of stock, not low stock
-    const totalStock = product.sizes.reduce((sum, size) => sum + size.stock, 0);
+    let totalStock = 0;
+    if (product.sizes.length === 0) {
+      totalStock = product.stock;
+    } else {
+      totalStock = product.sizes.reduce((sum, size) => sum + size.stock, 0);
+    }
     return totalStock > 0 && totalStock <= 5;
   }).length;
 
@@ -137,7 +144,7 @@ async function getDashboardStats() {
   // Initialize daily revenue and order data
   const dailyRevenueMap = new Map<string, number>();
   const dailyOrderMap = new Map<string, number>();
-  
+
   for (let i = 6; i >= 0; i--) {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
@@ -149,13 +156,13 @@ async function getDashboardStats() {
   // Aggregate revenue and orders by day
   recentOrdersForChart.forEach((order) => {
     const dayKey = format(new Date(order.createdAt), "MMM d");
-    
+
     // Revenue (only for completed orders)
     if (["PROCESSING", "SHIPPED", "DELIVERED"].includes(order.status)) {
       const currentRevenue = dailyRevenueMap.get(dayKey) || 0;
       dailyRevenueMap.set(dayKey, currentRevenue + Number(order.total));
     }
-    
+
     // Order count (all orders)
     const currentOrders = dailyOrderMap.get(dayKey) || 0;
     dailyOrderMap.set(dayKey, currentOrders + 1);
@@ -295,8 +302,8 @@ export default async function AdminDashboardPage() {
 
       {/* Enhanced Charts */}
       <div className="mb-6">
-        <RevenueChart 
-          data={stats.dailyRevenueData} 
+        <RevenueChart
+          data={stats.dailyRevenueData}
           orderData={stats.dailyOrderData}
           statusData={stats.orderStatusCounts}
         />
@@ -438,22 +445,21 @@ export default async function AdminDashboardPage() {
                               #{order.orderNumber}
                             </span>
                             <span
-                              className={`px-2 py-0.5 rounded-md text-xs font-medium shrink-0 ${
-                                statusColors[order.status as keyof typeof statusColors] || ""
-                              }`}
+                              className={`px-2 py-0.5 rounded-md text-xs font-medium shrink-0 ${statusColors[order.status as keyof typeof statusColors] || ""
+                                }`}
                             >
                               {order.status.charAt(0) +
                                 order.status.slice(1).toLowerCase()}
                             </span>
                           </div>
-                          
+
                           {/* Customer Name */}
                           <div className="mb-2">
                             <p className="text-sm font-medium text-foreground">
                               {order.user.name || order.user.email}
                             </p>
                           </div>
-                          
+
                           {/* Date and Time - Stacked on mobile, inline on desktop */}
                           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs text-muted-foreground">
                             <span>{formattedDate}</span>
@@ -464,13 +470,13 @@ export default async function AdminDashboardPage() {
                               {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                             </span>
                           </div>
-                          
+
                           {/* Items count - Mobile only */}
                           <div className="sm:hidden mt-1 text-xs text-muted-foreground">
                             {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                           </div>
                         </div>
-                        
+
                         {/* Right Section - Amount and Arrow */}
                         <div className="flex items-start justify-between sm:justify-end gap-3 sm:flex-col sm:items-end">
                           <div className="text-right sm:text-right">
