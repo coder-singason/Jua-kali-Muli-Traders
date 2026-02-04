@@ -30,15 +30,15 @@ export function OrderSuccessBanner({
             <p className="text-green-800 dark:text-green-200 mb-3">
               Thank you for your purchase! Your order <span className="font-semibold">#{orderNumber}</span> has been received and is being processed.
             </p>
-            {showPaymentNote && paymentMethod === "MPESA" && (
+            {showPaymentNote && paymentMethod === "PAYPAL" && (
               <div className="flex items-start gap-2 p-3 rounded-lg bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-800 mb-3">
                 <CreditCard className="h-5 w-5 text-green-700 dark:text-green-300 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-green-900 dark:text-green-100">
-                    Complete Your Payment
+                    Payment Successful
                   </p>
                   <p className="text-xs text-green-800 dark:text-green-200 mt-1">
-                    Please complete the M-Pesa payment on your phone to confirm your order.
+                    Your payment has been securely processed via PayPal.
                   </p>
                 </div>
               </div>

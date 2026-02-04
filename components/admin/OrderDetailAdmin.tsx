@@ -94,7 +94,7 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
 
       const result = await response.json();
       setOrder(result.order);
-      
+
       toast({
         title: "Order Updated",
         description: `Order status has been updated to ${statusConfig[newStatus as keyof typeof statusConfig].label}`,
@@ -162,7 +162,7 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
                       <SelectItem value="PROCESSING">Processing</SelectItem>
                       <SelectItem value="SHIPPED">Shipped</SelectItem>
                       <SelectItem value="DELIVERED">Delivered</SelectItem>
-                      <SelectItem 
+                      <SelectItem
                         value="CANCELLED"
                         disabled={order.status !== "PENDING" && order.status !== "PROCESSING"}
                       >
@@ -328,7 +328,7 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
                 <p className="font-medium">
                   {order.paymentMethod === "CASH_ON_DELIVERY"
                     ? "Cash on Delivery"
-                    : "M-Pesa"}
+                    : "PayPal"}
                 </p>
               </div>
               {order.payments.length > 0 && (
@@ -340,16 +340,8 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
                         <span className="capitalize">{payment.status.toLowerCase()}</span>
                         <span className="font-medium">KSh {Number(payment.amount).toLocaleString()}</span>
                       </div>
-                      {payment.mpesaReceiptNumber && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Receipt: {payment.mpesaReceiptNumber}
-                        </p>
-                      )}
-                      {payment.phoneNumber && (
-                        <p className="text-xs text-muted-foreground">
-                          Phone: {payment.phoneNumber}
-                        </p>
-                      )}
+
+
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(payment.createdAt), "PPP 'at' p")}
                       </p>

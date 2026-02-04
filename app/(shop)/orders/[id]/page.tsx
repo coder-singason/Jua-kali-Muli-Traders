@@ -94,7 +94,7 @@ export default async function OrderDetailPage({
         <OrderSuccessBanner
           orderNumber={order.orderNumber}
           paymentMethod={order.paymentMethod}
-          showPaymentNote={search.payment === "mpesa"}
+          showPaymentNote={search.payment === "paypal"}
         />
       )}
 
@@ -159,13 +159,13 @@ export default async function OrderDetailPage({
             estimatedDelivery={
               order.status !== "DELIVERED" && order.status !== "CANCELLED"
                 ? new Date(
-                    new Date(order.createdAt).getTime() +
-                      (order.status === "SHIPPED" ? 2 : order.status === "PROCESSING" ? 4 : 7) *
-                        24 *
-                        60 *
-                        60 *
-                        1000
-                  )
+                  new Date(order.createdAt).getTime() +
+                  (order.status === "SHIPPED" ? 2 : order.status === "PROCESSING" ? 4 : 7) *
+                  24 *
+                  60 *
+                  60 *
+                  1000
+                )
                 : undefined
             }
           />
@@ -262,7 +262,7 @@ export default async function OrderDetailPage({
                 <p className="font-medium">
                   {order.paymentMethod === "CASH_ON_DELIVERY"
                     ? "Cash on Delivery"
-                    : "M-Pesa"}
+                    : "PayPal"}
                 </p>
               </div>
               {order.payments.length > 0 && (
@@ -271,25 +271,15 @@ export default async function OrderDetailPage({
                   {order.payments.map((payment) => (
                     <div key={payment.id} className="text-sm">
                       <div className="flex items-center justify-between">
-                        <span className={`capitalize font-medium ${
-                          payment.status === "COMPLETED" ? "text-green-600" :
+                        <span className={`capitalize font-medium ${payment.status === "COMPLETED" ? "text-green-600" :
                           payment.status === "FAILED" ? "text-red-600" :
-                          "text-yellow-600"
-                        }`}>
+                            "text-yellow-600"
+                          }`}>
                           {payment.status.toLowerCase()}
                         </span>
                         <span className="font-medium">KSh {Number(payment.amount).toLocaleString()}</span>
                       </div>
-                      {payment.mpesaReceiptNumber && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Receipt: {payment.mpesaReceiptNumber}
-                        </p>
-                      )}
-                      {payment.phoneNumber && (
-                        <p className="text-xs text-muted-foreground">
-                          Phone: {payment.phoneNumber}
-                        </p>
-                      )}
+
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(payment.createdAt), "PPP 'at' p")}
                       </p>

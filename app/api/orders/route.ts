@@ -23,7 +23,7 @@ const createOrderSchema = z.object({
     city: z.string(),
     postalCode: z.string().optional(),
   }),
-  paymentMethod: z.enum(["CASH_ON_DELIVERY", "MPESA"]),
+  paymentMethod: z.enum(["CASH_ON_DELIVERY", "PAYPAL"]),
   phone: z.string(),
 });
 
@@ -163,17 +163,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // If M-Pesa payment, create payment record
-      if (paymentMethod === "MPESA") {
-        await prisma.payment.create({
-          data: {
-            orderId: order.id,
-            amount: total,
-            status: "PENDING",
-            phoneNumber: phone,
-          },
-        });
-      }
+
 
       // Send order confirmation email (non-blocking)
       if (user?.email) {
