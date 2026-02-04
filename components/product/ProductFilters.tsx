@@ -28,8 +28,6 @@ interface ProductFiltersProps {
 
 interface FilterOptions {
   brands: string[];
-  colors: string[];
-  materials: string[];
 }
 
 export function ProductFilters({ categories }: ProductFiltersProps) {
@@ -41,12 +39,8 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
   const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
   const [featured, setFeatured] = useState(searchParams.get("featured") === "true");
   const [brand, setBrand] = useState(searchParams.get("brand") || "");
-  const [color, setColor] = useState(searchParams.get("color") || "");
-  const [material, setMaterial] = useState(searchParams.get("material") || "");
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     brands: [],
-    colors: [],
-    materials: [],
   });
   const isInitialMount = useRef(true);
   const isApplyingFilters = useRef(false);
@@ -91,9 +85,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
       minPrice !== urlMinPrice ||
       maxPrice !== urlMaxPrice ||
       featured !== urlFeatured ||
-      brand !== urlBrand ||
-      color !== urlColor ||
-      material !== urlMaterial
+      brand !== urlBrand
     ) {
       setSearch(urlSearch);
       setCategory(urlCategory);
@@ -101,10 +93,8 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
       setMaxPrice(urlMaxPrice);
       setFeatured(urlFeatured);
       setBrand(urlBrand);
-      setColor(urlColor);
-      setMaterial(urlMaterial);
     }
-  }, [searchParams, search, category, minPrice, maxPrice, featured, brand, color, material]);
+  }, [searchParams, search, category, minPrice, maxPrice, featured, brand]);
 
   useEffect(() => {
     // Fetch filter options
@@ -116,24 +106,22 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
 
   const buildParams = useCallback(() => {
     const params = new URLSearchParams();
-    
+
     if (search.trim()) params.set("search", search.trim());
     if (category && category !== "all") params.set("category", category);
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (featured) params.set("featured", "true");
     if (brand && brand !== "all") params.set("brand", brand);
-    if (color && color !== "all") params.set("color", color);
-    if (material && material !== "all") params.set("material", material);
-    
+
     return params;
-  }, [search, category, minPrice, maxPrice, featured, brand, color, material]);
+  }, [search, category, minPrice, maxPrice, featured, brand]);
 
   const applyFilters = useCallback(() => {
     const params = buildParams();
     const newUrl = `/products?${params.toString()}`;
     const currentUrl = `/products?${searchParams.toString()}`;
-    
+
     // Only navigate if URL actually changed
     if (newUrl !== currentUrl) {
       isApplyingFilters.current = true;
@@ -149,13 +137,11 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
     setMaxPrice("");
     setFeatured(false);
     setBrand("");
-    setColor("");
-    setMaterial("");
     isApplyingFilters.current = true;
     router.replace("/products");
   };
 
-  const hasActiveFilters = search || category || minPrice || maxPrice || featured || (brand && brand !== "all") || (color && color !== "all") || (material && material !== "all");
+  const hasActiveFilters = search || category || minPrice || maxPrice || featured || (brand && brand !== "all");
 
   useEffect(() => {
     // Skip on initial mount to avoid double navigation
@@ -169,7 +155,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
       applyFilters();
     }, 500);
     return () => clearTimeout(timeoutId);
-  }, [search, category, minPrice, maxPrice, featured, brand, color, material, applyFilters]);
+  }, [search, category, minPrice, maxPrice, featured, brand, applyFilters]);
 
   return (
     <Card className="mb-6">
@@ -235,45 +221,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
               </div>
             )}
 
-            {/* Color Filter */}
-            {filterOptions.colors.length > 0 && (
-              <div className="space-y-2">
-                <Label htmlFor="color">Color</Label>
-                <Select value={color || "all"} onValueChange={(value) => setColor(value === "all" ? "" : value)}>
-                  <SelectTrigger id="color">
-                    <SelectValue placeholder="All Colors" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Colors</SelectItem>
-                    {filterOptions.colors.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
 
-            {/* Material Filter */}
-            {filterOptions.materials.length > 0 && (
-              <div className="space-y-2">
-                <Label htmlFor="material">Material</Label>
-                <Select value={material || "all"} onValueChange={(value) => setMaterial(value === "all" ? "" : value)}>
-                  <SelectTrigger id="material">
-                    <SelectValue placeholder="All Materials" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Materials</SelectItem>
-                    {filterOptions.materials.map((m) => (
-                      <SelectItem key={m} value={m}>
-                        {m}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
 
             {/* Price Range */}
             <div className="space-y-2">

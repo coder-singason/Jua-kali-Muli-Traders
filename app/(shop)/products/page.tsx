@@ -15,8 +15,6 @@ async function getProducts(searchParams: {
   maxPrice?: string;
   featured?: string;
   brand?: string;
-  color?: string;
-  material?: string;
   page?: string;
 }) {
   const category = searchParams.category;
@@ -25,8 +23,6 @@ async function getProducts(searchParams: {
   const maxPrice = searchParams.maxPrice;
   const featured = searchParams.featured;
   const brand = searchParams.brand;
-  const color = searchParams.color;
-  const material = searchParams.material;
   const page = parseInt(searchParams.page || "1");
   const limit = 12;
   const skip = (page - 1) * limit;
@@ -65,13 +61,7 @@ async function getProducts(searchParams: {
     where.brand = { contains: brand, mode: "insensitive" };
   }
 
-  if (color && color !== "all") {
-    where.color = { contains: color, mode: "insensitive" };
-  }
 
-  if (material && material !== "all") {
-    where.material = { contains: material, mode: "insensitive" };
-  }
 
   const [products, total] = await Promise.all([
     prisma.product.findMany({
@@ -133,7 +123,7 @@ async function getCategories() {
         name: "asc",
       },
     });
-    
+
     // If no top-level categories, try to get all categories (including nested ones)
     if (categories.length === 0) {
       const allCategories = await prisma.category.findMany({
@@ -150,7 +140,7 @@ async function getCategories() {
       });
       return allCategories.filter(cat => !cat.parentId); // Return only top-level
     }
-    
+
     return categories;
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -168,8 +158,6 @@ export default async function ProductsPage({
     maxPrice?: string;
     featured?: string;
     brand?: string;
-    color?: string;
-    material?: string;
     page?: string;
   }>;
 }) {
@@ -188,8 +176,6 @@ export default async function ProductsPage({
   if (params.maxPrice) currentParams.set("maxPrice", params.maxPrice);
   if (params.featured) currentParams.set("featured", params.featured);
   if (params.brand) currentParams.set("brand", params.brand);
-  if (params.color) currentParams.set("color", params.color);
-  if (params.material) currentParams.set("material", params.material);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8 max-w-7xl">
@@ -257,11 +243,10 @@ export default async function ProductsPage({
                       )}
                       <Link
                         href={`/products?${currentParams.toString()}&page=${pageNum}`}
-                        className={`rounded px-4 py-2 transition-colors ${
-                          pageNum === page
+                        className={`rounded px-4 py-2 transition-colors ${pageNum === page
                             ? "bg-primary text-primary-foreground"
                             : "bg-secondary hover:bg-secondary/80"
-                        }`}
+                          }`}
                       >
                         {pageNum}
                       </Link>

@@ -23,7 +23,7 @@ interface ProductCardProps {
 
 export const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
-  
+
   // Get image URL - prioritize productImages, fallback to legacy images
   const imageUrl = useMemo(() => {
     const productWithImages = product as any;
@@ -36,8 +36,13 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
     }
     return null; // No placeholder - use fallback component
   }, [product]);
-  
-  const hasStock = useMemo(() => product.sizes.some((size) => size.stock > 0), [product.sizes]);
+
+  const hasStock = useMemo(() => {
+    if (product.sizes && product.sizes.length > 0) {
+      return product.sizes.some((size) => size.stock > 0);
+    }
+    return product.stock > 0;
+  }, [product.sizes, product.stock]);
   const availableSizes = useMemo(() => product.sizes.filter((size) => size.stock > 0), [product.sizes]);
   const [isAdding, setIsAdding] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
@@ -99,7 +104,7 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
   const handleSizeSelect = async (size: string) => {
     setIsAdding(true);
     setShowQuickAdd(false);
-    
+
     await new Promise((resolve) => setTimeout(resolve, 400));
 
     addToCart({
@@ -121,23 +126,23 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
   return (
     <>
       <Card className="group relative h-full flex flex-col overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1">
-            {/* Image Section */}
-            <div className="relative aspect-square w-full overflow-hidden bg-muted">
-              {imageUrl ? (
-                <Image
-                  src={imageUrl}
-                  alt={product.name}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-110"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  loading="lazy"
-                  placeholder="blur"
-                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//9k="
-                />
-              ) : (
-                <ProductImageFallback className="w-full h-full" size="lg" />
-              )}
-          
+        {/* Image Section */}
+        <div className="relative aspect-square w-full overflow-hidden bg-muted">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={product.name}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-110"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              loading="lazy"
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//9k="
+            />
+          ) : (
+            <ProductImageFallback className="w-full h-full" size="lg" />
+          )}
+
           {/* Top Badges - Always Visible */}
           <div className="absolute top-2 left-2 right-2 flex items-start justify-between gap-2 z-10">
             <div className="flex items-center gap-2 flex-wrap">
@@ -148,11 +153,11 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
                 </div>
               )}
             </div>
-            <WishlistButton 
-              productId={product.id} 
-              size="md" 
+            <WishlistButton
+              productId={product.id}
+              size="md"
               variant="icon"
-              className="bg-background/95 backdrop-blur-sm shadow-md hover:bg-background transition-all" 
+              className="bg-background/95 backdrop-blur-sm shadow-md hover:bg-background transition-all"
             />
           </div>
 
@@ -170,7 +175,7 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
         <CardContent className="flex flex-col flex-1 p-4 space-y-3">
           {/* Product Info */}
           <div className="flex-1 space-y-2">
-            <h3 
+            <h3
               className="font-semibold text-base leading-tight line-clamp-2 cursor-pointer hover:text-primary transition-colors font-sf-pro"
               onClick={handleCardClick}
             >
