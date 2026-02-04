@@ -51,7 +51,7 @@ export function getPayPalClient() {
  */
 export async function createPayPalOrder(
     amount: number,
-    currency: string = "USD",
+    currency: string = "KES", // Kenyan Shillings - PayPal supports KES natively!
     orderReference: string,
     returnUrl: string,
     cancelUrl: string
