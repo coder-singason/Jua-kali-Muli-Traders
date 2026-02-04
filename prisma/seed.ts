@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Starting Juakali database seed...");
+  console.log("🌱 Starting Juakali database seed with Local Assets...");
 
   // 1. Clean existing data
   console.log("🧹 Cleaning existing data...");
@@ -12,6 +12,9 @@ async function main() {
   await prisma.payment.deleteMany();
   await prisma.order.deleteMany();
   await prisma.address.deleteMany();
+  // Don't delete users to preserve admin access
+  // await prisma.user.deleteMany(); 
+
   await prisma.productSize.deleteMany();
   await prisma.productReview.deleteMany();
   await prisma.wishlistItem.deleteMany();
@@ -43,6 +46,9 @@ async function main() {
 
   console.log("🛠️ Creating products...");
 
+  // Helper to standard image path
+  const getImg = (name: string) => `/images/products/${name}`;
+
   // --- FURNITURE ---
   await prisma.product.create({
     data: {
@@ -51,8 +57,11 @@ async function main() {
       price: 35000,
       categoryId: furniture.id,
       brand: "Juakali Woodworks",
-      // Reliable Pallet/Sofa Image
-      images: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?width=800&q=80"],
+      images: [getImg("Rustic Pallet Sofa Set.jpg")],
+      // Add productImages relation
+      productImages: {
+        create: [{ url: getImg("Rustic Pallet Sofa Set.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 5,
       sku: "FURN-001",
       featured: true,
@@ -71,8 +80,11 @@ async function main() {
       price: 12500,
       categoryId: furniture.id,
       brand: "Urban Metal",
-      // Reliable Table Image
-      images: ["https://images.unsplash.com/photo-1532372320572-cda25653a26d?width=800&q=80"],
+      // Proxy: using pallet sofa image as it's the closest 'rustic furniture' asset
+      images: [getImg("Rustic Pallet Sofa Set.jpg")],
+      productImages: {
+        create: [{ url: getImg("Rustic Pallet Sofa Set.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 8,
       sku: "FURN-002",
       featured: false,
@@ -91,8 +103,11 @@ async function main() {
       price: 4500,
       categoryId: furniture.id,
       brand: "Elimu Works",
-      // Reliable Desk Image
-      images: ["https://images.unsplash.com/photo-1503602642458-232111445657?width=800&q=80"],
+      // Proxy: using pallet image set
+      images: [getImg("Rustic Pallet Sofa Set.jpg")],
+      productImages: {
+        create: [{ url: getImg("Rustic Pallet Sofa Set.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 20,
       sku: "FURN-003",
       condition: "New",
@@ -108,8 +123,11 @@ async function main() {
       price: 3800,
       categoryId: furniture.id,
       brand: "Coastal Weaves",
-      // Reliable Chair Image
-      images: ["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?width=800&q=80"],
+      // Proxy: using banana fiber basket for 'woven' texture
+      images: [getImg("Banana Fiber Laundry Basket.jpg")],
+      productImages: {
+        create: [{ url: getImg("Banana Fiber Laundry Basket.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 12,
       sku: "FURN-004",
       condition: "New",
@@ -126,8 +144,11 @@ async function main() {
       price: 45000,
       categoryId: metalwork.id,
       brand: "Nairobi Steelworks",
-      // Reliable Gate Image
-      images: ["https://images.unsplash.com/photo-1535953396732-d85c5c9e4215?width=800&q=80"],
+      // Proxy: using window grills for 'steel work'
+      images: [getImg("Steel Window Grills.jpg")],
+      productImages: {
+        create: [{ url: getImg("Steel Window Grills.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 2,
       sku: "METL-001",
       featured: true,
@@ -146,8 +167,11 @@ async function main() {
       price: 1500,
       categoryId: metalwork.id,
       brand: "EcoJiko",
-      // Fire/Stove Image (using a fire pit as proxy)
-      images: ["https://images.unsplash.com/photo-1512969339324-10664e3c9c68?width=800&q=80"],
+      // Proxy: using BBQ grill for cooking appliance
+      images: [getImg("Commercial BBQ Grill.jpg")],
+      productImages: {
+        create: [{ url: getImg("Commercial BBQ Grill.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 50,
       sku: "METL-002",
       featured: true,
@@ -164,8 +188,10 @@ async function main() {
       price: 3500,
       categoryId: metalwork.id,
       brand: "SecureHome",
-      // Metal pattern/texture
-      images: ["https://images.unsplash.com/photo-1509644851169-2acc08aa25b5?width=800&q=80"],
+      images: [getImg("Steel Window Grills.jpg")],
+      productImages: {
+        create: [{ url: getImg("Steel Window Grills.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 100,
       sku: "METL-003",
       condition: "New",
@@ -181,8 +207,10 @@ async function main() {
       price: 8500,
       categoryId: metalwork.id,
       brand: "Choma Master",
-      // BBQ Grill
-      images: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?width=800&q=80"],
+      images: [getImg("Commercial BBQ Grill.jpg")],
+      productImages: {
+        create: [{ url: getImg("Commercial BBQ Grill.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 10,
       sku: "METL-004",
       condition: "New",
@@ -198,8 +226,10 @@ async function main() {
       price: 2500,
       categoryId: metalwork.id,
       brand: "Thika Welders",
-      // Motorcycle parts/metal view
-      images: ["https://images.unsplash.com/photo-1558981403-c5f9899a28bc?width=800&q=80"],
+      images: [getImg("Boda Boda Carrier Frame.jpg")],
+      productImages: {
+        create: [{ url: getImg("Boda Boda Carrier Frame.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 15,
       sku: "METL-005",
       condition: "New",
@@ -215,8 +245,10 @@ async function main() {
       price: 800,
       categoryId: decor.id,
       brand: "Green Cycle",
-      // Garden planter
-      images: ["https://images.unsplash.com/photo-1545241047-6083a3684587?width=800&q=80"],
+      images: [getImg("Recycled Tire Planters.jpg")],
+      productImages: {
+        create: [{ url: getImg("Recycled Tire Planters.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 30,
       sku: "DECO-001",
       condition: "New",
@@ -231,8 +263,10 @@ async function main() {
       price: 2200,
       categoryId: decor.id,
       brand: "Safari Warmth",
-      // Checkered fabric close-up
-      images: ["https://images.unsplash.com/photo-1596704017254-9b121068fb31?width=800&q=80"],
+      images: [getImg("Maasai Shuka Fleece Blanket.jpg")],
+      productImages: {
+        create: [{ url: getImg("Maasai Shuka Fleece Blanket.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 40,
       sku: "DECO-002",
       featured: true,
@@ -248,8 +282,10 @@ async function main() {
       price: 3500,
       categoryId: decor.id,
       brand: "Kazuri Beads",
-      // Beads/Art
-      images: ["https://images.unsplash.com/photo-1615486511484-92e172cc416d?width=800&q=80"],
+      images: [getImg("Beaded Wire Sculpture - Lion.jpg")],
+      productImages: {
+        create: [{ url: getImg("Beaded Wire Sculpture - Lion.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 5,
       sku: "DECO-003",
       condition: "New",
@@ -264,8 +300,10 @@ async function main() {
       price: 1800,
       categoryId: decor.id,
       brand: "Natural Weaves",
-      // Woven Basket
-      images: ["https://images.unsplash.com/photo-1513519245088-0e12902e5a38?width=800&q=80"],
+      images: [getImg("Banana Fiber Laundry Basket.jpg")],
+      productImages: {
+        create: [{ url: getImg("Banana Fiber Laundry Basket.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 25,
       sku: "DECO-004",
       condition: "New",
@@ -281,8 +319,10 @@ async function main() {
       price: 5500,
       categoryId: utility.id,
       brand: "Jenga Tools",
-      // Wheelbarrow
-      images: ["https://images.unsplash.com/photo-1589939705384-5185137a7f0f?width=800&q=80"],
+      images: [getImg("Custom Heavy Wheelbarrow.jpg")],
+      productImages: {
+        create: [{ url: getImg("Custom Heavy Wheelbarrow.jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 12,
       sku: "UTIL-001",
       condition: "New",
@@ -298,8 +338,10 @@ async function main() {
       price: 18000,
       categoryId: utility.id,
       brand: "AgriStructures",
-      // Wooden hut / coop
-      images: ["https://images.unsplash.com/photo-1587593810167-a6492031e5fd?width=800&q=80"],
+      images: [getImg("Poultry House (Chicken Coop).jpg")],
+      productImages: {
+        create: [{ url: getImg("Poultry House (Chicken Coop).jpg"), viewType: "FRONT", sortOrder: 0 }]
+      },
       stock: 3,
       sku: "UTIL-002",
       featured: true,
@@ -308,7 +350,8 @@ async function main() {
     },
   });
 
-  console.log("✅ Seed completed successfully! Images updated.");
+  console.log("✅ Seed completed successfully with Local Assets!");
+  console.log("📊 Added 15 Juakali products linked to /public/images/products files");
 }
 
 main()
