@@ -21,7 +21,6 @@ async function main() {
   await prisma.productDetail.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
-  // Keep users/accounts/sessions to avoid locking you out
 
   // 2. Create Categories
   console.log("📁 Creating categories...");
@@ -52,7 +51,8 @@ async function main() {
       price: 35000,
       categoryId: furniture.id,
       brand: "Juakali Woodworks",
-      images: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80"],
+      // Pallet furniture / Outdoor sofa
+      images: ["https://images.unsplash.com/photo-1616486338812-3dadae4b4f9d?w=800&q=80"],
       stock: 5,
       sku: "FURN-001",
       featured: true,
@@ -71,7 +71,8 @@ async function main() {
       price: 12500,
       categoryId: furniture.id,
       brand: "Urban Metal",
-      images: ["https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=800&q=80"],
+      // Industrial style table
+      images: ["https://images.unsplash.com/photo-1542361345439-c8b2bad0343a?w=800&q=80"],
       stock: 8,
       sku: "FURN-002",
       featured: false,
@@ -90,6 +91,7 @@ async function main() {
       price: 4500,
       categoryId: furniture.id,
       brand: "Elimu Works",
+      // Wood and metal desk/bench
       images: ["https://images.unsplash.com/photo-1503602642458-232111445657?w=800&q=80"],
       stock: 20,
       sku: "FURN-003",
@@ -106,7 +108,8 @@ async function main() {
       price: 3800,
       categoryId: furniture.id,
       brand: "Coastal Weaves",
-      images: ["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80"],
+      // Woven chair
+      images: ["https://images.unsplash.com/photo-1596162955779-9c8c7c2af206?w=800&q=80"],
       stock: 12,
       sku: "FURN-004",
       condition: "New",
@@ -123,7 +126,8 @@ async function main() {
       price: 45000,
       categoryId: metalwork.id,
       brand: "Nairobi Steelworks",
-      images: ["https://images.unsplash.com/photo-1535953396732-d85c5c9e4215?w=800&q=80"],
+      // Metal gate
+      images: ["https://images.unsplash.com/photo-1613545325278-f24b0cae1224?w=800&q=80"],
       stock: 2,
       sku: "METL-001",
       featured: true,
@@ -142,7 +146,8 @@ async function main() {
       price: 1500,
       categoryId: metalwork.id,
       brand: "EcoJiko",
-      images: ["https://images.unsplash.com/photo-1542601906990-b4d3fb7d5b7a?w=800&q=80"],
+      // Charcoal stove / fire
+      images: ["https://images.unsplash.com/photo-1512969339324-10664e3c9c68?w=800&q=80"],
       stock: 50,
       sku: "METL-002",
       featured: true,
@@ -159,8 +164,9 @@ async function main() {
       price: 3500,
       categoryId: metalwork.id,
       brand: "SecureHome",
-      images: ["https://images.unsplash.com/photo-1509644851169-2acc08aa25b5?w=800&q=80"],
-      stock: 100, // Conceptually "materials available"
+      // Window bars/grill (abstract metal pattern)
+      images: ["https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80"],
+      stock: 100,
       sku: "METL-003",
       condition: "New",
       deliveryTime: "3-5 Days",
@@ -175,7 +181,8 @@ async function main() {
       price: 8500,
       categoryId: metalwork.id,
       brand: "Choma Master",
-      images: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80"], // Using sofa placeholder as generic fallback if BBQ specific absent
+      // BBQ Grill
+      images: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80"],
       stock: 10,
       sku: "METL-004",
       condition: "New",
@@ -191,6 +198,7 @@ async function main() {
       price: 2500,
       categoryId: metalwork.id,
       brand: "Thika Welders",
+      // Motorcycle parts/metal
       images: ["https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&q=80"],
       stock: 15,
       sku: "METL-005",
@@ -207,7 +215,8 @@ async function main() {
       price: 800,
       categoryId: decor.id,
       brand: "Green Cycle",
-      images: ["https://images.unsplash.com/photo-1545241047-6083a3684587?w=800&q=80"],
+      // Garden planter
+      images: ["https://images.unsplash.com/photo-1598282928399-566ca8d20ae4?w=800&q=80"],
       stock: 30,
       sku: "DECO-001",
       condition: "New",
@@ -222,6 +231,7 @@ async function main() {
       price: 2200,
       categoryId: decor.id,
       brand: "Safari Warmth",
+      // Plaid/Checkered fabric
       images: ["https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=800&q=80"],
       stock: 40,
       sku: "DECO-002",
@@ -238,7 +248,8 @@ async function main() {
       price: 3500,
       categoryId: decor.id,
       brand: "Kazuri Beads",
-      images: ["https://images.unsplash.com/photo-1493962853295-0fd70327578a?w=800&q=80"], // Generic art/craft
+      // Wire art / metal sculpture
+      images: ["https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=800&q=80"],
       stock: 5,
       sku: "DECO-003",
       condition: "New",
@@ -253,7 +264,8 @@ async function main() {
       price: 1800,
       categoryId: decor.id,
       brand: "Natural Weaves",
-      images: ["https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&q=80"],
+      // Woven basket
+      images: ["https://images.unsplash.com/photo-1621274403997-37aace184f49?w=800&q=80"],
       stock: 25,
       sku: "DECO-004",
       condition: "New",
@@ -269,7 +281,8 @@ async function main() {
       price: 5500,
       categoryId: utility.id,
       brand: "Jenga Tools",
-      images: ["https://images.unsplash.com/photo-1581235720704-06d3acfcb36f?w=800&q=80"],
+      // Wheelbarrow
+      images: ["https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&q=80"],
       stock: 12,
       sku: "UTIL-001",
       condition: "New",
@@ -285,7 +298,8 @@ async function main() {
       price: 18000,
       categoryId: utility.id,
       brand: "AgriStructures",
-      images: ["https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=800&q=80"], // Wood texture
+      // Chicken coop / wooden structure
+      images: ["https://images.unsplash.com/photo-1587593810167-a6492031e5fd?w=800&q=80"],
       stock: 3,
       sku: "UTIL-002",
       featured: true,
