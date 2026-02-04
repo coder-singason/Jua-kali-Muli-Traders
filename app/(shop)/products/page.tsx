@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Package, Search } from "lucide-react";
 import Link from "next/link";
-// this is a dummy comment
+
 
 async function getProducts(searchParams: {
   category?: string;
