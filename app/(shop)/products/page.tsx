@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Package, Search } from "lucide-react";
 import Link from "next/link";
+// this is a dummy comment
 
 async function getProducts(searchParams: {
   category?: string;
@@ -244,8 +245,8 @@ export default async function ProductsPage({
                       <Link
                         href={`/products?${currentParams.toString()}&page=${pageNum}`}
                         className={`rounded px-4 py-2 transition-colors ${pageNum === page
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-secondary hover:bg-secondary/80"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary hover:bg-secondary/80"
                           }`}
                       >
                         {pageNum}
