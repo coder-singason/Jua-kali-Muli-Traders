@@ -1,4 +1,12 @@
-import { client, orders } from "@paypal/paypal-server-sdk";
+import {
+    Client,
+    Environment,
+    LogLevel,
+    OrdersController,
+    CheckoutPaymentIntent,
+    OrderApplicationContextLandingPage,
+    OrderApplicationContextUserAction,
+} from "@paypal/paypal-server-sdk";
 
 interface PayPalConfig {
     clientId: string;
@@ -20,15 +28,16 @@ function initializePayPalClient() {
     }
 
     const environment =
-        mode === "live"
-            ? client.Environment.Production
-            : client.Environment.Sandbox;
+        mode === "live" ? Environment.Production : Environment.Sandbox;
 
-    const paypalClient = client.Client({
+    const paypalClient = new Client({
+        clientCredentialsAuthCredentials: {
+            oAuthClientId: clientId,
+            oAuthClientSecret: clientSecret,
+        },
         environment,
-        auth: {
-            clientId,
-            clientSecret,
+        logging: {
+            logLevel: LogLevel.Info,
         },
     });
 
@@ -63,12 +72,12 @@ export async function createPayPalOrder(
 
     const request = {
         body: {
-            intent: orders.OrderIntentEnum.Capture,
+            intent: CheckoutPaymentIntent.Capture,
             purchaseUnits: [
                 {
                     referenceId: orderReference,
                     amount: {
-                        currencyCode: currency as orders.CurrencyCodeEnum,
+                        currencyCode: currency,
                         value: amount.toFixed(2),
                     },
                 },
@@ -76,15 +85,15 @@ export async function createPayPalOrder(
             applicationContext: {
                 returnUrl,
                 cancelUrl,
-                brandName: "Electronics & Juakali Shop",
-                landingPage: orders.LandingPageEnum.Billing,
-                userAction: orders.UserActionEnum.PayNow,
+                brandName: "JUA-KALI MULI TRADERS",
+                landingPage: OrderApplicationContextLandingPage.Billing,
+                userAction: OrderApplicationContextUserAction.PayNow,
             },
         },
     };
 
-    const ordersApi = new orders.OrdersController(client);
-    const response = await ordersApi.ordersCreate(request);
+    const ordersApi = new OrdersController(client);
+    const response = await ordersApi.createOrder(request);
 
     return response.result;
 }
@@ -103,8 +112,8 @@ export async function capturePayPalOrder(paypalOrderId: string) {
         prefer: "return=representation",
     };
 
-    const ordersApi = new orders.OrdersController(client);
-    const response = await ordersApi.ordersCapture(request);
+    const ordersApi = new OrdersController(client);
+    const response = await ordersApi.captureOrder(request);
 
     return response.result;
 }
@@ -122,8 +131,8 @@ export async function getPayPalOrderDetails(paypalOrderId: string) {
         id: paypalOrderId,
     };
 
-    const ordersApi = new orders.OrdersController(client);
-    const response = await ordersApi.ordersGet(request);
+    const ordersApi = new OrdersController(client);
+    const response = await ordersApi.getOrder(request);
 
     return response.result;
 }
