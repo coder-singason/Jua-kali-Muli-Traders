@@ -72,9 +72,30 @@ export default function LoginPage() {
         setError("Invalid email or password");
         setIsLoading(false);
       } else {
-        // Redirect to callback URL or home
+        // Fetch session to check role
+        const sessionUpdate = await fetch("/api/auth/session?t=" + Date.now(), {
+          cache: "no-store",
+          headers: {
+            "Pragma": "no-cache"
+          }
+        });
+        const sessionData = await sessionUpdate.json();
+        console.log("Login Page - Session Data:", JSON.stringify(sessionData));
+        console.log("Login Page - Role:", sessionData?.user?.role);
+
+        // Redirect logic
         const params = new URLSearchParams(window.location.search);
-        const callbackUrl = params.get("callbackUrl") || "/";
+        let callbackUrl = params.get("callbackUrl") || "/";
+
+        // If user is admin, force redirect to dashboard unless a specific deep link exists
+        // (Optional: prioritize dashboard over callback if desired, or strictly for root logins)
+        if (sessionData?.user?.role === "ADMIN") {
+          // If the callback is explicitly the home page or empty, go to dashboard
+          if (callbackUrl === "/" || callbackUrl === "") {
+            callbackUrl = "/admin/dashboard";
+          }
+        }
+
         // Keep loading state visible during redirect
         router.push(callbackUrl);
         router.refresh();

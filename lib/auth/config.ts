@@ -17,6 +17,7 @@ export const authConfig: NextAuthConfig = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        console.log("JWT Callback - User:", JSON.stringify(user));
         token.id = user.id;
         token.role = user.role;
         token.email = user.email;
@@ -26,10 +27,12 @@ export const authConfig: NextAuthConfig = {
     },
     async session({ session, token }) {
       if (token && session.user) {
+        console.log("Session Callback - Token:", JSON.stringify(token));
         session.user.id = token.id as string;
         session.user.role = token.role as "USER" | "ADMIN";
         session.user.email = token.email as string;
         session.user.name = token.name as string;
+        console.log("Session Callback - Final Session User:", JSON.stringify(session.user));
       }
       return session;
     },
