@@ -454,8 +454,8 @@ export function RevenueChart({
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Trend</p>
                 <p className={`text-lg font-bold flex items-center gap-1 ${metrics.trend >= 0 || metrics.trend === Infinity
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-red-600 dark:text-red-400"
                   }`}>
                   {metrics.trend === Infinity ? (
                     <>
@@ -509,7 +509,7 @@ export function RevenueChart({
             </CardHeader>
             <CardContent>
               <div className="w-full h-[400px] min-h-[300px]">
-                <ResponsiveContainer width="100%" height="100%" minHeight={300} aspect={2}>
+                <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
                     data={formattedData}
                     margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
