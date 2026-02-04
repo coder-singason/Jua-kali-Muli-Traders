@@ -155,6 +155,7 @@ export async function PATCH(
       sku: productData.sku?.trim() || null, // Normalize empty string to null
       featured: productData.featured || false,
       stock: productData.stock || 0,
+      images: productData.images || [], // Update legacy images array
     };
 
     // Add optional fields only if they're provided

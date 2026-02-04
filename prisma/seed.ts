@@ -51,8 +51,8 @@ async function main() {
       price: 35000,
       categoryId: furniture.id,
       brand: "Juakali Woodworks",
-      // Pallet furniture / Outdoor sofa
-      images: ["https://images.unsplash.com/photo-1616486338812-3dadae4b4f9d?w=800&q=80"],
+      // Reliable Pallet/Sofa Image
+      images: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?width=800&q=80"],
       stock: 5,
       sku: "FURN-001",
       featured: true,
@@ -71,8 +71,8 @@ async function main() {
       price: 12500,
       categoryId: furniture.id,
       brand: "Urban Metal",
-      // Industrial style table
-      images: ["https://images.unsplash.com/photo-1542361345439-c8b2bad0343a?w=800&q=80"],
+      // Reliable Table Image
+      images: ["https://images.unsplash.com/photo-1532372320572-cda25653a26d?width=800&q=80"],
       stock: 8,
       sku: "FURN-002",
       featured: false,
@@ -91,8 +91,8 @@ async function main() {
       price: 4500,
       categoryId: furniture.id,
       brand: "Elimu Works",
-      // Wood and metal desk/bench
-      images: ["https://images.unsplash.com/photo-1503602642458-232111445657?w=800&q=80"],
+      // Reliable Desk Image
+      images: ["https://images.unsplash.com/photo-1503602642458-232111445657?width=800&q=80"],
       stock: 20,
       sku: "FURN-003",
       condition: "New",
@@ -108,8 +108,8 @@ async function main() {
       price: 3800,
       categoryId: furniture.id,
       brand: "Coastal Weaves",
-      // Woven chair
-      images: ["https://images.unsplash.com/photo-1596162955779-9c8c7c2af206?w=800&q=80"],
+      // Reliable Chair Image
+      images: ["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?width=800&q=80"],
       stock: 12,
       sku: "FURN-004",
       condition: "New",
@@ -126,8 +126,8 @@ async function main() {
       price: 45000,
       categoryId: metalwork.id,
       brand: "Nairobi Steelworks",
-      // Metal gate
-      images: ["https://images.unsplash.com/photo-1613545325278-f24b0cae1224?w=800&q=80"],
+      // Reliable Gate Image
+      images: ["https://images.unsplash.com/photo-1535953396732-d85c5c9e4215?width=800&q=80"],
       stock: 2,
       sku: "METL-001",
       featured: true,
@@ -146,8 +146,8 @@ async function main() {
       price: 1500,
       categoryId: metalwork.id,
       brand: "EcoJiko",
-      // Charcoal stove / fire
-      images: ["https://images.unsplash.com/photo-1512969339324-10664e3c9c68?w=800&q=80"],
+      // Fire/Stove Image (using a fire pit as proxy)
+      images: ["https://images.unsplash.com/photo-1512969339324-10664e3c9c68?width=800&q=80"],
       stock: 50,
       sku: "METL-002",
       featured: true,
@@ -164,8 +164,8 @@ async function main() {
       price: 3500,
       categoryId: metalwork.id,
       brand: "SecureHome",
-      // Window bars/grill (abstract metal pattern)
-      images: ["https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80"],
+      // Metal pattern/texture
+      images: ["https://images.unsplash.com/photo-1509644851169-2acc08aa25b5?width=800&q=80"],
       stock: 100,
       sku: "METL-003",
       condition: "New",
@@ -182,7 +182,7 @@ async function main() {
       categoryId: metalwork.id,
       brand: "Choma Master",
       // BBQ Grill
-      images: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80"],
+      images: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?width=800&q=80"],
       stock: 10,
       sku: "METL-004",
       condition: "New",
@@ -198,8 +198,8 @@ async function main() {
       price: 2500,
       categoryId: metalwork.id,
       brand: "Thika Welders",
-      // Motorcycle parts/metal
-      images: ["https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&q=80"],
+      // Motorcycle parts/metal view
+      images: ["https://images.unsplash.com/photo-1558981403-c5f9899a28bc?width=800&q=80"],
       stock: 15,
       sku: "METL-005",
       condition: "New",
@@ -216,7 +216,7 @@ async function main() {
       categoryId: decor.id,
       brand: "Green Cycle",
       // Garden planter
-      images: ["https://images.unsplash.com/photo-1598282928399-566ca8d20ae4?w=800&q=80"],
+      images: ["https://images.unsplash.com/photo-1545241047-6083a3684587?width=800&q=80"],
       stock: 30,
       sku: "DECO-001",
       condition: "New",
@@ -231,8 +231,8 @@ async function main() {
       price: 2200,
       categoryId: decor.id,
       brand: "Safari Warmth",
-      // Plaid/Checkered fabric
-      images: ["https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=800&q=80"],
+      // Checkered fabric close-up
+      images: ["https://images.unsplash.com/photo-1596704017254-9b121068fb31?width=800&q=80"],
       stock: 40,
       sku: "DECO-002",
       featured: true,
@@ -248,8 +248,8 @@ async function main() {
       price: 3500,
       categoryId: decor.id,
       brand: "Kazuri Beads",
-      // Wire art / metal sculpture
-      images: ["https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=800&q=80"],
+      // Beads/Art
+      images: ["https://images.unsplash.com/photo-1615486511484-92e172cc416d?width=800&q=80"],
       stock: 5,
       sku: "DECO-003",
       condition: "New",
@@ -264,8 +264,8 @@ async function main() {
       price: 1800,
       categoryId: decor.id,
       brand: "Natural Weaves",
-      // Woven basket
-      images: ["https://images.unsplash.com/photo-1621274403997-37aace184f49?w=800&q=80"],
+      // Woven Basket
+      images: ["https://images.unsplash.com/photo-1513519245088-0e12902e5a38?width=800&q=80"],
       stock: 25,
       sku: "DECO-004",
       condition: "New",
@@ -282,7 +282,7 @@ async function main() {
       categoryId: utility.id,
       brand: "Jenga Tools",
       // Wheelbarrow
-      images: ["https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&q=80"],
+      images: ["https://images.unsplash.com/photo-1589939705384-5185137a7f0f?width=800&q=80"],
       stock: 12,
       sku: "UTIL-001",
       condition: "New",
@@ -298,8 +298,8 @@ async function main() {
       price: 18000,
       categoryId: utility.id,
       brand: "AgriStructures",
-      // Chicken coop / wooden structure
-      images: ["https://images.unsplash.com/photo-1587593810167-a6492031e5fd?w=800&q=80"],
+      // Wooden hut / coop
+      images: ["https://images.unsplash.com/photo-1587593810167-a6492031e5fd?width=800&q=80"],
       stock: 3,
       sku: "UTIL-002",
       featured: true,
@@ -308,8 +308,7 @@ async function main() {
     },
   });
 
-  console.log("✅ Seed completed successfully!");
-  console.log("📊 Added 15 Juakali products across 4 categories.");
+  console.log("✅ Seed completed successfully! Images updated.");
 }
 
 main()

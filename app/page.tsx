@@ -12,6 +12,12 @@ async function getFeaturedProducts() {
     include: {
       category: true,
       sizes: true,
+      productImages: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+        take: 1,
+      },
     },
     take: 8,
     orderBy: {
