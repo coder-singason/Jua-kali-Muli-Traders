@@ -99,50 +99,50 @@
 
 @layer base {
   :root {
-    /* Light Theme - White, Black, Red Palette */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-    --primary: 0 0% 9%;
+    /* Light Theme - Warm Industrial & Earthy Tones for Juakali/Electronics */
+    --background: 35 15% 97%;          /* Warm off-white background */
+    --foreground: 25 25% 15%;          /* Dark brown foreground */
+    --card: 35 20% 98%;                /* Slightly warm white cards */
+    --card-foreground: 25 25% 15%;     /* Dark brown text */
+    --popover: 35 20% 98%;
+    --popover-foreground: 25 25% 15%;
+    --primary: 25 60% 40%;             /* Rich brown - juakali/wood */
     --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 15%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 0 72% 51%;
+    --secondary: 35 30% 88%;           /* Light tan/beige */
+    --secondary-foreground: 25 40% 20%;
+    --muted: 35 20% 92%;               /* Soft beige */
+    --muted-foreground: 25 15% 45%;
+    --accent: 30 80% 55%;              /* Warm copper/amber accent */
     --accent-foreground: 0 0% 98%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 90%;
-    --input: 0 0% 85%;
-    --ring: 0 72% 51%;
+    --border: 35 20% 85%;              /* Light tan border */
+    --input: 35 20% 88%;
+    --ring: 30 70% 50%;                /* Copper ring */
     --radius: 0.75rem;
   }
 
   .dark {
-    /* Dark Theme - Black, White, Red Palette */
-    --background: 0 0% 9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 12%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 18%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 18%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 0 72% 51%;
-    --accent-foreground: 0 0% 98%;
+    /* Dark Theme - Industrial Metal & Warm Earth */
+    --background: 25 15% 10%;          /* Dark charcoal with warmth */
+    --foreground: 35 10% 95%;          /* Warm white */
+    --card: 25 18% 13%;                /* Slightly lighter charcoal */
+    --card-foreground: 35 10% 95%;
+    --popover: 25 18% 13%;
+    --popover-foreground: 35 10% 95%;
+    --primary: 30 70% 60%;             /* Copper/amber primary */
+    --primary-foreground: 25 15% 10%;
+    --secondary: 25 15% 22%;           /* Dark gray-brown */
+    --secondary-foreground: 35 10% 95%;
+    --muted: 25 12% 20%;               /* Muted dark brown */
+    --muted-foreground: 35 8% 60%;
+    --accent: 35 75% 55%;              /* Warm orange/amber */
+    --accent-foreground: 25 15% 10%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 25%;
-    --input: 0 0% 25%;
-    --ring: 0 72% 51%;
+    --border: 25 15% 25%;              /* Dark brown border */
+    --input: 25 15% 25%;
+    --ring: 30 70% 55%;                /* Copper ring */
   }
 }
 

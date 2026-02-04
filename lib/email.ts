@@ -72,11 +72,11 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Order Confirmation - KicksZone</title>
+          <title>Order Confirmation - JUA-KALI MULI TRADERS</title>
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #1e1e1e 0%, #000 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-            <h1 style="margin: 0; font-size: 28px;">KicksZone</h1>
+            <h1 style="margin: 0; font-size: 28px;">JUA-KALI MULI TRADERS</h1>
             <p style="margin: 10px 0 0 0; opacity: 0.9;">Order Confirmation</p>
           </div>
           
@@ -93,10 +93,10 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
               <h2 style="margin-top: 0; color: #1e1e1e; font-size: 20px;">Order #${data.orderNumber}</h2>
               <p style="margin: 5px 0; color: #6b7280;">
                 Order Date: ${new Date(data.orderDate).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })}
               </p>
             </div>
             
@@ -154,7 +154,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
             
             <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
               <p style="color: #6b7280; font-size: 14px; margin: 0;">
-                Thank you for shopping with KicksZone!
+                Thank you for shopping with JUA-KALI MULI TRADERS!
               </p>
             </div>
           </div>
@@ -167,7 +167,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
     }
 
     const result = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "KicksZone <noreply@kickszone.com>",
+      from: process.env.RESEND_FROM_EMAIL || "JUA-KALI MULI TRADERS <noreply@juakalimulitraders.com>",
       to: data.customerEmail,
       subject: `Order Confirmation - #${data.orderNumber}`,
       html,
@@ -232,7 +232,7 @@ export async function sendOrderStatusUpdateEmail(
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #1e1e1e 0%, #000 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-            <h1 style="margin: 0; font-size: 28px;">KicksZone</h1>
+            <h1 style="margin: 0; font-size: 28px;">JUA-KALI MULI TRADERS</h1>
             <p style="margin: 10px 0 0 0; opacity: 0.9;">Order Update</p>
           </div>
           
@@ -261,7 +261,7 @@ export async function sendOrderStatusUpdateEmail(
             
             <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
               <p style="color: #6b7280; font-size: 14px; margin: 0;">
-                Thank you for shopping with KicksZone!
+                Thank you for shopping with JUA-KALI MULI TRADERS!
               </p>
             </div>
           </div>
@@ -274,7 +274,7 @@ export async function sendOrderStatusUpdateEmail(
     }
 
     const result = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "KicksZone <noreply@kickszone.com>",
+      from: process.env.RESEND_FROM_EMAIL || "JUA-KALI MULI TRADERS <noreply@juakalimulitraders.com>",
       to: customerEmail,
       subject: statusInfo.subject,
       html,

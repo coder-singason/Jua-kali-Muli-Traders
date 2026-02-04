@@ -27,13 +27,13 @@ export function Header() {
     <header className="hidden lg:block sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-6">
         {/* Logo */}
-        <Link 
-          href="/" 
-          className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+        <Link
+          href="/"
+          className="flex items-center hover:opacity-80 transition-opacity"
           prefetch={true}
         >
-          <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            KicksZone
+          <span className="text-lg font-bold bg-gradient-to-r from-primary via-accent to-primary/70 bg-clip-text text-transparent whitespace-nowrap">
+            JUA-KALI MULI TRADERS
           </span>
         </Link>
 

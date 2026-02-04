@@ -51,17 +51,17 @@ export function CustomerSidebar() {
     },
     ...(session && session.user.role !== "ADMIN"
       ? [
-          {
-            href: "/wishlist",
-            icon: Heart,
-            label: "Wishlist",
-          },
-          {
-            href: "/profile",
-            icon: User,
-            label: "Profile",
-          },
-        ]
+        {
+          href: "/wishlist",
+          icon: Heart,
+          label: "Wishlist",
+        },
+        {
+          href: "/profile",
+          icon: User,
+          label: "Profile",
+        },
+      ]
       : []),
   ];
 
@@ -85,7 +85,7 @@ export function CustomerSidebar() {
             <ShoppingBag className="h-5 w-5" />
           </div>
           <div className="flex flex-col">
-            <h2 className="font-bold text-lg leading-tight text-foreground">KicksZone</h2>
+            <h2 className="font-bold text-lg leading-tight text-foreground">JUA-KALI MULI TRADERS</h2>
             <p className="text-xs text-muted-foreground font-medium">
               {session?.user?.name || "Shop"}
             </p>

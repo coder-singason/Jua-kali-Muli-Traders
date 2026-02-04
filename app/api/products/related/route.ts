@@ -31,10 +31,10 @@ export async function GET(request: NextRequest) {
         },
       },
       take: limit,
-      orderBy: {
-        featured: "desc",
-        createdAt: "desc",
-      },
+      orderBy: [
+        { featured: "desc" },
+        { createdAt: "desc" },
+      ],
     });
 
     const response = NextResponse.json(relatedProducts);

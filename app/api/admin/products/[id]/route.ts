@@ -123,7 +123,7 @@ export async function PATCH(
     if (productData.sku !== undefined) {
       // Normalize empty string to null
       const newSku = productData.sku?.trim() || null;
-      
+
       if (newSku) {
         // Check if SKU is already taken by another product
         const existingProduct = await prisma.product.findFirst({
@@ -183,14 +183,16 @@ export async function PATCH(
         where: { productId: id },
       });
 
-      // Create new sizes
-      await prisma.productSize.createMany({
-        data: sizes.map((size) => ({
-          productId: id,
-          size: size.size,
-          stock: size.stock,
-        })),
-      });
+      // Create new sizes (only if array is not empty)
+      if (sizes.length > 0) {
+        await prisma.productSize.createMany({
+          data: sizes.map((size) => ({
+            productId: id,
+            size: size.size,
+            stock: size.stock,
+          })),
+        });
+      }
     }
 
     // Update product images if provided
@@ -200,16 +202,18 @@ export async function PATCH(
         where: { productId: id },
       });
 
-      // Create new images
-      await prisma.productImage.createMany({
-        data: productImages.map((img) => ({
-          productId: id,
-          url: img.url,
-          viewType: img.viewType,
-          alt: img.alt || "",
-          sortOrder: img.sortOrder,
-        })),
-      });
+      // Create new images (only if array is not empty)
+      if (productImages.length > 0) {
+        await prisma.productImage.createMany({
+          data: productImages.map((img) => ({
+            productId: id,
+            url: img.url,
+            viewType: img.viewType,
+            alt: img.alt || "",
+            sortOrder: img.sortOrder,
+          })),
+        });
+      }
     }
 
     // Update product details if provided
@@ -219,15 +223,17 @@ export async function PATCH(
         where: { productId: id },
       });
 
-      // Create new details
-      await prisma.productDetail.createMany({
-        data: productDetails.map((detail) => ({
-          productId: id,
-          label: detail.label,
-          value: detail.value,
-          sortOrder: detail.sortOrder,
-        })),
-      });
+      // Create new details (only if array is not empty)
+      if (productDetails.length > 0) {
+        await prisma.productDetail.createMany({
+          data: productDetails.map((detail) => ({
+            productId: id,
+            label: detail.label,
+            value: detail.value,
+            sortOrder: detail.sortOrder,
+          })),
+        });
+      }
     }
 
     const updatedProduct = await prisma.product.findUnique({
@@ -251,7 +257,7 @@ export async function PATCH(
     return NextResponse.json({ product: updatedProduct });
   } catch (error: any) {
     console.error("Error updating product:", error);
-    
+
     // Handle Prisma unique constraint errors
     if (error.code === "P2002") {
       const target = error.meta?.target;
@@ -276,7 +282,7 @@ export async function PATCH(
     // Handle Prisma validation errors
     if (error.code === "P2009" || error.message?.includes("Unknown argument")) {
       return NextResponse.json(
-        { 
+        {
           error: "Invalid product data",
           message: "Some fields are not recognized. Please restart the development server and try again.",
           details: error.message,
@@ -286,7 +292,7 @@ export async function PATCH(
     }
 
     return NextResponse.json(
-      { 
+      {
         error: "Failed to update product",
         message: error.message || "An unexpected error occurred",
         details: process.env.NODE_ENV === "development" ? error.stack : undefined,
@@ -347,7 +353,7 @@ export async function DELETE(
     return NextResponse.json({ message: "Product deleted successfully" });
   } catch (error: any) {
     console.error("Error deleting product:", error);
-    
+
     // Handle Prisma relation constraint errors
     if (error.code === "P2014") {
       return NextResponse.json(

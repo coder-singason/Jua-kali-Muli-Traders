@@ -1,6 +1,6 @@
-# KicksZone 🚀
+# Electronics & Juakali Appliances Shop 🚀
 
-A modern, full-stack e-commerce platform for selling premium shoes, built with Next.js 15, MongoDB, and modern web technologies. Designed for the Kenyan market with M-Pesa payment integration and cash on delivery options.
+A modern, full-stack e-commerce platform for selling electronics and juakali (artisan) appliances, built with Next.js 15, MongoDB, and modern web technologies. Features PayPal payment integration and cash on delivery options.
 
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)
@@ -10,29 +10,26 @@ A modern, full-stack e-commerce platform for selling premium shoes, built with N
 ## ✨ Features
 
 ### Customer Features
-- 🛍️ **Product Catalog**: Advanced search, filtering by category/price/brand/color/material, smart pagination
-- 🖼️ **Multiple Product Views**: Front, side, top, back, and general image views
-- 🛒 **Shopping Cart**: Persistent cart with Zustand, quick add to cart, dynamic shipping calculation
-- 💳 **Checkout**: Saved addresses, pre-filled user data, payment options (M-Pesa & Cash on Delivery)
+- 🛍️ **Product Catalog**: Browse electronics, appliances, and juakali tools with advanced filtering by category/price/brand
+- 🖼️ **Technical Specifications**: Detailed product specs including voltage, wattage, dimensions, and warranty
+- 🛒 **Shopping Cart**: Persistent cart with Zustand, dynamic shipping calculation
+- 💳 **Checkout**: Multiple payment options (PayPal & Cash on Delivery), saved addresses
 - 📦 **Order Tracking**: Interactive visual timeline for order status, order cancellation
 - 👤 **User Accounts**: Profile management, order history, address book
-- ❤️ **Wishlist**: Add products to wishlist with smart feedback and contextual actions
+- ❤️ **Wishlist**: Save products for later
 - ⭐ **Product Reviews**: Write and view product reviews with ratings
-- 🔍 **Recently Viewed**: Track recently viewed products
-- 🌓 **Dark Mode**: Full dark/light theme support with no flicker
-- 📱 **Responsive Design**: Mobile-first with collapsible sidebars and bottom navigation
+- 🌓 **Dark Mode**: Full dark/light theme support
+- 📱 **Responsive Design**: Mobile-first design with optimized navigation
 
 ### Admin Features
-- 📊 **Enhanced Dashboard**: Revenue analytics, interactive charts, order status overview with 7-day trends
-- 📈 **Revenue Visualization**: Daily revenue charts with smart color coding, order status pie charts
-- 📦 **Product Management**: Full CRUD with multi-image uploads, dynamic details, and customizable product features
-  - **Product Features**: Admin can set Delivery Time, Warranty, Quality, and Shipping Fee per product
-- 📋 **Order Management**: Filter, search, status updates, stock restoration on cancellation
-- 🏷️ **Category Management**: Hierarchical categories with CRUD operations
+- 📊 **Enhanced Dashboard**: Revenue analytics, interactive charts, order status overview
+- 📈 **Revenue Visualization**: Daily revenue charts, order status pie charts
+- 📦 **Product Management**: Full CRUD with multi-image uploads, technical specifications editor
+- 📋 **Order Management**: Filter, search, status updates, stock management
+- 🏷️ **Category Management**: Hierarchical categories for electronics/appliances/tools
 - 💬 **Review Management**: View and manage all product reviews
 - ⚠️ **Stock Alerts**: Low stock and out-of-stock warnings
-- 👥 **Customer Insights**: Customer count and statistics
-- 🚚 **Smart Shipping**: Per-product shipping fees with location-based calculation ready for future maps integration
+- 🚚 **Smart Shipping**: Per-product shipping fees
 
 ## 🛠️ Tech Stack
 
@@ -60,7 +57,7 @@ A modern, full-stack e-commerce platform for selling premium shoes, built with N
 - Node.js 18+ and npm/yarn
 - MongoDB Atlas account (or local MongoDB)
 - Cloudinary account (for image uploads)
-- (Optional) M-Pesa API credentials for payment integration
+- (Optional) PayPal sandbox account for payment integration
 
 ### Installation
 
@@ -77,11 +74,11 @@ A modern, full-stack e-commerce platform for selling premium shoes, built with N
 
 3. **Set up environment variables**
 
-   Create a `.env.local` file in the root directory:
+   Create a `.env` file in the root directory:
 
    ```env
    # Database
-   DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/kickszone?retryWrites=true&w=majority"
+   DATABASE_URL="mongodb+srv://username:password@cluster.mongodb.net/electronics_shop?retryWrites=true&w=majority"
 
    # NextAuth
    NEXTAUTH_SECRET="your-secret-key-here"
@@ -92,15 +89,14 @@ A modern, full-stack e-commerce platform for selling premium shoes, built with N
    CLOUDINARY_API_KEY="your-api-key"
    CLOUDINARY_API_SECRET="your-api-secret"
 
-   # M-Pesa (Optional - for payment integration)
-   MPESA_CONSUMER_KEY="your-consumer-key"
-   MPESA_CONSUMER_SECRET="your-consumer-secret"
-   MPESA_BUSINESS_SHORTCODE="your-shortcode"
-   MPESA_PASSKEY="your-passkey"
-   MPESA_ENVIRONMENT="sandbox" # or "production"
+   # PayPal (Sandbox)
+   PAYPAL_CLIENT_ID="your-paypal-client-id"
+   PAYPAL_CLIENT_SECRET="your-paypal-client-secret"
+   PAYPAL_WEBHOOK_ID="your-webhook-id"
+   PAYPAL_MODE="sandbox"
 
-   # Resend (Optional - for email notifications)
-   RESEND_API_KEY="your-resend-api-key"
+   # App URL
+   NEXT_PUBLIC_APP_URL="http://localhost:3000"
    ```
 
 4. **Set up the database**
@@ -112,7 +108,7 @@ A modern, full-stack e-commerce platform for selling premium shoes, built with N
    # Push schema to database
    npm run db:push
 
-   # (Optional) Seed the database with sample data
+   # Seed the database with sample electronics products
    npm run db:seed
    ```
 
@@ -141,7 +137,7 @@ A modern, full-stack e-commerce platform for selling premium shoes, built with N
 ## 📁 Project Structure
 
 ```
-kickszone/
+electronics-shop/
 ├── app/                    # Next.js App Router
 │   ├── (auth)/            # Authentication routes
 │   │   ├── login/
@@ -150,7 +146,7 @@ kickszone/
 │   │   ├── products/      # Product listing & details
 │   │   ├── cart/          # Shopping cart
 │   │   ├── checkout/      # Checkout process
-│   │   ├── orders/         # Order tracking
+│   │   ├── orders/        # Order tracking
 │   │   └── profile/       # User profile
 │   ├── admin/             # Admin routes (protected)
 │   │   ├── dashboard/     # Admin dashboard
@@ -162,22 +158,23 @@ kickszone/
 │       ├── products/      # Product APIs
 │       ├── orders/        # Order APIs
 │       ├── admin/         # Admin APIs
-│       └── payments/      # Payment APIs (M-Pesa)
+│       └── payments/      # Payment APIs (PayPal)
 ├── components/
 │   ├── ui/                # shadcn/ui components
 │   ├── product/           # Product components
-│   ├── admin/            # Admin components
-│   ├── layout/           # Layout components
-│   └── theme/            # Theme provider
+│   ├── admin/             # Admin components
+│   ├── layout/            # Layout components
+│   └── theme/             # Theme provider
 ├── lib/
-│   ├── db/               # Database (Prisma)
-│   ├── auth/             # Authentication config
-│   ├── stores/           # Zustand stores
-│   └── utils/            # Utility functions
+│   ├── db/                # Database (Prisma)
+│   ├── auth/              # Authentication config
+│   ├── stores/            # Zustand stores
+│   ├── payments/          # PayPal integration
+│   └── utils/             # Utility functions
 ├── prisma/
-│   ├── schema.prisma     # Database schema
-│   └── seed.ts           # Database seed script
-└── public/               # Static assets
+│   ├── schema.prisma      # Database schema
+│   └── seed.ts            # Database seed script
+└── public/                # Static assets
 ```
 
 ## 🔐 Authentication
@@ -202,15 +199,15 @@ npm run db:studio
 The application uses MongoDB with the following key models:
 
 - **Users**: Customer and admin accounts
-- **Products**: Shoe products with images, details, and customizable features (delivery time, warranty, quality, shipping fee)
-- **ProductImages**: Multiple images per product with view types
+- **Products**: Electronics/appliances with technical specifications (voltage, wattage, dimensions, warranty, condition)
+- **ProductImages**: Multiple images per product
 - **ProductDetails**: Dynamic product specifications
-- **ProductSizes**: Size options with individual stock
-- **Categories**: Hierarchical category structure
-- **Orders**: Customer orders with status tracking and calculated shipping costs
-- **OrderItems**: Individual items in orders with product references
+- **ProductSizes**: Variant options (storage capacity, etc.) - optional for most products
+- **Categories**: Electronics, appliances, juakali tools, audio equipment
+- **Orders**: Customer orders with status tracking and shipping costs
+- **OrderItems**: Individual items in orders
 - **Addresses**: Saved shipping addresses
-- **Payments**: M-Pesa payment records
+- **Payments**: PayPal payment records
 - **ProductReview**: Product reviews and ratings
 - **WishlistItem**: User wishlist items
 - **RecentlyViewed**: Track recently viewed products
@@ -223,13 +220,14 @@ See `prisma/schema.prisma` for the complete schema.
 - Default payment option
 - No additional setup required
 
-### M-Pesa Integration
-- Requires M-Pesa API credentials
-- STK Push for mobile payments
-- Payment webhook handling
+### PayPal Integration
+- Sandbox and production support
+- Secure payment processing
+- Order creation and capture flow
+- Webhook handling for payment events
 - Transaction status tracking
 
-**Note**: M-Pesa integration requires API credentials from Safaricom. The app structure is ready, but you'll need to configure credentials for production use.
+**Setup**: Add your PayPal credentials to the `.env` file. For sandbox testing, get credentials from https://developer.paypal.com
 
 ## 🎨 Theming
 

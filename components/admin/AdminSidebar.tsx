@@ -117,7 +117,7 @@ export function AdminSidebar() {
             </div>
             <div className="flex flex-col">
               <h2 className="font-bold text-lg leading-tight text-foreground">Admin Panel</h2>
-              <p className="text-xs text-muted-foreground font-medium">KicksZone</p>
+              <p className="text-xs text-muted-foreground font-medium">JUA-KALI MULI TRADERS</p>
             </div>
           </div>
           <Button
@@ -156,8 +156,8 @@ export function AdminSidebar() {
                 <div
                   className={cn(
                     "relative flex items-center rounded-xl transition-all duration-200",
-                    isCollapsed 
-                      ? "justify-center h-12 w-12 mx-auto" 
+                    isCollapsed
+                      ? "justify-center h-12 w-12 mx-auto"
                       : "h-12 gap-3 px-4",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
@@ -168,7 +168,7 @@ export function AdminSidebar() {
                   {isActive && !isCollapsed && (
                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-10 bg-primary-foreground rounded-r-full" />
                   )}
-                  
+
                   <div
                     className={cn(
                       "flex items-center justify-center shrink-0 transition-all",
@@ -180,7 +180,7 @@ export function AdminSidebar() {
                   >
                     <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
                   </div>
-                  
+
                   {!isCollapsed && (
                     <span
                       className={cn(
@@ -191,7 +191,7 @@ export function AdminSidebar() {
                       {item.label}
                     </span>
                   )}
-                  
+
                   {item.badge && !isCollapsed && (
                     <span
                       className={cn(
@@ -220,16 +220,16 @@ export function AdminSidebar() {
                 "flex items-center rounded-lg transition-all duration-200",
                 "border border-border/50 hover:border-border hover:bg-muted/60",
                 "text-muted-foreground hover:text-foreground",
-                isCollapsed 
-                  ? "justify-center h-12 w-12 mx-auto border-0" 
+                isCollapsed
+                  ? "justify-center h-12 w-12 mx-auto border-0"
                   : "h-11 gap-3 px-3"
               )}
             >
-              <Home 
+              <Home
                 className={cn(
                   "shrink-0 text-muted-foreground group-hover:text-foreground transition-colors",
                   isCollapsed ? "h-5 w-5" : "h-5 w-5"
-                )} 
+                )}
               />
               {!isCollapsed && (
                 <span className="font-medium text-sm transition-all duration-200 whitespace-nowrap">
@@ -244,8 +244,8 @@ export function AdminSidebar() {
               "flex items-center rounded-lg transition-all duration-200 mt-2",
               "border border-border/50 hover:border-border hover:bg-muted/60",
               "text-muted-foreground hover:text-foreground",
-              isCollapsed 
-                ? "justify-center h-12 w-12 mx-auto border-0" 
+              isCollapsed
+                ? "justify-center h-12 w-12 mx-auto border-0"
                 : "h-11 gap-3 px-3"
             )}
           >

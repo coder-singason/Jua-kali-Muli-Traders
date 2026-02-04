@@ -32,8 +32,9 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "KicksZone - Premium Shoe Shop",
-  description: "Shop the latest and greatest sneakers and shoes",
+  title: "JUA-KALI MULI TRADERS - Electronics & Appliances",
+  description:
+    "Quality electronics, home appliances, and juakali tools in Murang'a. Samsung, HP, Bosch, JBL, and more trusted brands.",
 };
 
 export default function RootLayout({
@@ -42,9 +43,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html 
-      lang="en" 
-      className={`${openSans.variable} ${poppins.variable} ${montserrat.variable}`} 
+    <html
+      lang="en"
+      className={`${openSans.variable} ${poppins.variable} ${montserrat.variable}`}
       suppressHydrationWarning
     >
       <body className="font-open-sans antialiased">

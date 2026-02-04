@@ -293,31 +293,31 @@ export default function NewProductPage() {
             <div className="space-y-4 border-t pt-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label>Sizes & Stock</Label>
+                  <Label>Variants & Stock (Optional)</Label>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Add each size separately (e.g., 8, 9, 10 as separate entries)
+                    Add product variants like storage capacity, power rating, size, color, etc.
                   </p>
                 </div>
                 <div className="flex gap-2">
                   <Button type="button" variant="outline" size="sm" onClick={addSize}>
-                    Add Size
+                    Add Variant
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      // Add common shoe sizes
-                      const commonSizes = ["7", "8", "9", "10", "11", "12"];
-                      const newSizes = commonSizes.map((size) => ({
-                        size,
+                      // Add common electronics/appliance variants
+                      const commonVariants = ["64GB", "128GB", "256GB", "512GB", "1TB"];
+                      const newVariants = commonVariants.map((variant) => ({
+                        size: variant,
                         stock: 0,
                       }));
-                      setSizes([...sizes, ...newSizes.filter((s) => !sizes.some((existing) => existing.size === s.size))]);
+                      setSizes([...sizes, ...newVariants.filter((s) => !sizes.some((existing) => existing.size === s.size))]);
                     }}
-                    title="Add common sizes"
+                    title="Add common storage variants for electronics"
                   >
-                    Add Common Sizes
+                    Add Storage Variants
                   </Button>
                 </div>
               </div>
@@ -325,10 +325,10 @@ export default function NewProductPage() {
               {sizes.length === 0 ? (
                 <div className="rounded-lg border border-dashed p-6 text-center">
                   <p className="text-sm text-muted-foreground mb-2">
-                    No sizes added yet. Each size needs its own stock count.
+                    No variants added. For products with variations (storage, color, size), add them here.
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Example: Size &quot;8&quot; with stock &quot;5&quot;, Size &quot;9&quot; with stock &quot;3&quot;, etc.
+                    Example: "64GB" with stock "5", "128GB" with stock "3", "Red" with stock "10", etc.
                   </p>
                 </div>
               ) : (
@@ -337,7 +337,7 @@ export default function NewProductPage() {
                     <div key={index} className="flex gap-2 items-center">
                       <div className="flex-1">
                         <Input
-                          placeholder="Size (e.g., 8, 9, 10, 42, etc.)"
+                          placeholder="Variant (e.g., 64GB, Red, Large, 900W)"
                           value={size.size}
                           onChange={(e) => updateSize(index, "size", e.target.value)}
                           className="font-medium"
@@ -367,17 +367,17 @@ export default function NewProductPage() {
               )}
             </div>
 
-                <div className="flex gap-4 pt-4">
-                  <Button type="submit" disabled={isSaving}>
-                    {isSaving ? (
-                      <>
-                        <LoadingSpinner size="sm" className="mr-2" />
-                        Creating...
-                      </>
-                    ) : (
-                      "Create Product"
-                    )}
-                  </Button>
+            <div className="flex gap-4 pt-4">
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Product"
+                )}
+              </Button>
               <Link href="/admin/products">
                 <Button type="button" variant="outline">
                   Cancel

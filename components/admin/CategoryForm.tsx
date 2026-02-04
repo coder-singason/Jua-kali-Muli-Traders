@@ -56,15 +56,15 @@ export function CategoryForm({ category, categories }: CategoryFormProps) {
     resolver: zodResolver(categorySchema),
     defaultValues: category
       ? {
-          name: category.name,
-          slug: category.slug,
-          parentId: category.parentId || undefined,
-        }
+        name: category.name,
+        slug: category.slug,
+        parentId: category.parentId || undefined,
+      }
       : {
-          name: "",
-          slug: "",
-          parentId: undefined,
-        },
+        name: "",
+        slug: "",
+        parentId: undefined,
+      },
   });
 
   const parentId = watch("parentId");
@@ -134,7 +134,7 @@ export function CategoryForm({ category, categories }: CategoryFormProps) {
                 register("name").onChange(e);
                 handleNameChange(e);
               }}
-              placeholder="e.g., Men's Shoes"
+              placeholder="e.g., Smartphones, Home Appliances"
             />
             {errors.name && (
               <p className="text-sm text-destructive">{errors.name.message}</p>
@@ -146,7 +146,7 @@ export function CategoryForm({ category, categories }: CategoryFormProps) {
             <Input
               id="slug"
               {...register("slug")}
-              placeholder="e.g., mens-shoes"
+              placeholder="e.g., smartphones, home-appliances"
             />
             <p className="text-xs text-muted-foreground">
               URL-friendly identifier (auto-generated from name)

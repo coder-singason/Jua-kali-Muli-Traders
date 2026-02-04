@@ -33,7 +33,7 @@ const checkoutSchema = z.object({
   addressLine2: z.string().optional(),
   city: z.string().min(2, "City is required"),
   postalCode: z.string().optional(),
-  paymentMethod: z.enum(["CASH_ON_DELIVERY", "MPESA"]),
+  paymentMethod: z.enum(["CASH_ON_DELIVERY", "PAYPAL"]),
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -204,7 +204,7 @@ export default function CheckoutPage() {
       router.push("/login?callbackUrl=/checkout");
       return;
     }
-    
+
     // Redirect admins away from checkout
     if (status === "authenticated" && session?.user?.role === "ADMIN") {
       toast({
@@ -291,46 +291,52 @@ export default function CheckoutPage() {
       if (!orderResponse.ok) {
         const errorMessage = orderResult.error || "Failed to create order";
         setError(errorMessage);
-        
+
         // If admin restriction error, redirect home
         if (orderResponse.status === 403 && errorMessage.includes("Administrator")) {
           setTimeout(() => {
             router.push("/");
           }, 2000);
         }
-        
+
         setIsLoading(false);
         return;
       }
 
-      // If M-Pesa, initiate payment
-      if (data.paymentMethod === "MPESA") {
-        const paymentResponse = await fetch("/api/payments/mpesa/initiate", {
+      // If PayPal, initiate payment
+      if (data.paymentMethod === "PAYPAL") {
+        const paymentResponse = await fetch("/api/payments/paypal/create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             orderId: orderResult.order.id,
-            phoneNumber: data.phone,
           }),
         });
 
         const paymentResult = await paymentResponse.json();
 
         if (!paymentResponse.ok) {
-          setError(paymentResult.error || "Failed to initiate payment");
+          setError(paymentResult.error || "Failed to initiate PayPal payment");
           setIsLoading(false);
           return;
         }
 
-        // Show success message and redirect immediately, then clear cart
+        // Redirect to PayPal for payment approval
         toast({
-          title: "Payment Initiated",
-          description: paymentResult.message || "Please complete the payment on your phone",
+          title: "Redirecting to PayPal",
+          description: "Please complete your payment on PayPal",
         });
-        setIsRedirecting(true);
+
+        // Clear cart before redirecting
         clearCart();
-        // Use replace to avoid back navigation, redirect immediately
-        router.replace(`/orders/${orderResult.order.id}?success=true&payment=mpesa`);
+
+        // Redirect to PayPal approval URL
+        if (paymentResult.approvalUrl) {
+          window.location.href = paymentResult.approvalUrl;
+        } else {
+          setError("PayPal approval URL not received");
+          setIsLoading(false);
+        }
       } else {
         // Cash on delivery - redirect immediately, then clear cart
         toast({
@@ -495,127 +501,125 @@ export default function CheckoutPage() {
                     )}
                   </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    {...register("phone")}
-                    placeholder="+254 700 000 000"
-                  />
-                  {errors.phone && (
-                    <p className="text-sm text-destructive">
-                      {errors.phone.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="addressLine1">Address Line 1</Label>
-                  <Input
-                    id="addressLine1"
-                    {...register("addressLine1")}
-                    placeholder="Street address"
-                  />
-                  {errors.addressLine1 && (
-                    <p className="text-sm text-destructive">
-                      {errors.addressLine1.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="addressLine2">Address Line 2 (Optional)</Label>
-                  <Input
-                    id="addressLine2"
-                    {...register("addressLine2")}
-                    placeholder="Apartment, suite, etc."
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input id="city" {...register("city")} placeholder="Nairobi" />
-                    {errors.city && (
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      {...register("phone")}
+                      placeholder="+254 700 000 000"
+                    />
+                    {errors.phone && (
                       <p className="text-sm text-destructive">
-                        {errors.city.message}
+                        {errors.phone.message}
                       </p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="postalCode">Postal Code (Optional)</Label>
+                    <Label htmlFor="addressLine1">Address Line 1</Label>
                     <Input
-                      id="postalCode"
-                      {...register("postalCode")}
-                      placeholder="00100"
+                      id="addressLine1"
+                      {...register("addressLine1")}
+                      placeholder="Street address"
+                    />
+                    {errors.addressLine1 && (
+                      <p className="text-sm text-destructive">
+                        {errors.addressLine1.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="addressLine2">Address Line 2 (Optional)</Label>
+                    <Input
+                      id="addressLine2"
+                      {...register("addressLine2")}
+                      placeholder="Apartment, suite, etc."
                     />
                   </div>
-                </div>
 
-                {/* Payment Method */}
-                <div className="space-y-4 pt-6 border-t">
-                  <Label className="text-base font-semibold flex items-center gap-2">
-                    <span>💳</span>
-                    Payment Method
-                  </Label>
-                  <div className="space-y-3">
-                    <label className={`flex items-start gap-3 rounded-lg border-2 p-4 cursor-pointer transition-all ${
-                      paymentMethod === "CASH_ON_DELIVERY" 
-                        ? "border-primary bg-primary/5" 
-                        : "border-border hover:border-primary/50 hover:bg-muted/50"
-                    }`}>
-                      <input
-                        type="radio"
-                        value="CASH_ON_DELIVERY"
-                        {...register("paymentMethod")}
-                        className="h-5 w-5 mt-0.5"
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="city">City</Label>
+                      <Input id="city" {...register("city")} placeholder="Nairobi" />
+                      {errors.city && (
+                        <p className="text-sm text-destructive">
+                          {errors.city.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="postalCode">Postal Code (Optional)</Label>
+                      <Input
+                        id="postalCode"
+                        {...register("postalCode")}
+                        placeholder="00100"
                       />
-                      <div className="flex-1">
-                        <div className="font-semibold text-base mb-1">Cash on Delivery</div>
-                        <div className="text-sm text-muted-foreground">
-                          Pay when you receive your order
-                        </div>
-                      </div>
-                    </label>
-                    <label className={`flex items-start gap-3 rounded-lg border-2 p-4 cursor-pointer transition-all ${
-                      paymentMethod === "MPESA" 
-                        ? "border-primary bg-primary/5" 
-                        : "border-border hover:border-primary/50 hover:bg-muted/50"
-                    }`}>
-                      <input
-                        type="radio"
-                        value="MPESA"
-                        {...register("paymentMethod")}
-                        className="h-5 w-5 mt-0.5"
-                      />
-                      <div className="flex-1">
-                        <div className="font-semibold text-base mb-1">M-Pesa</div>
-                        <div className="text-sm text-muted-foreground">
-                          Pay via M-Pesa mobile money
-                        </div>
-                      </div>
-                    </label>
+                    </div>
                   </div>
-                </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full rounded-full" 
-                  size="lg" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <LoadingSpinner size="sm" className="mr-2" />
-                      Processing Order...
-                    </>
-                  ) : paymentMethod === "MPESA" ? (
-                    "Pay with M-Pesa"
-                  ) : (
-                    "Place Order"
-                  )}
-                </Button>
+                  {/* Payment Method */}
+                  <div className="space-y-4 pt-6 border-t">
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      <span>💳</span>
+                      Payment Method
+                    </Label>
+                    <div className="space-y-3">
+                      <label className={`flex items-start gap-3 rounded-lg border-2 p-4 cursor-pointer transition-all ${paymentMethod === "CASH_ON_DELIVERY"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50 hover:bg-muted/50"
+                        }`}>
+                        <input
+                          type="radio"
+                          value="CASH_ON_DELIVERY"
+                          {...register("paymentMethod")}
+                          className="h-5 w-5 mt-0.5"
+                        />
+                        <div className="flex-1">
+                          <div className="font-semibold text-base mb-1">Cash on Delivery</div>
+                          <div className="text-sm text-muted-foreground">
+                            Pay when you receive your order
+                          </div>
+                        </div>
+                      </label>
+                      <label className={`flex items-start gap-3 rounded-lg border-2 p-4 cursor-pointer transition-all ${paymentMethod === "PAYPAL"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50 hover:bg-muted/50"
+                        }`}>
+                        <input
+                          type="radio"
+                          value="PAYPAL"
+                          {...register("paymentMethod")}
+                          className="h-5 w-5 mt-0.5"
+                        />
+                        <div className="flex-1">
+                          <div className="font-semibold text-base mb-1">PayPal</div>
+                          <div className="text-sm text-muted-foreground">
+                            Pay securely with PayPal
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full rounded-full"
+                    size="lg"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <LoadingSpinner size="sm" className="mr-2" />
+                        Processing Order...
+                      </>
+                    ) : paymentMethod === "PAYPAL" ? (
+                      "Pay with PayPal"
+                    ) : (
+                      "Place Order"
+                    )}
+                  </Button>
                 </div>
               </form>
             </CardContent>
@@ -634,7 +638,7 @@ export default function CheckoutPage() {
                   const itemTotal = item.price * item.quantity;
                   return (
                     <div key={item.id} className="flex gap-3 pb-3 border-b last:border-0 last:pb-0">
-                      <Link 
+                      <Link
                         href={`/products/${item.productId}`}
                         className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted group"
                       >

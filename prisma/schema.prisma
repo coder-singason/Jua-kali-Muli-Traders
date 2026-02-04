@@ -32,7 +32,7 @@ enum PaymentStatus {
 
 enum PaymentMethod {
   CASH_ON_DELIVERY
-  MPESA
+  PAYPAL
 }
 
 model User {
@@ -131,8 +131,12 @@ model Product {
   stock       Int      @default(0)
   sku         String?  @unique
   featured    Boolean  @default(false)
-  color       String?  // For filtering
-  material    String?  // For filtering
+  // Electronics/Appliances specific fields
+  specifications   Json?    // Flexible field for product specs (display, processor, etc.)
+  technicalDetails Json?    // Voltage, wattage, power consumption, dimensions, weight, etc.
+  condition        String?  // New, Refurbished, Used
+  modelNumber      String?  @map("model_number")
+  // General fields (applicable to all products)
   deliveryTime String? @map("delivery_time") // e.g., "1-3 Days", "5-7 Days"
   warranty    String?  // e.g., "1 Year", "2 Years", "6 Months"
   quality     String?  // e.g., "Premium", "Standard", "Basic"
@@ -249,16 +253,19 @@ model OrderItem {
 }
 
 model Payment {
-  id                  String        @id @default(auto()) @map("_id") @db.ObjectId
-  orderId             String        @map("order_id") @db.ObjectId
-  mpesaTransactionId  String?       @unique @map("mpesa_transaction_id")
-  mpesaReceiptNumber  String?       @map("mpesa_receipt_number")
-  phoneNumber         String?       @map("phone_number")
-  amount              Float
-  status              PaymentStatus @default(PENDING)
-  callbackData        Json?         @map("callback_data")
-  createdAt           DateTime      @default(now()) @map("created_at")
-  updatedAt           DateTime      @updatedAt @map("updated_at")
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  orderId         String        @map("order_id") @db.ObjectId
+  // PayPal specific fields
+  paypalOrderId   String?       @unique @map("paypal_order_id")
+  paypalPayerId   String?       @map("paypal_payer_id")
+  paypalPaymentId String?       @map("paypal_payment_id")
+  paypalCapture   Json?         @map("paypal_capture") // Store capture/authorization response
+  // General payment fields
+  amount          Float
+  status          PaymentStatus @default(PENDING)
+  callbackData    Json?         @map("callback_data")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
