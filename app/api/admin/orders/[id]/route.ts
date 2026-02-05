@@ -5,7 +5,10 @@ import { sendOrderStatusUpdateEmail } from "@/lib/email";
 import { z } from "zod";
 
 const updateOrderSchema = z.object({
-  status: z.enum(["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"]),
+  status: z.enum(["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"]).optional(),
+  paymentStatus: z.enum(["PENDING", "COMPLETED", "FAILED", "CANCELLED"]).optional(),
+}).refine((data) => data.status || data.paymentStatus, {
+  message: "At least one of status or paymentStatus must be provided",
 });
 
 export async function PATCH(
@@ -23,124 +26,129 @@ export async function PATCH(
     const parsedData = updateOrderSchema.safeParse(body);
 
     if (!parsedData.success) {
+      console.error("Validation error:", parsedData.error.errors);
       return NextResponse.json(
         { error: "Invalid input", details: parsedData.error.errors },
         { status: 400 }
       );
     }
 
-    // Get current order to check if status is changing
+    // Get current order to check validity
     const currentOrder = await prisma.order.findUnique({
       where: { id },
       include: {
         items: true,
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
+        user: { select: { name: true, email: true } },
+        payments: { orderBy: { createdAt: "desc" }, take: 1 },
       },
     });
 
     if (!currentOrder) {
-      return NextResponse.json(
-        { error: "Order not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Prevent updating cancelled orders
-    if (currentOrder.status === "CANCELLED") {
-      return NextResponse.json(
-        { error: "Cannot update a cancelled order. Cancelled orders are final." },
-        { status: 400 }
-      );
-    }
+    const { status: newStatus, paymentStatus: newPaymentStatus } = parsedData.data;
 
-    const newStatus = parsedData.data.status;
-    const statusChanged = currentOrder.status !== newStatus;
+    // Update operations
+    const updatePromises: any[] = [];
 
-    // FIX: Removed '&& currentOrder.status !== "CANCELLED"' because the early return 
-    // above ensures currentOrder.status is NOT "CANCELLED" by this point.
-    if (newStatus === "CANCELLED") {
-      // Only allow cancellation if order is PENDING or PROCESSING
-      if (currentOrder.status !== "PENDING" && currentOrder.status !== "PROCESSING") {
+    // 1. Handle Order Status Update
+    if (newStatus && newStatus !== currentOrder.status) {
+      // Prevent updating cancelled orders unless reactivating (not implemented yet)
+      if (currentOrder.status === "CANCELLED") {
         return NextResponse.json(
-          { error: `Cannot cancel an order with status: ${currentOrder.status}. Only PENDING or PROCESSING orders can be cancelled.` },
+          { error: "Cannot update a cancelled order." },
           { status: 400 }
         );
       }
 
-      // Restore stock when cancelling
-      for (const item of currentOrder.items) {
-        try {
-          await prisma.productSize.update({
-            where: {
-              productId_size: {
-                productId: item.productId,
-                size: item.size,
-              },
-            },
-            data: {
-              stock: {
-                increment: item.quantity,
-              },
-            },
-          });
-        } catch (error) {
-          console.error(`Failed to restore stock for product ${item.productId} size ${item.size}:`, error);
+      // Logic for changing TO Cancelled
+      if (newStatus === "CANCELLED") {
+        if (currentOrder.status !== "PENDING" && currentOrder.status !== "PROCESSING") {
+          return NextResponse.json(
+            { error: "Only PENDING or PROCESSING orders can be cancelled." },
+            { status: 400 }
+          );
+        }
+
+        // Restore stock
+        for (const item of currentOrder.items) {
+          updatePromises.push(
+            prisma.productSize.update({
+              where: { productId_size: { productId: item.productId, size: item.size } },
+              data: { stock: { increment: item.quantity } },
+            })
+          );
         }
       }
+
+      updatePromises.push(
+        prisma.order.update({
+          where: { id },
+          data: { status: newStatus },
+        })
+      );
+
+      // Email notification (async, handled after await)
     }
 
-    const order = await prisma.order.update({
+    // 2. Handle Payment Status Update
+    if (newPaymentStatus && currentOrder.payments.length > 0) {
+      const latestPayment = currentOrder.payments[0];
+      if (latestPayment.status !== newPaymentStatus) {
+        updatePromises.push(
+          prisma.payment.update({
+            where: { id: latestPayment.id },
+            data: { status: newPaymentStatus },
+          })
+        );
+      }
+    } else if (newPaymentStatus && currentOrder.payments.length === 0) {
+      // Edge case: No payment record exists yet (e.g. clean COD). 
+      // Admin wants to set payment status. Create a record?
+      // For simplicity: Create a "Manual Adjustment" payment record.
+      updatePromises.push(
+        prisma.payment.create({
+          data: {
+            orderId: id,
+            amount: currentOrder.total,
+            status: newPaymentStatus,
+            // No external IDs since it's manual
+          }
+        })
+      );
+    }
+
+    // Execute all updates
+    await prisma.$transaction(updatePromises);
+
+    // Fetch updated order to return
+    const updatedOrder = await prisma.order.findUnique({
       where: { id },
-      data: {
-        status: newStatus,
-      },
       include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
-        payments: {
-          orderBy: {
-            createdAt: "desc",
-          },
-        },
+        items: { include: { product: true } },
+        user: { select: { id: true, name: true, email: true, phone: true } },
+        payments: { orderBy: { createdAt: "desc" } },
       },
     });
 
-    // Send status update email if status changed and user has email (non-blocking)
-    if (statusChanged && currentOrder.user?.email && newStatus !== "PENDING") {
-      // Don't await - send email asynchronously
+    if (!updatedOrder) throw new Error("Failed to retrieve updated order");
+
+    // Send email if Order Status changed
+    if (newStatus && newStatus !== currentOrder.status && currentOrder.user?.email && newStatus !== "PENDING") {
       sendOrderStatusUpdateEmail(
         currentOrder.user.email,
         currentOrder.user.name || "Customer",
-        order.orderNumber,
+        updatedOrder.orderNumber,
         newStatus
-      ).catch((error) => {
-        console.error("Failed to send order status update email:", error);
-        // Don't fail the request if email fails
-      });
+      ).catch(e => console.error("Email error:", e));
     }
 
-    return NextResponse.json({ order });
+    return NextResponse.json({ order: updatedOrder });
   } catch (error) {
     console.error("Error updating order:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to update order", details: errorMessage },
+      { error: "Failed to update order", details: error instanceof Error ? error.message : "Unknown" },
       { status: 500 }
     );
   }

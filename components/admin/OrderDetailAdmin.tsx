@@ -112,6 +112,40 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
     }
   };
 
+  const handlePaymentStatusChange = async (newStatus: string) => {
+    setIsUpdating(true);
+    try {
+      const response = await fetch(`/api/admin/orders/${order.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentStatus: newStatus }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || errorData.details || "Failed to update payment status");
+      }
+
+      const result = await response.json();
+      setOrder(result.order);
+
+      toast({
+        title: "Payment Updated",
+        description: `Payment status has been updated to ${newStatus}`,
+      });
+      router.refresh();
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update payment status",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const shippingAddress = order.shippingAddress as {
     fullName: string;
     phone: string;
@@ -341,24 +375,62 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
                       : order.paymentMethod}
                 </p>
               </div>
-              {order.payments.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Payment Status</p>
-                  {order.payments.map((payment) => (
-                    <div key={payment.id} className="text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="capitalize">{payment.status.toLowerCase()}</span>
-                        <span className="font-medium">KSh {Number(payment.amount).toLocaleString()}</span>
-                      </div>
 
-
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(payment.createdAt), "PPP 'at' p")}
-                      </p>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Payment Status</p>
+                {order.payments.length > 0 ? (
+                  <div className="space-y-3">
+                    {/* Latest Payment Status Control */}
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={order.payments[0].status}
+                        onValueChange={(val) => handlePaymentStatusChange(val)}
+                        disabled={isUpdating}
+                      >
+                        <SelectTrigger className="h-8 w-[140px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PENDING">Pending</SelectItem>
+                          <SelectItem value="COMPLETED">Completed</SelectItem>
+                          <SelectItem value="FAILED">Failed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {isUpdating && <LoadingSpinner size="sm" />}
                     </div>
-                  ))}
-                </div>
-              )}
+
+                    {/* History */}
+                    <div className="pt-2 border-t space-y-2">
+                      <p className="text-xs text-muted-foreground font-semibold">Transaction History</p>
+                      {order.payments.map((payment) => (
+                        <div key={payment.id} className="text-sm bg-muted/50 p-2 rounded">
+                          <div className="flex items-center justify-between">
+                            <span className={`capitalize text-xs font-medium ${payment.status === 'COMPLETED' ? 'text-green-600' :
+                              payment.status === 'FAILED' ? 'text-red-600' : 'text-yellow-600'
+                              }`}>{payment.status.toLowerCase()}</span>
+                            <span className="font-mono text-xs">KSh {Number(payment.amount).toLocaleString()}</span>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            {format(new Date(payment.createdAt), "PPP p")}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm text-yellow-600 italic">No payment records found.</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePaymentStatusChange("COMPLETED")}
+                      disabled={isUpdating}
+                    >
+                      Mark as Paid (Manual)
+                    </Button>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>

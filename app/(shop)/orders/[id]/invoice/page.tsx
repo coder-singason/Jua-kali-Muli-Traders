@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft, Printer } from "lucide-react";
+import { InvoicePrintButton } from "@/components/invoice/InvoicePrintButton";
 
 async function getOrder(id: string) {
     return await prisma.order.findUnique({
@@ -86,10 +87,7 @@ export default async function InvoicePage({
                     </Button>
                 </Link>
                 <div className="flex gap-2">
-                    <Button onClick={() => window.print()} className="gap-2">
-                        <Printer className="h-4 w-4" />
-                        Print Invoice
-                    </Button>
+                    <InvoicePrintButton />
                 </div>
             </div>
 
