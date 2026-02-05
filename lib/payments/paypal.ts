@@ -58,9 +58,11 @@ export function getPayPalClient() {
 /**
  * Create a PayPal order
  */
+const EXCHANGE_RATE = 130; // 1 USD = 130 KES (Fixed rate for MVP)
+
 export async function createPayPalOrder(
     amount: number,
-    currency: string = "KES", // Kenyan Shillings - PayPal supports KES natively!
+    currency: string = "KES", // Default input is KES
     orderReference: string,
     returnUrl: string,
     cancelUrl: string
@@ -70,6 +72,15 @@ export async function createPayPalOrder(
         throw new Error("PayPal client not initialized");
     }
 
+    // Convert KES to USD if currency is KES (PayPal doesn't support KES)
+    let finalAmount = amount;
+    let finalCurrency = currency;
+
+    if (currency === "KES") {
+        finalAmount = Number((amount / EXCHANGE_RATE).toFixed(2));
+        finalCurrency = "USD";
+    }
+
     const request = {
         body: {
             intent: CheckoutPaymentIntent.Capture,
@@ -77,8 +88,8 @@ export async function createPayPalOrder(
                 {
                     referenceId: orderReference,
                     amount: {
-                        currencyCode: currency,
-                        value: amount.toFixed(2),
+                        currencyCode: finalCurrency,
+                        value: finalAmount.toString(),
                     },
                 },
             ],

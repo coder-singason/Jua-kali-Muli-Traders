@@ -190,7 +190,9 @@ export function OrdersList({ orders, currentStatus, currentSearch }: OrdersListP
                         {order.items.length} item(s) •{" "}
                         {order.paymentMethod === "CASH_ON_DELIVERY"
                           ? "Cash on Delivery"
-                          : "M-Pesa"}
+                          : order.paymentMethod === "PAYPAL"
+                            ? "PayPal"
+                            : order.paymentMethod}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(order.createdAt), "PPP 'at' p")}

@@ -52,10 +52,10 @@ export async function POST(request: NextRequest) {
         const cancelUrl = `${appUrl}/orders/${order.id}?canceled=true`;
 
         // Create PayPal order with KES (Kenyan Shillings)
-        // No conversion needed - PayPal supports KES natively
+        // Helper function will convert KES to USD (Rate: 130)
         const paypalOrder = await createPayPalOrder(
-            order.total,     // Amount in KSh (no conversion!)
-            "KES",          // Kenyan Shillings currency code
+            order.total,     // Amount in KSh
+            "KES",          // Input currency
             order.orderNumber,
             returnUrl,
             cancelUrl

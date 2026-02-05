@@ -328,7 +328,9 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
                 <p className="font-medium">
                   {order.paymentMethod === "CASH_ON_DELIVERY"
                     ? "Cash on Delivery"
-                    : "PayPal"}
+                    : order.paymentMethod === "PAYPAL"
+                      ? "PayPal"
+                      : order.paymentMethod}
                 </p>
               </div>
               {order.payments.length > 0 && (
