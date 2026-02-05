@@ -124,12 +124,20 @@ export function OrderDetailAdmin({ order: initialOrder }: OrderDetailAdminProps)
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Back Button */}
-      <Link href="/admin/orders">
-        <Button variant="ghost" size="sm" className="text-xs sm:text-sm">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Orders
-        </Button>
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href="/admin/orders">
+          <Button variant="ghost" size="sm" className="text-xs sm:text-sm">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Orders
+          </Button>
+        </Link>
+        <Link href={`/orders/${order.id}/invoice`} target="_blank">
+          <Button variant="outline" size="sm" className="gap-2">
+            <CreditCard className="h-4 w-4" />
+            Print Invoice
+          </Button>
+        </Link>
+      </div>
 
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Main Content */}

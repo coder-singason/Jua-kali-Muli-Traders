@@ -128,17 +128,25 @@ export default async function OrderDetailPage({
         </Card>
       )}
 
-      <div className="mb-6">
-        <Link href="/profile?tab=orders">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Orders
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div>
+          <Link href="/profile?tab=orders">
+            <Button variant="ghost" size="sm" className="mb-4">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Orders
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-bold">Order #{order.orderNumber}</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Placed on {format(new Date(order.createdAt), "PPP 'at' p")}
+          </p>
+        </div>
+        <Link href={`/orders/${order.id}/invoice`} target="_blank">
+          <Button variant="outline" className="gap-2">
+            <CreditCard className="h-4 w-4" />
+            View Invoice
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Order #{order.orderNumber}</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Placed on {format(new Date(order.createdAt), "PPP 'at' p")}
-        </p>
       </div>
 
       {/* Order Tracking */}
