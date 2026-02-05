@@ -61,13 +61,18 @@ export default async function InvoicePage({
         );
     }
 
-    const shippingAddress = order.shippingAddress as {
+    const shippingAddress = (order.shippingAddress as {
         fullName: string;
         phone: string;
         addressLine1: string;
         addressLine2?: string;
         city: string;
         postalCode?: string;
+    }) || {
+        fullName: order.user.name || "N/A",
+        phone: order.user.phone || "N/A",
+        addressLine1: "Address not available",
+        city: "N/A",
     };
 
     return (
