@@ -14,29 +14,34 @@ import { ProductImageFallback } from "@/components/ui/product-image-fallback";
 import Link from "next/link";
 
 async function getProduct(id: string) {
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: {
-      category: true,
-      sizes: {
-        orderBy: {
-          size: "asc",
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        category: true,
+        sizes: {
+          orderBy: {
+            size: "asc",
+          },
+        },
+        productImages: {
+          orderBy: {
+            sortOrder: "asc",
+          },
+        },
+        productDetails: {
+          orderBy: {
+            sortOrder: "asc",
+          },
         },
       },
-      productImages: {
-        orderBy: {
-          sortOrder: "asc",
-        },
-      },
-      productDetails: {
-        orderBy: {
-          sortOrder: "asc",
-        },
-      },
-    },
-  });
+    });
 
-  return product;
+    return product;
+  } catch (error) {
+    console.error(`Error fetching product ${id}:`, error);
+    return null;
+  }
 }
 
 export default async function ProductDetailPage({

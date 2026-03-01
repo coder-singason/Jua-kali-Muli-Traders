@@ -6,30 +6,35 @@ import { Button } from "@/components/ui/button";
 import { ProductsList } from "@/components/admin/ProductsList";
 
 async function getProducts() {
-  const products = await prisma.product.findMany({
-    include: {
-      category: true,
-      sizes: true,
-      productImages: {
-        orderBy: {
-          sortOrder: "asc",
+  try {
+    const products = await prisma.product.findMany({
+      include: {
+        category: true,
+        sizes: true,
+        productImages: {
+          orderBy: {
+            sortOrder: "asc",
+          },
+          take: 1, // Only get first image for list view
         },
-        take: 1, // Only get first image for list view
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
-  // FIX: Transform 'null' values to 'undefined' to match the component's interface
-  return products.map((product) => ({
-    ...product,
-    productImages: product.productImages.map((img) => ({
-      ...img,
-      alt: img.alt || undefined, // Converts null to undefined
-    })),
-  }));
+    // Transform 'null' values to 'undefined' to match the component's interface
+    return products.map((product) => ({
+      ...product,
+      productImages: (product.productImages || []).map((img) => ({
+        ...img,
+        alt: img.alt || undefined,
+      })),
+    }));
+  } catch (error) {
+    console.error("Error fetching admin products:", error);
+    return [];
+  }
 }
 
 export default async function AdminProductsPage() {
