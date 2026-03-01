@@ -73,9 +73,9 @@ export default function RootLayout({
         <ThemeProvider defaultTheme="system" storageKey="kickszone-theme">
           <QueryProvider>
             <SessionProvider>
-              <div className="flex min-h-screen flex-col">
+              <div className="flex min-h-screen flex-col print:min-h-0">
                 <Header />
-                <main className="flex-1 pb-16 md:pb-20 lg:pb-0">{children}</main>
+                <main className="flex-1 pb-16 md:pb-20 lg:pb-0 print:pb-0">{children}</main>
                 <Footer />
                 <FloatingNav />
               </div>
@@ -87,4 +87,3 @@ export default function RootLayout({
     </html>
   );
 }
-

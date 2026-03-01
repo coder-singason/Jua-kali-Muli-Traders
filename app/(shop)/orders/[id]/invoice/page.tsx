@@ -75,16 +75,16 @@ export default async function InvoicePage({
     };
 
     return (
-        <div className="min-h-screen bg-white text-black p-8 print:p-0">
+        <div className="bg-white text-black p-4 sm:p-8 print:p-0 print:min-h-0">
             {/* Print Controls - Hidden when printing */}
             <div className="max-w-4xl mx-auto mb-8 flex justify-end items-center print:hidden">
                 <InvoicePrintButton />
             </div>
 
             {/* Invoice Content */}
-            <div className="max-w-4xl mx-auto border border-gray-200 p-8 shadow-sm print:shadow-none print:border-none print:max-w-none">
+            <div className="max-w-4xl mx-auto border border-gray-200 p-8 shadow-sm print:shadow-none print:border-none print:max-w-none print:p-4">
                 {/* Header */}
-                <div className="flex justify-between items-start border-b pb-8 mb-8">
+                <div className="flex justify-between items-start border-b pb-8 mb-8 print:pb-5 print:mb-5">
                     <div>
                         <h1 className="text-4xl font-bold tracking-tight text-gray-900 mb-2">INVOICE</h1>
                         <p className="text-sm text-gray-500">
@@ -115,7 +115,7 @@ export default async function InvoicePage({
                 </div>
 
                 {/* Bill To / Ship To */}
-                <div className="grid grid-cols-2 gap-8 mb-8">
+                <div className="grid grid-cols-2 gap-8 mb-8 print:gap-5 print:mb-5">
                     <div>
                         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Bill To</h3>
                         <div className="text-sm text-gray-700">
@@ -140,7 +140,7 @@ export default async function InvoicePage({
                 </div>
 
                 {/* Items Table */}
-                <div className="mb-8">
+                <div className="mb-8 print:mb-5">
                     <table className="w-full text-left table-auto">
                         <thead>
                             <tr className="border-b border-gray-200">
@@ -189,7 +189,7 @@ export default async function InvoicePage({
                 </div>
 
                 {/* Footer Notes */}
-                <div className="mt-12 pt-8 border-t border-gray-200">
+                <div className="mt-12 pt-8 border-t border-gray-200 print:mt-6 print:pt-4">
                     <h4 className="text-sm font-semibold text-gray-900 mb-2">Thank you for your business!</h4>
                     <p className="text-xs text-gray-500">
                         For any questions regarding this invoice, please contact us at admin@juakalimulitraders.com.
