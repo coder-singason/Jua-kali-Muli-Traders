@@ -39,9 +39,13 @@ export const authConfig: NextAuthConfig = {
       async authorize(credentials) {
         const parsedCredentials = loginSchema.safeParse(credentials);
 
-        if (parsedCredentials.success) {
-          const { email, password } = parsedCredentials.data;
+        if (!parsedCredentials.success) {
+          return null;
+        }
 
+        const { email, password } = parsedCredentials.data;
+
+        try {
           const user = await prisma.user.findUnique({
             where: { email },
           });
@@ -58,6 +62,9 @@ export const authConfig: NextAuthConfig = {
               role: user.role,
             };
           }
+        } catch (error) {
+          console.error("Credentials authorize error:", error);
+          return null;
         }
 
         return null;
@@ -65,4 +72,3 @@ export const authConfig: NextAuthConfig = {
     }),
   ],
 };
-
