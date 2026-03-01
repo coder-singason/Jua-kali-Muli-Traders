@@ -103,8 +103,8 @@ export default async function InvoicePage({
                         <div className="mt-4 text-sm text-gray-600">
                             <p className="font-semibold text-gray-900">JUA-KALI MULI TRADERS</p>
                             <p>Murang'a, Kenya</p>
-                            <p>Email: support@juakalishop.com</p>
-                            <p>Phone: +254 700 000 000</p>
+                            <p>Email: admin@juakalimulitraders.com</p>
+                            <p>Phone: +254 714 747 751</p>
                         </div>
                     </div>
                     <div className="text-right">
@@ -202,7 +202,7 @@ export default async function InvoicePage({
                 <div className="mt-12 pt-8 border-t border-gray-200">
                     <h4 className="text-sm font-semibold text-gray-900 mb-2">Thank you for your business!</h4>
                     <p className="text-xs text-gray-500">
-                        For any questions regarding this invoice, please contact us at support@juakalishop.com.
+                        For any questions regarding this invoice, please contact us at admin@juakalimulitraders.com.
                         We appreciate your support of local Juakali artisans.
                     </p>
                 </div>

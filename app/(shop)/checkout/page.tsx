@@ -506,7 +506,7 @@ export default function CheckoutPage() {
                     <Input
                       id="phone"
                       {...register("phone")}
-                      placeholder="+254 700 000 000"
+                      placeholder="+254 714 747 751"
                     />
                     {errors.phone && (
                       <p className="text-sm text-destructive">

@@ -157,7 +157,7 @@ export default function RegisterPage() {
               <Input
                 id="phone"
                 type="tel"
-                placeholder="+254 700 000 000"
+                placeholder="+254 714 747 751"
                 {...register("phone")}
               />
               {errors.phone && (
