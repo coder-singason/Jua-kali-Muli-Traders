@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+function hasSessionCookie(req: NextRequest): boolean {
+  const cookieNames = [
+    "__Secure-authjs.session-token",
+    "authjs.session-token",
+    "__Secure-next-auth.session-token",
+    "next-auth.session-token",
+  ];
+
+  return cookieNames.some((cookieName) => req.cookies.has(cookieName));
+}
+
 function resolveAuthRedirectTarget(callbackUrl: string | null, role?: string): string {
   let target = callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/";
 
@@ -22,16 +33,22 @@ function resolveAuthRedirectTarget(callbackUrl: string | null, role?: string): s
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+  const authSecret = process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET;
   const token = await getToken({
     req,
     secret: authSecret,
   });
   const isLoggedIn = !!token;
+  const hasSession = hasSessionCookie(req);
 
   // Protect admin routes
   if (pathname.startsWith("/admin")) {
     if (!isLoggedIn) {
+      // Fallback for edge token decode mismatches: let server-side auth() decide.
+      if (hasSession) {
+        return NextResponse.next();
+      }
+
       const loginUrl = new URL("/login", req.url);
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
