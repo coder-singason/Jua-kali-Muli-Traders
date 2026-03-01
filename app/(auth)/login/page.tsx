@@ -21,6 +21,24 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+function resolvePostLoginTarget(callbackUrl: string | null, role?: string) {
+  let target = callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/";
+
+  if (target.startsWith("/admin") && role !== "ADMIN") {
+    target = "/";
+  }
+
+  if (target.startsWith("/login") || target.startsWith("/register")) {
+    target = role === "ADMIN" ? "/admin/dashboard" : "/";
+  }
+
+  if (role === "ADMIN" && target === "/") {
+    target = "/admin/dashboard";
+  }
+
+  return target;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -31,13 +49,11 @@ export default function LoginPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (status === "authenticated") {
-      // Check for callback URL in query params
       const params = new URLSearchParams(window.location.search);
-      const callbackUrl = params.get("callbackUrl") || "/";
-      router.push(callbackUrl);
-      router.refresh();
+      const target = resolvePostLoginTarget(params.get("callbackUrl"), session?.user?.role);
+      router.replace(target);
     }
-  }, [status, router]);
+  }, [status, session?.user?.role, router]);
 
   // Check for success message from registration
   useEffect(() => {
@@ -85,20 +101,11 @@ export default function LoginPage() {
 
         // Redirect logic
         const params = new URLSearchParams(window.location.search);
-        let callbackUrl = params.get("callbackUrl") || "/";
-
-        // If user is admin, force redirect to dashboard unless a specific deep link exists
-        // (Optional: prioritize dashboard over callback if desired, or strictly for root logins)
-        if (sessionData?.user?.role === "ADMIN") {
-          // If the callback is explicitly the home page or empty, go to dashboard
-          if (callbackUrl === "/" || callbackUrl === "") {
-            callbackUrl = "/admin/dashboard";
-          }
-        }
+        const callbackUrl = params.get("callbackUrl");
+        const target = resolvePostLoginTarget(callbackUrl, sessionData?.user?.role);
 
         // Keep loading state visible during redirect
-        router.push(callbackUrl);
-        router.refresh();
+        router.replace(target);
       }
     } catch (err) {
       setError("An error occurred. Please try again.");
@@ -216,4 +223,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

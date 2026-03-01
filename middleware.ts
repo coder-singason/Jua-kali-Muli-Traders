@@ -2,11 +2,30 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+function resolveAuthRedirectTarget(callbackUrl: string | null, role?: string): string {
+  let target = callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/";
+
+  if (target.startsWith("/admin") && role !== "ADMIN") {
+    return "/";
+  }
+
+  if (target.startsWith("/login") || target.startsWith("/register")) {
+    target = role === "ADMIN" ? "/admin/dashboard" : "/";
+  }
+
+  if (role === "ADMIN" && target === "/") {
+    return "/admin/dashboard";
+  }
+
+  return target;
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
   const token = await getToken({
     req,
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: authSecret,
   });
   const isLoggedIn = !!token;
 
@@ -25,7 +44,9 @@ export async function middleware(req: NextRequest) {
 
   // Redirect logged-in users away from auth pages
   if ((pathname.startsWith("/login") || pathname.startsWith("/register")) && isLoggedIn) {
-    return NextResponse.redirect(new URL("/", req.url));
+    const callbackUrl = req.nextUrl.searchParams.get("callbackUrl");
+    const target = resolveAuthRedirectTarget(callbackUrl, token?.role as string | undefined);
+    return NextResponse.redirect(new URL(target, req.url));
   }
 
   return NextResponse.next();

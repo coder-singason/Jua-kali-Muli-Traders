@@ -1,12 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 const IMAGE_SOURCE_DIRECTORY = path.join(process.cwd(), "assets");
 const IMAGE_PUBLIC_DIRECTORY = path.join(process.cwd(), "public", "images", "products");
 const IMAGE_WEB_PATH = "/images/products";
 const SUPPORTED_IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".avif"]);
+const ADMIN_NAME = "admin";
+const ADMIN_EMAIL = "admin@juakalimulitraders.com";
+const ADMIN_PASSWORD = "admin_juakalimulitraders";
 
 type CategorySlug = "furniture" | "metalwork" | "home-decor" | "construction-utility";
 
@@ -323,6 +327,23 @@ async function main() {
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
 
+  console.log("👤 Seeding admin user...");
+  const adminPasswordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+  await prisma.user.upsert({
+    where: { email: ADMIN_EMAIL },
+    update: {
+      name: ADMIN_NAME,
+      password: adminPasswordHash,
+      role: "ADMIN",
+    },
+    create: {
+      name: ADMIN_NAME,
+      email: ADMIN_EMAIL,
+      password: adminPasswordHash,
+      role: "ADMIN",
+    },
+  });
+
   console.log("📁 Creating categories...");
   const categoryMap = new Map<CategorySlug, string>();
   for (const category of categories) {
@@ -364,6 +385,7 @@ async function main() {
   }
 
   console.log(`✅ Seed completed successfully. Added ${products.length} products.`);
+  console.log(`🔐 Admin user ready: ${ADMIN_EMAIL}`);
 
   if (missingImages.size > 0) {
     console.log("⚠️ Missing image files for the following products:");
