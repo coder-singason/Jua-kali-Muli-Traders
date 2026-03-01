@@ -23,11 +23,16 @@ export function FloatingNav() {
   const itemCount = useCartStore((state) => state.getItemCount());
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const isInvoicePage = pathname?.includes("/invoice");
 
   // Prevent hydration mismatch by only showing cart badge after mount
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  if (isInvoicePage) {
+    return null;
+  }
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
 

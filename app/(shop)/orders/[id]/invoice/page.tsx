@@ -2,10 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db/prisma";
 import { format } from "date-fns";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, Printer } from "lucide-react";
 import { InvoicePrintButton } from "@/components/invoice/InvoicePrintButton";
 
 async function getOrder(id: string) {
@@ -79,16 +77,8 @@ export default async function InvoicePage({
     return (
         <div className="min-h-screen bg-white text-black p-8 print:p-0">
             {/* Print Controls - Hidden when printing */}
-            <div className="max-w-4xl mx-auto mb-8 flex justify-between items-center print:hidden">
-                <Link href={isAdmin ? "/admin/orders" : `/orders/${order.id}`}>
-                    <Button variant="outline" size="sm">
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back to Order
-                    </Button>
-                </Link>
-                <div className="flex gap-2">
-                    <InvoicePrintButton />
-                </div>
+            <div className="max-w-4xl mx-auto mb-8 flex justify-end items-center print:hidden">
+                <InvoicePrintButton />
             </div>
 
             {/* Invoice Content */}

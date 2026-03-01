@@ -11,10 +11,15 @@ import { SidebarContext } from "./SidebarContext";
 export function Footer() {
   const { data: session } = useSession();
   const pathname = usePathname();
+  const isInvoicePage = pathname?.includes("/invoice");
 
   // Safely get sidebar context (might not be available on all pages)
   const sidebarContext = useContext(SidebarContext);
   const isCollapsed = sidebarContext?.isCollapsed ?? false;
+
+  if (isInvoicePage) {
+    return null;
+  }
 
   // Check if we're on a shop page (sidebar visible)
   const isShopPage = !pathname?.startsWith("/admin") && !pathname?.startsWith("/login") && !pathname?.startsWith("/register");
@@ -113,4 +118,3 @@ export function Footer() {
     </footer>
   );
 }
-
