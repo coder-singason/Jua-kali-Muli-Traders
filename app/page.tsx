@@ -4,26 +4,33 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
+export const dynamic = "force-dynamic";
+
 async function getFeaturedProducts() {
-  return await prisma.product.findMany({
-    where: {
-      featured: true,
-    },
-    include: {
-      category: true,
-      sizes: true,
-      productImages: {
-        orderBy: {
-          sortOrder: "asc",
-        },
-        take: 1,
+  try {
+    return await prisma.product.findMany({
+      where: {
+        featured: true,
       },
-    },
-    take: 8,
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      include: {
+        category: true,
+        sizes: true,
+        productImages: {
+          orderBy: {
+            sortOrder: "asc",
+          },
+          take: 1,
+        },
+      },
+      take: 8,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching featured products:", error);
+    return [];
+  }
 }
 
 export default async function Home() {
@@ -79,4 +86,3 @@ export default async function Home() {
     </main>
   );
 }
-
